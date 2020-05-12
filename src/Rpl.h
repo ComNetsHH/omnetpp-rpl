@@ -8,6 +8,7 @@
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "Rpl_m.h"
@@ -20,11 +21,16 @@ class Rpl : public RoutingProtocolBase
 {
   private:
     cModule *host;
+    uint8_t dodagVersion;
+    uint16_t rank;
     const char *interfaces;
-    IL3AddressType *addressType;
     IInterfaceTable *interfaceTable;
     IRoutingTable *routingTable;
+    InterfaceEntry *interfaceEntryPtr;
     INetfilter *networkProtocol;
+    cPacket *packetInProcessing;
+    cMessage *trickleTimerEvent;
+    double trickleTimerDelay;
     bool isRoot;
 
   public:
@@ -42,9 +48,21 @@ class Rpl : public RoutingProtocolBase
     void processSelfMessage(cMessage *message);
     void processMessage(cMessage *message);
 
-    // handling Udp packets
-    void sendUdpPacket(cPacket *packet, double delay);
-    void processUdpPacket(Packet *packet);
+    // handling generic packets
+    void sendPacket(cPacket *packet, double delay);
+    void processPacket(Packet *packet);
+
+    // handling RPL packets
+    void processRplPacket(Packet *packet, const Ptr<const RplPacket>& rplPacket, RplPacketCode code);
+    void processDio(Packet *packet, const Ptr<const Dio>& dioPacket);
+    void processDao(Packet *packet, const Ptr<const Dao>& daoPacket);
+    void processDis(Packet *packet, const Ptr<const Dis>& disPacket);
+    void sendRplPacket(const Ptr<RplPacket>& packet, const InterfaceEntry *interfaceEntry,
+                const L3Address& nextHop, double delay);
+    const Ptr<Dio> createDio();
+
+    // handling routing data
+    void addParent(const Ipv6Address& srcAddr, bool preferred);
 
     // lifecycle
     virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
@@ -56,14 +74,10 @@ class Rpl : public RoutingProtocolBase
     // configuration
     void configureInterfaces();
 
-//     address
+    // utility
+    RplPacketCode getIcmpv6CodeByClassname(const Ptr<RplPacket>& packet);
     Ipv6Address getSelfAddress();
 
-    // RPL messages
-    void sendRplPacket(const Ptr<RplPacket>& packet, const InterfaceEntry *interfaceEntry,
-            const L3Address& nextHop, double delay);
-    const Ptr<DioMsg> createDio();
-//    bool isClientAddress(const L3Address& address);
 };
 
 } // namespace inet

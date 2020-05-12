@@ -1,7 +1,3 @@
-//
-// This program is property of its copyright holder. All rights reserved.
-//
-
 
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
@@ -20,13 +16,7 @@ network RplNetwork
         }
         configurator: Ipv6FlatNetworkConfigurator {
             parameters:
-//                config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
                 @display("p=100,100;is=s");
-        }
-        scenarioManager: ScenarioManager {
-            parameters:
-                script = default(xml("<scenario/>"));
-                @display("p=100,400;is=s");
         }
         host[numNodes]: RplRouter {
             parameters:
