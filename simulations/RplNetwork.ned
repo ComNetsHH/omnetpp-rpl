@@ -1,4 +1,3 @@
-
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;

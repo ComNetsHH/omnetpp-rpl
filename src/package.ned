@@ -1,3 +1,3 @@
 package rpl;
 
-@license(LGPL);
+@license(GPLv3);
