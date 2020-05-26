@@ -20,52 +20,100 @@
  */
 
 #include "TrickleTimer.h"
-#include "RplDefs.h"
+#include "Rpl.h"
 
 namespace inet {
 
+Define_Module(TrickleTimer);
+
 TrickleTimer::TrickleTimer() :
     trickleTriggerEvent(nullptr),
-    routingModulePtr(nullptr),
+    intervalTriggerEvent(nullptr),
     dioIntervalMin(DEFAULT_DIO_INTERVAL_MIN),
     dioNumDoublings(DEFAULT_DIO_INTERVAL_DOUBLINGS),
     dioCurrentInterval(DEFAULT_DIO_INTERVAL_MIN),
     dioRedundancyConst(DEFAULT_DIO_REDUNDANCY_CONST),
     dioReceivedCounter(0)
-{}
+{
+}
 
 TrickleTimer::~TrickleTimer() {
+    stop();
+}
+
+void TrickleTimer::stop() {
     try {
-        routingModulePtr->cancelAndDelete(trickleTriggerEvent);
-    } catch (std::exception &e) {
-        EV_WARN << "Exception occured while disposing of trickleTriggerEvent" << endl;
+        cancelAndDelete(trickleTriggerEvent);
+        cancelAndDelete(intervalTriggerEvent);
+    } catch (std::exception& e) {
+        EV_WARN << "Error while disposing of TrickleTimer message objects" << endl;
     }
 
 }
 
+void TrickleTimer::initialize() {
+    EV_DETAIL << "Trickle timer module initialized";
+}
 
 void TrickleTimer::start() {
-    EV_DETAIL << "Trickle timer started" << endl;
-    trickleTriggerEvent = new cMessage("Trickle timer-triggered DIO broadcast");
-    trickleTriggerEvent->setKind(TRICKLE_TRIGGER_EVENT);
+    Enter_Method("TrickleTimer::start()");
+    EV_INFO << "Trickle timer started" << endl;
+    intervalTriggerEvent = new cMessage("Trickle timer current interval ended",
+            TRICKLE_INTERVAL_UPDATE_EVENT);
+    scheduleAt(simTime() + dioCurrentInterval, intervalTriggerEvent);
     scheduleNext();
 }
 
+void TrickleTimer::handleMessageWhenUp(cMessage *message)
+{
+    if (message->isSelfMessage())
+        processSelfMessage(message);
+    else
+        handleMessage(message);
+}
+
+void TrickleTimer::handleMessage(cMessage *message)
+{
+    if (message->isSelfMessage())
+        processSelfMessage(message);
+}
+
+void TrickleTimer::processSelfMessage(cMessage *message)
+{
+    switch (message->getKind()) {
+        case TRICKLE_INTERVAL_UPDATE_EVENT: {
+            dioCurrentInterval *= 2;
+            scheduleAt(simTime() + dioCurrentInterval, intervalTriggerEvent);
+            scheduleNext();
+            EV_INFO << "Trickle interval doubled, current = " <<
+                    dioCurrentInterval << endl;
+            break;
+        }
+        case TRICKLE_TRIGGER_EVENT: {
+            send(trickleTriggerEvent, "rpModule$o");
+            break;
+        }
+        default: {
+            throw cRuntimeError("Unknown kind of trickle timer self message");
+        }
+    }
+}
+
+
 void TrickleTimer::scheduleNext() {
-    // reset counter of DIOs heard during last interval
-    dioReceivedCounter = 0;
-    // TODO: Calculate delay properly
-    unsigned long delay = intrand(new cMersenneTwister(), dioCurrentInterval/2);
+    trickleTriggerEvent = new cMessage("Trickle timer-triggered DIO broadcast", TRICKLE_TRIGGER_EVENT);
+    unsigned long delay = dioCurrentInterval/2
+            + intrand(dioCurrentInterval/2);
+    scheduleAt(simTime() + delay, trickleTriggerEvent);
     EV_DETAIL << "DIO broadcast scheduled with delay - " << delay << endl;
-    routingModulePtr->scheduleAt(simTime() + delay, this->trickleTriggerEvent);
-    dioCurrentInterval *= 2;
-    EV_DETAIL << "Updated DIO broadcast interval - " << dioCurrentInterval << endl;
 }
 
 void TrickleTimer::reset() {
+    Enter_Method_Silent("TrickleTimer::reset()");
     EV_DETAIL << "Trickle timer reset" << endl;
     dioCurrentInterval = dioIntervalMin;
-    routingModulePtr->scheduleAt(simTime() + 1, trickleTriggerEvent);
+    scheduleAt(simTime() + dioCurrentInterval, intervalTriggerEvent);
+    scheduleNext();
 }
 
 

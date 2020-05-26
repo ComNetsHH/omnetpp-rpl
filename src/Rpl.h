@@ -44,22 +44,27 @@ namespace inet {
 class Rpl : public RoutingProtocolBase
 {
   private:
-    uint8_t dodagVersion;
-    uint16_t rank;
-    int prefixLength;
     IInterfaceTable *interfaceTable;
     IRoutingTable *routingTable;
     InterfaceEntry *interfaceEntryPtr;
     INetfilter *networkProtocol;
+    ObjectiveFunction *objectiveFunction;
+    TrickleTimer *trickleTimer;
+    uint8_t dodagVersion;
+    Ipv6Address dodagId;
+    Ipv6Address prefParentAddr;
+    uint8_t instanceId;
+    Mop mop;
+    bool isRoot;
+    uint16_t rank;
+    int prefixLength;
+    Dio *preferredParent;
+    Dio *backupParent;
     cPacket *packetInProcessing;
     std::string objectiveFunctionType;
-    ObjectiveFunction *objectiveFunctionPtr;
-    TrickleTimer *trickleTimer;
-    std::vector<Dio *> neighborSet;
-    Ipv6Address *preferredParent;
-    Ipv6Address *backupParent;
-    Ipv6Address *dodagId;
-    bool isRoot;
+    std::map<Ipv6Address, Dio *> backupParents;
+    std::map<Ipv6Address, Dio *> candidateParents;
+
 
   public:
     Rpl();
@@ -79,6 +84,7 @@ class Rpl : public RoutingProtocolBase
     // handling generic packets
     void sendPacket(cPacket *packet, double delay);
     void processPacket(Packet *packet);
+    void processTrickleTimerMsg(cMessage *message);
 
     // handling RPL packets
     void processRplPacket(Packet *packet, const Ptr<const RplPacket>& rplPacket, RplPacketCode code);
@@ -90,7 +96,8 @@ class Rpl : public RoutingProtocolBase
     const Ptr<Dio> createDio();
 
     // handling routing data
-    void updateRoutingTable(bool updatePreferred);
+    void updateRoutingTable();
+    void addNodeAsNeighbour(const Ptr<const Dio>& dio);
 
     // lifecycle
     virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
@@ -101,9 +108,8 @@ class Rpl : public RoutingProtocolBase
 
     // utility
     RplPacketCode getIcmpv6CodeByClassname(const Ptr<RplPacket>& packet);
-    bool equalRoutes(IRoute *r1, IRoute *r2);
+    bool checkUnknownDio(const Ptr<const Dio>& dio);
     Ipv6Address getSelfAddress();
-    void addRouteIfNotPresent(IRoute* route, IRoutingTable* rt);
 
 };
 

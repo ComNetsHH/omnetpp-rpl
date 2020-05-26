@@ -24,9 +24,12 @@
 
 namespace inet {
 
-
 #define INF_RANK 0xFFFF
-// Trickle timer default parameters (RFC 6550)
+#define ROOT_RANK 1
+#define DEFAULT_PREFIX_LENGTH 64
+#define DEFAULT_INSTANCE_ID 1
+
+// Trickle timer defaults (RFC 6550)
 #define DEFAULT_DIO_INTERVAL_MIN 0x03
 #define DEFAULT_DIO_REDUNDANCY_CONST 0x01
 #define DEFAULT_DIO_INTERVAL_DOUBLINGS 0x14
@@ -34,30 +37,21 @@ namespace inet {
 // Objective Function parameters
 #define DEFAULT_MIN_HOP_RANK_INCREASE 0x100
 
-static const Ipv6Address LL_RPL_MULTICAST("FF02::1A");
+static Ipv6Address LL_RPL_MULTICAST("FF02::1A");
 
+// Trickle timer-generated event types
 enum {
-    TRICKLE_TRIGGER_EVENT,
-    SELF_TRICKLE_EVENT
+    TRICKLE_START,
+    TRICKLE_INTERVAL_UPDATE_EVENT,
+    TRICKLE_TRIGGER_EVENT
 };
 
-enum OF_TYPE {
+// Objective Code Point - defines objective function of RPL instance
+enum OCP {
     ETX,
     HOP_COUNT,
     ENERGY
 };
-
-//enum Mop {
-//    NON_STORING,
-//    STORING
-//};
-//
-//enum RplPacketCode {
-//    DIS = 0,
-//    DIO = 1,
-//    DAO = 2,
-//    DAO_ACK = 3
-//};
 
 } // namespace inet
 

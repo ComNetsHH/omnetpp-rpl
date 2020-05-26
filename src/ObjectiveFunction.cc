@@ -30,41 +30,43 @@ ObjectiveFunction::ObjectiveFunction() :
     minHopRankIncrease(DEFAULT_MIN_HOP_RANK_INCREASE)
 {}
 
-ObjectiveFunction::ObjectiveFunction(std::string type) {
-    if (type.compare(std::string("ETX")) == 0)
+ObjectiveFunction::ObjectiveFunction(std::string objFunctionType) {
+    if (objFunctionType.compare(std::string("ETX")) == 0)
         type = ETX;
-    else if (type.compare(std::string("energy")) == 0)
+    else if (objFunctionType.compare(std::string("energy")) == 0)
         type = ENERGY;
     else
         type = HOP_COUNT;
-
+    EV_DETAIL << "Objective function initialized with type - " << objFunctionType << endl;
 }
 
 ObjectiveFunction::~ObjectiveFunction() {
 
 }
 
-Dio* ObjectiveFunction::getPreferredParent(std::vector<Dio *> parentSet) {
+Dio* ObjectiveFunction::getPreferredParent(std::map<Ipv6Address, Dio *> candidateParents) {
     // determine lowest rank parent
-    uint16_t minRank = parentSet[0]->getRank();
-    Dio *preferredParent = parentSet[0];
-    for (int i = 1; i < parentSet.size(); i++) {
-        uint16_t candidateParentRank = parentSet[i]->getRank();
+    Dio *preferredParent = candidateParents.begin()->second;
+    uint16_t minRank = preferredParent->getRank();
+    for (std::pair<Ipv6Address, Dio *> candidate : candidateParents) {
+        uint16_t candidateParentRank = candidate.second->getRank();
         if (candidateParentRank < minRank) {
             minRank = candidateParentRank;
-            preferredParent = parentSet[i];
+            preferredParent = candidate.second;
         }
     }
 
     return preferredParent;
 }
 
-uint16_t ObjectiveFunction::computeRank(uint16_t preferredParentRank) {
+uint16_t ObjectiveFunction::calcRank(Dio* preferredParent) {
+    uint16_t prefParentRank = preferredParent->getRank();
+
     switch (type) {
         case HOP_COUNT:
-            return preferredParentRank + 1;
+            return prefParentRank + 1;
         default:
-            return preferredParentRank + minHopRankIncrease;
+            return prefParentRank + minHopRankIncrease;
     }
 }
 

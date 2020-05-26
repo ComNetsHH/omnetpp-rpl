@@ -46,7 +46,7 @@ namespace inet {
 class ObjectiveFunction : public cObject
 {
   private:
-    OF_TYPE type;
+    OCP type;
     int minHopRankIncrease;
 
   public:
@@ -54,8 +54,8 @@ class ObjectiveFunction : public cObject
     ObjectiveFunction(std::string type);
     virtual ~ObjectiveFunction();
 
-    virtual Dio* getPreferredParent(std::vector<Dio *> parentSet);
-    virtual uint16_t computeRank(uint16_t preferedParentRank);
+    virtual Dio* getPreferredParent(std::map<Ipv6Address, Dio *> candidateParents);
+    virtual uint16_t calcRank(Dio* preferredParent);
 
 };
 

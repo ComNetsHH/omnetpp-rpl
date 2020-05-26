@@ -65,7 +65,7 @@ class Dio extends RplPacket {
     uint8_t instanceId;        	  	// RPL instance ID
     uint8_t dodagVersion;        	
 	uint16_t rank;            	 	// Node's rank
-    Mop mop;                  	  	// Mode of operation
+    Mop mop;					    // Mode of operation               
     bool grounded;              		   
     uint8_t dtsn;                 	// Destination Advertisement Trigger Sequence Number       
    

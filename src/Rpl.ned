@@ -23,7 +23,7 @@ package rpl;
 
 import inet.routing.contract.IManetRouting;
 
-simple Rpl like IManetRouting
+module Rpl like IManetRouting
 {
     parameters:
         // properties
@@ -41,5 +41,6 @@ simple Rpl like IManetRouting
     gates:
         input ipIn;
         output ipOut;
+        inout ttModule; // trickle timer interface
 }
 

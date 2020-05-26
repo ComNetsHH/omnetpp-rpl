@@ -21,22 +21,17 @@
 
 package rpl;
 
-import inet.node.inet.AdhocHost;
-import rpl.Rpl;
-import rpl.TrickleTimer; 
+import inet.routing.contract.IManetRouting;
 
-module RplRouter extends AdhocHost
+simple TrickleTimer
 {
-    submodules:
-        rpl: Rpl {
-            @display("p=825,226");
-        }
-        trickleTimer: TrickleTimer {
-        }
+    parameters:
+        // properties
+        @class("inet::TrickleTimer");
+
+
+    gates:
+        inout rpModule; // connection to routing protocol module
         
-    connections:
-        rpl.ipOut --> tn.in++;
-        rpl.ipIn <-- tn.out++;
-        rpl.ttModule <--> trickleTimer.rpModule; 
 }
 

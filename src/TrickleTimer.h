@@ -43,14 +43,14 @@
 
 namespace inet {
 
-class TrickleTimer : public cObject
+class TrickleTimer : public cSimpleModule
 {
   private:
     uint8_t dioIntervalMin;
     uint8_t dioNumDoublings;
     int dioCurrentInterval;
-    cSimpleModule *routingModulePtr;
     cMessage *trickleTriggerEvent;
+    cMessage *intervalTriggerEvent;
     uint8_t dioRedundancyConst;
     uint8_t dioReceivedCounter;
 
@@ -59,11 +59,20 @@ class TrickleTimer : public cObject
     ~TrickleTimer();
 
     // lifecycle
+    void initialize();
     virtual void start();
     virtual void reset();
+    virtual void stop();
+
     void incrementDioReceivedCounter() { dioReceivedCounter++; }
     bool checkRedundancyConst() { return dioReceivedCounter < dioRedundancyConst; }
     void scheduleNext();
+    void updateInterval();
+
+    // Messsage processing
+    void handleMessage(cMessage *message);
+    void processSelfMessage(cMessage *message);
+    void handleMessageWhenUp(cMessage *message);
 
     int getDioCurrentInterval() const { return dioCurrentInterval; }
     void setDioCurrentInterval(int dioCurrentInterval) { this->dioCurrentInterval = dioCurrentInterval; }
@@ -77,8 +86,6 @@ class TrickleTimer : public cObject
     uint8_t getDioRedundancyConst() const { return dioRedundancyConst; }
     void setDioRedundancyConst(uint8_t dioRedundancyConst) { this->dioRedundancyConst = dioRedundancyConst; }
 
-    const cSimpleModule* getRoutingModulePtr() { return routingModulePtr; }
-    void setRoutingModulePtr(cSimpleModule *routingModulePtr) { this->routingModulePtr = routingModulePtr; }
 };
 
 } // namespace inet
