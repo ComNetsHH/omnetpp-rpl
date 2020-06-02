@@ -24,15 +24,21 @@ network RplNetwork
         //            @display("i=device/pocketpc_s;p=218.43599,81.096");
         //        }
         sink: RplRouter {
-            @display("i=device/pocketpc_s;p=94.175995,149.112");
+            @display("i=device/pocketpc_s;p=207.972,71.939995");
         }
         host1: RplRouter {
-            @display("i=device/pocketpc_s;p=207.972,90.252");
+            @display("i=device/pocketpc_s;p=109.871994,179.196");
         }
         host2: RplRouter {
-            @display("i=device/pocketpc_s;p=319.152,149.112");
+            @display("i=device/pocketpc_s;p=287.75998,179.196");
+        }
+        host3: RplRouter {
+            @display("i=device/pocketpc_s;p=196.2,329.616");
+        }
+        host4: RplRouter {
+            @display("i=device/pocketpc_s;p=345.31198,290.376");
         }
 
     connections allowunconnected:
-        
+
 }

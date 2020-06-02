@@ -23,7 +23,7 @@ package rpl;
 
 import inet.node.inet.AdhocHost;
 import rpl.Rpl;
-import rpl.TrickleTimer; 
+import rpl.TrickleTimer;
 
 module RplRouter extends AdhocHost
 {
@@ -32,11 +32,12 @@ module RplRouter extends AdhocHost
             @display("p=825,226");
         }
         trickleTimer: TrickleTimer {
+            @display("p=946.57495,225.22499");
         }
-        
+
     connections:
         rpl.ipOut --> tn.in++;
         rpl.ipIn <-- tn.out++;
-        rpl.ttModule <--> trickleTimer.rpModule; 
+        rpl.ttModule <--> trickleTimer.rpModule;
 }
 

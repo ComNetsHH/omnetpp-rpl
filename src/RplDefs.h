@@ -28,10 +28,11 @@ namespace inet {
 #define ROOT_RANK 1
 #define DEFAULT_PREFIX_LENGTH 64
 #define DEFAULT_INSTANCE_ID 1
+#define DEFAULT_PING_TIMEOUT_DELAY 50 // 500 ms
 
 // Trickle timer defaults (RFC 6550)
 #define DEFAULT_DIO_INTERVAL_MIN 0x03
-#define DEFAULT_DIO_REDUNDANCY_CONST 0x01
+#define DEFAULT_DIO_REDUNDANCY_CONST 0x03
 #define DEFAULT_DIO_INTERVAL_DOUBLINGS 0x14
 
 // Objective Function parameters
@@ -39,18 +40,12 @@ namespace inet {
 
 static Ipv6Address LL_RPL_MULTICAST("FF02::1A");
 
-// Trickle timer-generated event types
+// Trickle and internal message types
 enum {
     TRICKLE_START,
     TRICKLE_INTERVAL_UPDATE_EVENT,
-    TRICKLE_TRIGGER_EVENT
-};
-
-// Objective Code Point - defines objective function of RPL instance
-enum OCP {
-    ETX,
-    HOP_COUNT,
-    ENERGY
+    TRICKLE_TRIGGER_EVENT,
+    PING_TIMEOUT
 };
 
 } // namespace inet

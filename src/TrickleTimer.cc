@@ -29,11 +29,11 @@ Define_Module(TrickleTimer);
 TrickleTimer::TrickleTimer() :
     trickleTriggerEvent(nullptr),
     intervalTriggerEvent(nullptr),
-    dioIntervalMin(DEFAULT_DIO_INTERVAL_MIN),
-    dioNumDoublings(DEFAULT_DIO_INTERVAL_DOUBLINGS),
-    dioCurrentInterval(DEFAULT_DIO_INTERVAL_MIN),
-    dioRedundancyConst(DEFAULT_DIO_REDUNDANCY_CONST),
-    dioReceivedCounter(0)
+    minInterval(DEFAULT_DIO_INTERVAL_MIN),
+    numDoublings(DEFAULT_DIO_INTERVAL_DOUBLINGS),
+    currentInterval(DEFAULT_DIO_INTERVAL_MIN),
+    redundancyConst(DEFAULT_DIO_REDUNDANCY_CONST),
+    ctrlMsgReceivedCounter(0)
 {
 }
 
@@ -52,7 +52,9 @@ void TrickleTimer::stop() {
 }
 
 void TrickleTimer::initialize() {
+    maxInterval = minInterval * (2 ^ numDoublings);
     EV_DETAIL << "Trickle timer module initialized";
+
 }
 
 void TrickleTimer::start() {
@@ -60,7 +62,7 @@ void TrickleTimer::start() {
     EV_INFO << "Trickle timer started" << endl;
     intervalTriggerEvent = new cMessage("Trickle timer current interval ended",
             TRICKLE_INTERVAL_UPDATE_EVENT);
-    scheduleAt(simTime() + dioCurrentInterval, intervalTriggerEvent);
+    scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
     scheduleNext();
 }
 
@@ -82,11 +84,12 @@ void TrickleTimer::processSelfMessage(cMessage *message)
 {
     switch (message->getKind()) {
         case TRICKLE_INTERVAL_UPDATE_EVENT: {
-            dioCurrentInterval *= 2;
-            scheduleAt(simTime() + dioCurrentInterval, intervalTriggerEvent);
+            if (currentInterval < maxInterval)
+                currentInterval *= 2;
+            scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
             scheduleNext();
             EV_INFO << "Trickle interval doubled, current = " <<
-                    dioCurrentInterval << endl;
+                    currentInterval << endl;
             break;
         }
         case TRICKLE_TRIGGER_EVENT: {
@@ -102,8 +105,7 @@ void TrickleTimer::processSelfMessage(cMessage *message)
 
 void TrickleTimer::scheduleNext() {
     trickleTriggerEvent = new cMessage("Trickle timer-triggered DIO broadcast", TRICKLE_TRIGGER_EVENT);
-    unsigned long delay = dioCurrentInterval/2
-            + intrand(dioCurrentInterval/2);
+    unsigned long delay = currentInterval/2 + intrand(currentInterval/2);
     scheduleAt(simTime() + delay, trickleTriggerEvent);
     EV_DETAIL << "DIO broadcast scheduled with delay - " << delay << endl;
 }
@@ -111,8 +113,8 @@ void TrickleTimer::scheduleNext() {
 void TrickleTimer::reset() {
     Enter_Method_Silent("TrickleTimer::reset()");
     EV_DETAIL << "Trickle timer reset" << endl;
-    dioCurrentInterval = dioIntervalMin;
-    scheduleAt(simTime() + dioCurrentInterval, intervalTriggerEvent);
+    currentInterval = minInterval;
+    scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
     scheduleNext();
 }
 

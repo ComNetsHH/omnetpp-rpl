@@ -46,13 +46,14 @@ namespace inet {
 class TrickleTimer : public cSimpleModule
 {
   private:
-    uint8_t dioIntervalMin;
-    uint8_t dioNumDoublings;
-    int dioCurrentInterval;
+    uint8_t minInterval;
+    uint8_t numDoublings;
+    int currentInterval;
+    int maxInterval;
     cMessage *trickleTriggerEvent;
     cMessage *intervalTriggerEvent;
-    uint8_t dioRedundancyConst;
-    uint8_t dioReceivedCounter;
+    uint8_t redundancyConst;
+    uint8_t ctrlMsgReceivedCounter;
 
   public:
     TrickleTimer();
@@ -64,8 +65,8 @@ class TrickleTimer : public cSimpleModule
     virtual void reset();
     virtual void stop();
 
-    void incrementDioReceivedCounter() { dioReceivedCounter++; }
-    bool checkRedundancyConst() { return dioReceivedCounter < dioRedundancyConst; }
+    void incrementCtrlMsgReceivedCounter() { ctrlMsgReceivedCounter++; }
+    bool checkRedundancyConst() { return ctrlMsgReceivedCounter < redundancyConst; }
     void scheduleNext();
     void updateInterval();
 
@@ -74,18 +75,25 @@ class TrickleTimer : public cSimpleModule
     void processSelfMessage(cMessage *message);
     void handleMessageWhenUp(cMessage *message);
 
-    int getDioCurrentInterval() const { return dioCurrentInterval; }
-    void setDioCurrentInterval(int dioCurrentInterval) { this->dioCurrentInterval = dioCurrentInterval; }
+    uint8_t getCtrlMsgReceivedCounter() const { return ctrlMsgReceivedCounter;}
+    void setCtrlMsgReceivedCounter(uint8_t ctrlMsgReceivedCounter) {
+        this->ctrlMsgReceivedCounter = ctrlMsgReceivedCounter;
+    }
 
-    uint8_t getDioIntervalMin() const { return dioIntervalMin; }
-    void setDioIntervalMin(uint8_t dioIntervalMin) { this->dioIntervalMin = dioIntervalMin; }
+    int getCurrentInterval() const { return currentInterval; }
+    void setCurrentInterval(int currentInterval) { this->currentInterval = currentInterval; }
 
-    uint8_t getDioNumDoublings() const { return dioNumDoublings; }
-    void setDioNumDoublings(uint8_t dioNumDoublings) { this->dioNumDoublings = dioNumDoublings; }
+    uint8_t getNumDoublings() const { return numDoublings; }
+    void setNumDoublings(uint8_t numDoublings) { this->numDoublings = numDoublings; }
 
-    uint8_t getDioRedundancyConst() const { return dioRedundancyConst; }
-    void setDioRedundancyConst(uint8_t dioRedundancyConst) { this->dioRedundancyConst = dioRedundancyConst; }
+    uint8_t getRedundancyConst() const { return redundancyConst; }
+    void setRedundancyConst(uint8_t redundancyConst) { this->redundancyConst = redundancyConst; }
 
+    int getMaxInterval() const { return maxInterval; }
+    void setMaxInterval(int maxInterval) { this->maxInterval = maxInterval; }
+
+    uint8_t getMinInterval() const { return minInterval; }
+    void setMinInterval(uint8_t minInterval) { this->minInterval = minInterval; }
 };
 
 } // namespace inet

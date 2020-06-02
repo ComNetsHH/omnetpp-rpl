@@ -43,6 +43,15 @@ enum RplPacketCode {
     DIO = 1;
     DAO = 2;
     DAO_ACK = 3;
+    PING = 4;
+    PING_ACK = 5;
+};
+
+// Objective Code Point - defines objective function of RPL instance
+enum OCP {
+    ETX = 0;
+    HOP_COUNT = 1;
+    ENERGY = 2;
 };
 
 
@@ -56,8 +65,9 @@ class RplHeader extends Icmpv6Header {
 }
 
 class RplPacket extends FieldsChunk {
-    int hopLimit;
-    
+    int hopLimit;		  
+    Ipv6Address destAddress;   		
+    Ipv6Address srcAddress;
 }
 
 // DODAG Information Option
@@ -69,17 +79,15 @@ class Dio extends RplPacket {
     bool grounded;              		   
     uint8_t dtsn;                 	// Destination Advertisement Trigger Sequence Number       
    
-	// Trickle timer parameters
-    double minInterval;           
-    int maxExponent;              
-    int redunConst;                
+	// Trickle timer parameters (DAG Configuration Option)
+    int minInterval;           
+    int dioRedundancyConst;              
+    int dioNumDoublings;
+    OCP ocp;                
     
     double lifetime;                  // Path lifetime
     double metric;
     Ipv6Address dodagId;              // IPv6 address set by DODAG root
-    Ipv6Address destAddress;   		
-    Ipv6Address srcAddress;			  // IPv6 sender address
-   	
 }
 
 
@@ -87,10 +95,9 @@ class Dio extends RplPacket {
 class Dao extends RplPacket {
     uint8_t instanceId;        	  	
     uint8_t dodagVersion;        	  			
-    uint8_t daoSeqNum;				  // DAOSequence number
+    uint8_t daoSeqNum;				  
 
 }
-
 
 // DODAG Information Solicitation
 class Dis extends RplPacket {

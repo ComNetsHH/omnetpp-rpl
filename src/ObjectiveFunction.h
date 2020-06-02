@@ -40,7 +40,6 @@
 #include "Rpl_m.h"
 #include "RplDefs.h"
 
-
 namespace inet {
 
 class ObjectiveFunction : public cObject
