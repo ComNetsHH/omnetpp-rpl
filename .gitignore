@@ -32,6 +32,7 @@ precompiled_*.h.*
 /tests/*/work/
 /tests/*/*/work/
 /tests/*/results*/
+*.html
 *.log
 *.sim
 *.pyc
@@ -52,6 +53,8 @@ precompiled_*.h.*
 .buildlog*
 
 # ignore binary files
+rpl
+run
 out/
 *.so
 *.dylib

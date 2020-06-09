@@ -58,7 +58,8 @@ class Rpl : public RoutingProtocolBase
     uint8_t dodagVersion;
     Ipv6Address dodagId;
     uint8_t instanceId;
-    int pingTimeoutDelay;
+    double pingDelay;
+    double pingTimeoutDelay;
     Mop mop;
     bool isRoot;
     uint16_t rank;
@@ -92,19 +93,18 @@ class Rpl : public RoutingProtocolBase
     void processTrickleTimerMsg(cMessage *message);
 
     // handling RPL packets
-    void processRplPacket(Packet *packet, const Ptr<const RplPacket>& rplPacket, RplPacketCode code);
     void processDio(Packet *packet, const Ptr<const Dio>& dioPacket);
     void processDao(Packet *packet, const Ptr<const Dao>& daoPacket);
     void processDis(Packet *packet, const Ptr<const Dis>& disPacket);
-    void sendRplPacket(const Ptr<RplPacket>& packet, const L3Address& nextHop, double delay);
+    void sendRplPacket(const Ptr<RplPacket>& packet, RplPacketCode code, const L3Address& nextHop, double delay);
     const Ptr<Dio> createDio();
+    const Ptr<Dao> createDao(const Ipv6Address &reachableDest);
 
     // handling routing data
-    void updateRoutingTable(Dio* newPrefParent);
-    void addNodeAsNeighbour(const Ptr<const Dio>& dio);
+    void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &destination);
+    void addNeighbour(const Ptr<const Dio>& dio);
     bool checkNodeReachable(Dio* node);
     void pingPreferredParent();
-    Packet* createPingReq(const Ipv6Address& destAddress, RplPacketCode code);
     bool deletePrefParentRoute();
     void updatePreferredParent();
 
@@ -116,7 +116,6 @@ class Rpl : public RoutingProtocolBase
     void stop();
 
     // utility
-    RplPacketCode getIcmpv6CodeByClassname(const Ptr<RplPacket>& packet);
     bool checkUnknownDio(const Ptr<const Dio>& dio);
     Ipv6Address getSelfAddress();
     void tryGetInterfaceId(Packet *pkt);

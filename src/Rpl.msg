@@ -82,7 +82,7 @@ class Dio extends RplPacket {
 	// Trickle timer parameters (DAG Configuration Option)
     int minInterval;           
     int dioRedundancyConst;              
-    int dioNumDoublings;
+    int dioNumDoublings;						
     OCP ocp;                
     
     double lifetime;                  // Path lifetime
@@ -95,7 +95,8 @@ class Dio extends RplPacket {
 class Dao extends RplPacket {
     uint8_t instanceId;        	  	
     uint8_t dodagVersion;        	  			
-    uint8_t daoSeqNum;				  
+    uint8_t daoSeqNum;
+    Ipv6Address reachableDestination;			
 
 }
 
