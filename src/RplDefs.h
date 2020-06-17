@@ -28,11 +28,8 @@ namespace inet {
 #define ROOT_RANK 1
 #define DEFAULT_PREFIX_LENGTH 64
 #define DEFAULT_INSTANCE_ID 1
-// temporary experimental delays to alleviate 'Received message from upper layers while transmitting' errors
-#define DEFAULT_PING_REPEAT_DELAY 3 // 3 ms - base experimental delay before sending
-                                    // new ping after former timeout (additionally multiplied with random modifier)
-#define DEFAULT_PING_TIMEOUT_DELAY 2 // 2 s - empirical value based on time
-                                     // needed to successfully deliver a packet in simulation
+// temporary experimental ping delays
+#define DEFAULT_PING_TIMEOUT_DELAY 4 // 4 s
 
 // Trickle timer defaults (RFC 6550)
 #define DEFAULT_DIO_INTERVAL_MIN 0x03
@@ -42,7 +39,7 @@ namespace inet {
 // Objective Function parameters
 #define DEFAULT_MIN_HOP_RANK_INCREASE 0x100
 
-static Ipv6Address LL_RPL_MULTICAST("FF02::1A");
+const Ipv6Address LL_RPL_MULTICAST("FF02:0:0:0:0:0:0:1A");
 
 // Trickle timer and internal event types
 enum {

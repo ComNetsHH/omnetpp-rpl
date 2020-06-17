@@ -68,11 +68,12 @@ class RplPacket extends FieldsChunk {
     int hopLimit;		  
     Ipv6Address destAddress;   		
     Ipv6Address srcAddress;
+    uint8_t instanceId;        	  	// RPL instance ID
+    Ipv6Address dodagId;            // IPv6 address of the DODAG root
 }
 
 // DODAG Information Option
 class Dio extends RplPacket {
-    uint8_t instanceId;        	  	// RPL instance ID
     uint8_t dodagVersion;        	
 	uint16_t rank;            	 	// Node's rank
     Mop mop;					    // Mode of operation               
@@ -87,16 +88,14 @@ class Dio extends RplPacket {
     
     double lifetime;                  // Path lifetime
     double metric;
-    Ipv6Address dodagId;              // IPv6 address set by DODAG root
 }
 
 
 // Destination Advertisement Object
 class Dao extends RplPacket {
-    uint8_t instanceId;        	  	
-    uint8_t dodagVersion;        	  			
-    uint8_t daoSeqNum;
-    Ipv6Address reachableDestination;			
+    uint8_t daoSeqNum;			// ID for each unique DAO sent by a node
+    bool daoAckRequired;		// indicates whether DAO-ACK is expected by the sender 
+    Ipv6Address reachableDest;	// advertised reachable destination		
 
 }
 
