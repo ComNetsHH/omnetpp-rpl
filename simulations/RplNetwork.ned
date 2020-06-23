@@ -1,9 +1,12 @@
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 //import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.physicallayer.contract.packetlevel.IRadioMedium;
+import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
+import inet.node.xmipv6.WirelessHost6;
 import rpl.RplRouter;
+import rpl.AdhocHost6;
 
 network RplNetwork
 {
@@ -14,30 +17,34 @@ network RplNetwork
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             @display("p=550,50");
         }
-        radioMedium: <default("UnitDiskRadioMedium")> like IRadioMedium {
+        radioMedium: UnitDiskRadioMedium {
             @display("p=550,250;is=s");
         }
         configurator: Ipv6FlatNetworkConfigurator {
             @display("p=550,150;is=s");
         }
+        //        configurator: Ipv4NetworkConfigurator {
+        //            @display("p=550,150;is=s");
+        //        }
         //        host[numNodes]: RplRouter {
         //            @display("i=device/pocketpc_s;p=218.43599,81.096");
         //        }
         sink: RplRouter {
-            @display("i=device/pocketpc_s;p=207.972,71.939995");
+            @display("i=device/pocketpc_s;p=149.112,75.864");
         }
         host1: RplRouter {
-            @display("i=device/pocketpc_s;p=109.871994,179.196");
+            @display("i=device/pocketpc_s;p=83.712,179.196");
         }
         host2: RplRouter {
-            @display("i=device/pocketpc_s;p=287.75998,179.196");
+            @display("i=device/pocketpc_s;p=222.36,179.196");
         }
         host3: RplRouter {
-            @display("i=device/pocketpc_s;p=196.2,329.616");
+            @display("i=device/pocketpc_s;p=83.712,306.072");
         }
         host4: RplRouter {
-            @display("i=device/pocketpc_s;p=345.31198,290.376");
+            @display("i=device/pocketpc_s;p=222.36,306.072");
         }
+        
 
     connections allowunconnected:
 

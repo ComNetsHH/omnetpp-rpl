@@ -21,27 +21,27 @@
 
 package rpl;
 
-import inet.node.inet.AdhocHost;
-import inet.node.xmipv6.WirelessHost6;
-import rpl.Rpl;
-import rpl.TrickleTimer;
+import inet.node.ipv6.Router6;
 
-module RplRouter extends WirelessHost6
+module AdhocHost6 extends Router6
 {
     parameters:
+        numWlanInterfaces = default(1);
+        wlan[*].mgmt.typename = default("Ieee80211MgmtAdhoc");
+        wlan[*].agent.typename = default("");
 //        forwarding = true;
     
     submodules:
-        rpl: Rpl {
-            @display("p=825,226");
-        }
-        trickleTimer: TrickleTimer {
-            @display("p=946.57495,225.22499");
-        }
+//        rpl: Rpl {
+//            @display("p=825,226");
+//        }
+//        trickleTimer: TrickleTimer {
+//            @display("p=946.57495,225.22499");
+//        }
 
     connections:
-        rpl.ipOut --> tn.in++;
-        rpl.ipIn <-- tn.out++;
-        rpl.ttModule <--> trickleTimer.rpModule;
+//        rpl.ipOut --> tn.in++;
+//        rpl.ipIn <-- tn.out++;
+//        rpl.ttModule <--> trickleTimer.rpModule;
 }
 

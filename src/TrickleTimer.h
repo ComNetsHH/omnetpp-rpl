@@ -51,7 +51,9 @@ class TrickleTimer : public cSimpleModule
     int currentInterval;
     int maxInterval;
     cMessage *trickleTriggerEvent;
+    cMessage *trickleTriggerMsg;
     cMessage *intervalTriggerEvent;
+
     uint8_t redundancyConst;
     uint8_t ctrlMsgReceivedCounter;
 

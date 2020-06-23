@@ -42,13 +42,9 @@ TrickleTimer::~TrickleTimer() {
 }
 
 void TrickleTimer::stop() {
-    try {
-        cancelAndDelete(trickleTriggerEvent);
-        cancelAndDelete(intervalTriggerEvent);
-    } catch (std::exception& e) {
-        EV_WARN << "Error while disposing of TrickleTimer message objects" << endl;
-    }
-
+    ctrlMsgReceivedCounter = 0;
+    cancelEvent(trickleTriggerEvent);
+    cancelEvent(intervalTriggerEvent);
 }
 
 void TrickleTimer::initialize() {
@@ -62,6 +58,7 @@ void TrickleTimer::start() {
     EV_INFO << "Trickle timer started" << endl;
     intervalTriggerEvent = new cMessage("Trickle timer current interval ended",
             TRICKLE_INTERVAL_UPDATE_EVENT);
+    trickleTriggerEvent = new cMessage("Trickle timer trigger self-msg", TRICKLE_TRIGGER_EVENT);
     scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
     scheduleNext();
 }
@@ -86,6 +83,7 @@ void TrickleTimer::processSelfMessage(cMessage *message)
         case TRICKLE_INTERVAL_UPDATE_EVENT: {
             if (currentInterval < maxInterval)
                 currentInterval *= 2;
+            ctrlMsgReceivedCounter = 0;
             scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
             scheduleNext();
             EV_INFO << "Trickle interval doubled, current = " <<
@@ -93,7 +91,8 @@ void TrickleTimer::processSelfMessage(cMessage *message)
             break;
         }
         case TRICKLE_TRIGGER_EVENT: {
-            send(trickleTriggerEvent, "rpModule$o");
+            auto triggerMsg = new cMessage("Trickle timer notification for external module", TRICKLE_TRIGGER_EVENT);
+            send(triggerMsg, "rpModule$o");
             break;
         }
         default: {
@@ -104,7 +103,6 @@ void TrickleTimer::processSelfMessage(cMessage *message)
 
 
 void TrickleTimer::scheduleNext() {
-    trickleTriggerEvent = new cMessage("Trickle timer-triggered DIO broadcast", TRICKLE_TRIGGER_EVENT);
     unsigned long delay = currentInterval/2 + intrand(currentInterval/2);
     scheduleAt(simTime() + delay, trickleTriggerEvent);
     EV_DETAIL << "DIO broadcast scheduled with delay - " << delay << endl;
@@ -113,6 +111,10 @@ void TrickleTimer::scheduleNext() {
 void TrickleTimer::reset() {
     Enter_Method_Silent("TrickleTimer::reset()");
     EV_DETAIL << "Trickle timer reset" << endl;
+    if (intervalTriggerEvent)
+        cancelEvent(intervalTriggerEvent);
+    if (trickleTriggerEvent)
+        cancelEvent(trickleTriggerEvent);
     currentInterval = minInterval;
     scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
     scheduleNext();

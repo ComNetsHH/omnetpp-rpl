@@ -105,10 +105,9 @@ class Rpl : public RoutingProtocolBase, public cListener
     // handling routing data
     void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &destination);
     void addNeighbour(const Ptr<const Dio>& dio);
-    bool checkNodeReachable(Dio* node);
     // TODO: Replace manual pinging with reachability check via NeighbourDiscovery module
-    void pingPreferredParent();
-    bool deletePrefParentRoute();
+    void pingPreferredParent(double delay, const Ipv6Address &parentAddr);
+    void deletePrefParentRoute();
     void updatePreferredParent();
 
     // lifecycle
@@ -122,6 +121,8 @@ class Rpl : public RoutingProtocolBase, public cListener
     bool checkUnknownDio(const Ptr<const Dio>& dio);
     Ipv6Address getSelfAddress();
     bool checkPrefParentChanged(Dio* updatedPrefParent);
+    bool checkDestAlreadyKnown(const Ipv6Address &dest);
+    void leaveDodag();
 
     // notification
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;

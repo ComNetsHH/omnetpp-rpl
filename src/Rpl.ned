@@ -33,10 +33,10 @@ module Rpl like IManetRouting
         // context parameters
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule = default(absPath("^.ipv6.routingTable"));
-        string neighbourDiscovery = default(absPath("^.ipv6.neighbourDiscovery"));
         string networkProtocolModule = default(absPath("^.ipv6.ipv6"));
     	
         bool isRoot = default(false);
+        bool disabled = default(false);
         string objectiveFunctionType = default("hopCount");	 // hopCount, ETX, energy, ...
 
     gates:

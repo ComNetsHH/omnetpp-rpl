@@ -74,11 +74,12 @@ class RplPacket extends FieldsChunk {
 
 // DODAG Information Option
 class Dio extends RplPacket {
-    uint8_t dodagVersion;        	
+    uint8_t dodagVersion;       	
 	uint16_t rank;            	 	// Node's rank
     Mop mop;					    // Mode of operation               
     bool grounded;              		   
-    uint8_t dtsn;                 	// Destination Advertisement Trigger Sequence Number       
+    uint8_t dtsn;                 	// Destination Advertisement Trigger Sequence Number
+    								// for downward routing       
    
 	// Trickle timer parameters (DAG Configuration Option)
     int minInterval;           
