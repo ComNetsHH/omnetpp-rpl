@@ -61,6 +61,8 @@ class Rpl : public RoutingProtocolBase, public cListener
     double daoDelay;
     Mop mop;
     bool isRoot;
+    bool daoEnabled;
+    bool pingEnabled;
     uint16_t rank;
     int prefixLength;
     Dio *preferredParent;
@@ -79,6 +81,7 @@ class Rpl : public RoutingProtocolBase, public cListener
     // module interface
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     void initialize(int stage) override;
+//    void handleMessage(cMessage *message) override;
     void handleMessageWhenUp(cMessage *message) override;
 
   private:
@@ -102,13 +105,14 @@ class Rpl : public RoutingProtocolBase, public cListener
     const Ptr<Dio> createDio();
     const Ptr<Dao> createDao(const Ipv6Address &reachableDest);
 
-    // handling routing data
+    // handling routing data and neighbour sets
     void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &destination);
     void addNeighbour(const Ptr<const Dio>& dio);
     // TODO: Replace manual pinging with reachability check via NeighbourDiscovery module
     void pingPreferredParent(double delay, const Ipv6Address &parentAddr);
     void deletePrefParentRoute();
     void updatePreferredParent();
+
 
     // lifecycle
     virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
@@ -119,6 +123,7 @@ class Rpl : public RoutingProtocolBase, public cListener
 
     // utility
     bool checkUnknownDio(const Ptr<const Dio>& dio);
+    Mop getMopFromStr(std::string mopPar);
     Ipv6Address getSelfAddress();
     bool checkPrefParentChanged(Dio* updatedPrefParent);
     bool checkDestAlreadyKnown(const Ipv6Address &dest);

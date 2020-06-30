@@ -48,7 +48,7 @@ enum RplPacketCode {
 };
 
 // Objective Code Point - defines objective function of RPL instance
-enum OCP {
+enum Ocp {
     ETX = 0;
     HOP_COUNT = 1;
     ENERGY = 2;
@@ -85,7 +85,7 @@ class Dio extends RplPacket {
     int minInterval;           
     int dioRedundancyConst;              
     int dioNumDoublings;						
-    OCP ocp;                
+    Ocp ocp;                
     
     double lifetime;                  // Path lifetime
     double metric;

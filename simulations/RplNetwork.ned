@@ -6,7 +6,6 @@ import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 import inet.node.xmipv6.WirelessHost6;
 import rpl.RplRouter;
-import rpl.AdhocHost6;
 
 network RplNetwork
 {

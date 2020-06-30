@@ -23,13 +23,17 @@ package rpl;
 
 import inet.node.inet.AdhocHost;
 import inet.node.xmipv6.WirelessHost6;
+import inet.node.ipv6.Router6;
 import rpl.Rpl;
 import rpl.TrickleTimer;
 
-module RplRouter extends WirelessHost6
+module RplRouter extends AdhocHost
 {
     parameters:
 //        forwarding = true;
+//		numWlanInterfaces = default(1);
+//        wlan[*].mgmt.typename = default("Ieee80211MgmtAdhoc");
+//        wlan[*].agent.typename = default("");
     
     submodules:
         rpl: Rpl {

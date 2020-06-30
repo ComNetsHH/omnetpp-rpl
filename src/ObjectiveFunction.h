@@ -45,7 +45,7 @@ namespace inet {
 class ObjectiveFunction : public cObject
 {
   private:
-    OCP type;
+    Ocp type;
     int minHopRankIncrease;
 
   public:

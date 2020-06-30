@@ -37,6 +37,9 @@ module Rpl like IManetRouting
     	
         bool isRoot = default(false);
         bool disabled = default(false);
+        bool daoEnabled = default(true);
+        bool pingEnabled = default(true);
+        string mop = default("non_storing");
         string objectiveFunctionType = default("hopCount");	 // hopCount, ETX, energy, ...
 
     gates:

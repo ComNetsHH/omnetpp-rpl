@@ -44,14 +44,13 @@ Define_Module(Rpl);
 Rpl::Rpl() :
     interfaceTable(nullptr),
     routingTable(nullptr),
-    networkProtocol(nullptr),
     isRoot(false),
     pingTimeoutDelay(DEFAULT_PING_TIMEOUT_DELAY),
     pingDelay(1),
     interfaceEntryPtr(nullptr),
     rank(INF_RANK),
     dodagVersion(0),
-    mop(STORING),
+    mop(NON_STORING),
     host(nullptr),
     dodagId(Ipv6Address::UNSPECIFIED_ADDRESS),
     prefixLength(DEFAULT_PREFIX_LENGTH),
@@ -79,9 +78,10 @@ void Rpl::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         routingTable = getModuleFromPar<IRoutingTable>(par("routingTableModule"), this);
-        networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
         trickleTimer = check_and_cast<TrickleTimer *>(getModuleByPath("^.trickleTimer"));
         isRoot = par("isRoot").boolValue();
+        daoEnabled = par("daoEnabled").boolValue();
+        pingEnabled = par("pingEnabled").boolValue();
         host = getContainingNode(this);
         objectiveFunctionType = par("objectiveFunctionType").stdstringValue();
         objectiveFunction = new ObjectiveFunction(objectiveFunctionType);
@@ -117,6 +117,7 @@ void Rpl::start()
         trickleTimer->start();
         rank = ROOT_RANK;
         dodagId = getSelfAddress();
+        mop = getMopFromStr(par("mop").stringValue());
     }
 }
 
@@ -145,26 +146,28 @@ void Rpl::processSelfMessage(cMessage *message)
     switch (message->getKind()) {
         case PING_TIMEOUT: {
             EV_DETAIL << "Deleting preferred parent route due to the ping timeout" << endl;
-            // Delete route through unreachable preferred parent and remove
-            // corresponding entry from candidate neighbour set
+            /* Delete route through unreachable preferred parent and remove
+             * corresponding entry from candidate neighbour set
+             */
             ASSERT(preferredParent != nullptr);
 //            candidateParents.erase(preferredParent->getSrcAddress());
             if (candidateParents.size() <= 1)
+                /* TODO: poison sub-dodag when node is not a part
+                 * of former DODAG, see Section 8.2.2.5
+                 */
                 leaveDodag();
 //            else
 //                updatePreferredParent();
-            // TODO: poison sub-dodag when node is not a part of former DODAG anymore!
-            // select new preferred parent
-            break;
-        }
-        case PING_TRIGGER: {
-//            pingPreferredParent();
             break;
         }
     }
 }
 
 void Rpl::leaveDodag() {
+    /* If node's parent set turns empty, node is no longer associated
+     * with the DODAG and suppresses former DODAG data it had, i.e.
+     * clears dodagId, instanceId, rank, parent sets, etc. see Section 8.2.2.1.
+     */
     EV_DETAIL << "Candidate parent list empty, leaving DODAG" << endl;
     candidateParents.erase(preferredParent->getSrcAddress());
     deletePrefParentRoute();
@@ -178,13 +181,14 @@ void Rpl::leaveDodag() {
 // Temporary method to test connectivity to the preferred parent
 void Rpl::pingPreferredParent(double delay, const Ipv6Address &parentAddr)
 {
-    // cancel previously scheduled timeout in case preferred parent has changed
+    // cancel previously scheduled timeout in case preferred parent
+    // has changed in the meantime
     if (pingTimeoutMsg)
         cancelEvent(pingTimeoutMsg);
     sendRplPacket(createDio(), PING, parentAddr, delay);
     EV_DETAIL << "Ping request sent to preferred parent - " << parentAddr << endl;
-    auto pingTimeoutStamp = simTime() + uniform(2, 5) * pingTimeoutDelay;
-    EV_DETAIL << "Ping timeout will occur at " << pingTimeoutStamp << " s" << endl;
+    auto pingTimeoutStamp = simTime() + uniform(3, 5) * pingTimeoutDelay;
+    EV_DETAIL << "Ping timeout occurs at " << pingTimeoutStamp << " s" << endl;
     // TODO: Manage pingTimeoutMsg object lifecycle more efficiently
     scheduleAt(pingTimeoutStamp, pingTimeoutMsg);
 }
@@ -206,12 +210,18 @@ void Rpl::processMessage(cMessage *message)
 
 void Rpl::processTrickleTimerMsg(cMessage *message)
 {
+    /* Process signal from trickle timer module,
+     * indicating DIO broadcast event, see Section 8.3
+     */
     EV_DETAIL << "Processing msg from trickle timer" << endl;
     switch (message->getKind()) {
         case TRICKLE_TRIGGER_EVENT: {
+            /* Broadcast DIO only if number of DIOs heard
+             * from other nodes <= redundancyConstant (k), see RFC6206 Section 4.2 p.4
+             */
             if (trickleTimer->checkRedundancyConst()) {
                 EV_DETAIL << "Redundancy OK, broadcasting DIO" << endl;
-                sendRplPacket(createDio(), DIO, Ipv6Address::ALL_ROUTERS_2);
+                sendRplPacket(createDio(), DIO, Ipv6Address::ALL_NODES_1);
             }
             break;
         }
@@ -223,6 +233,11 @@ void Rpl::processTrickleTimerMsg(cMessage *message)
 
 void Rpl::processPacket(Packet *packet)
 {
+//    EV_DETAIL << "Received packet " << packet->str() << endl;
+//    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
+//    auto protocol = packetProtocolTag->getProtocol();
+//    EV_DETAIL << "Protocol - " << protocol->str() << endl;
+
     auto rplHeader = packet->popAtFront<RplHeader>();
 //    EV_DETAIL << "Processing incoming packet " << packet
 //        << "Icmpv6 code - " << rplHeader->getIcmpv6Code() << endl;
@@ -234,7 +249,10 @@ void Rpl::processPacket(Packet *packet)
             break;
         }
         case DAO: {
-            processDao(packet, dynamicPtrCast<const Dao>(rplBody));
+            if (daoEnabled)
+                processDao(packet, dynamicPtrCast<const Dao>(rplBody));
+            else
+                EV_DETAIL << "DAO support not enabled, discarding packet" << endl;
             break;
         }
         case DAO_ACK: {
@@ -246,7 +264,8 @@ void Rpl::processPacket(Packet *packet)
             break;
         }
         case PING: {
-            if (preferredParent && rank != INF_RANK) {
+            EV_DETAIL << "Received ping request from " << senderAddr << endl;
+            if ((preferredParent || isRoot) && rank != INF_RANK) {
                 sendRplPacket(createDio(), PING_ACK, senderAddr, pingDelay);
                 EV_DETAIL << "Ping_ACK sent to " << senderAddr << endl;
             }
@@ -297,7 +316,7 @@ const Ptr<Dio> Rpl::createDio()
 {
     auto dio = makeShared<Dio>();
     dio->setInstanceId(instanceId);
-    dio->setChunkLength(b(192)); // TODO: Set DIO size as constant or via function
+    dio->setChunkLength(b(32)); // TODO: Set DIO size as constant or via function
     dio->setMop(mop);
     dio->setRank(rank);
     dio->setDodagVersion(dodagVersion);
@@ -309,12 +328,14 @@ const Ptr<Dio> Rpl::createDio()
 const Ptr<Dao> Rpl::createDao(const Ipv6Address &reachableDest)
 {
     auto dao = makeShared<Dao>();
-    // TODO[OPTIONAL]: expand with DAO optional fields as in RFC 6550
+    // TODO[OPTIONAL]: expand with DAO optional fields as specified in Section 6.4.3
     dao->setInstanceId(instanceId);
-    dao->setChunkLength(b(32)); // FIXME: replace with constant or function calculating DAO size
+    dao->setChunkLength(b(64)); // FIXME: replace with constant or function calculating DAO size
     dao->setSrcAddress(getSelfAddress());
     dao->setReachableDest(reachableDest);
     dao->setDaoAckRequired(false);
+    EV_DETAIL << "DAO created, advertising reachability of " << dao->getReachableDest() << endl;
+//            << "to be sent to " << preferredParent->getSrcAddress() << endl;
     return dao;
 }
 
@@ -328,6 +349,7 @@ void Rpl::processDio(Packet *packet, const Ptr<const Dio>& dio)
         mop = dio->getMop();
         // Start broadcasting DIOs forwarding DODAG control data
         trickleTimer->start();
+        EV_DETAIL << "Joined a DODAG with id - " << dodagId << endl;
     }
     trickleTimer->incrementCtrlMsgReceivedCounter();
     // Do not process DIO from unknown DAG/RPL instance or if receiver is root
@@ -335,15 +357,15 @@ void Rpl::processDio(Packet *packet, const Ptr<const Dio>& dio)
         EV_DETAIL << "Unknown DODAG/InstanceId, or receiver is root - discarding DIO" << endl;
         return;
     }
-    // Check if dodagVersion is not incremented
+    // Check if dodagVersion has changed
     if (dio->getDodagVersion() > dodagVersion) {
-        // new dodag version discovered, erase parent sets
+        // new dodag version discovered, join it and erase parent sets
         EV_DETAIL << "New DODAG version discovered, clearing parent sets" << endl;
         backupParents.erase(backupParents.begin(), backupParents.end());
         candidateParents.erase(candidateParents.begin(), candidateParents.end());
         dodagVersion = dio->getDodagVersion();
     } else if (dio->getDodagVersion() < dodagVersion)
-        EV_DETAIL << "Previous DODAG version advertised, discarding DIO" << endl;
+        EV_DETAIL << "Outdated DODAG version advertised, discarding DIO" << endl;
     addNeighbour(dio);
     updatePreferredParent();
     delete packet;
@@ -354,7 +376,9 @@ void Rpl::processDao(Packet *packet, const Ptr<const Dao>& dao) {
             << "destination advertised - " << dao->getReachableDest() << endl;
     if (dao->getDaoAckRequired())
         sendRplPacket(createDao(Ipv6Address::UNSPECIFIED_ADDRESS), DAO_ACK, dao->getSrcAddress());
-    // store routing data contained in DAO
+    /* Update routing table with information about reachable destinations from DAO
+     * if storing mode is enabled or receiver is root, see Section 3.3
+     */
     if (mop == STORING || isRoot) {
         if (!checkDestAlreadyKnown(dao->getReachableDest())) {
             updateRoutingTable(dao->getSrcAddress(), dao->getReachableDest());
@@ -364,11 +388,15 @@ void Rpl::processDao(Packet *packet, const Ptr<const Dao>& dao) {
             EV_DETAIL << "Destination " << dao->getReachableDest()
                         << " already known, discarding DAO" << endl;
     } else {
-        EV_DETAIL << "Forwarding DAO to pref. parent, advertising "
+        EV_DETAIL << "Non-storing mode, forwarding DAO upwards advertising "
                     << dao->getReachableDest() << " reachability" << endl;
-//        sendRplPacket(createDao(dao->getReachableDest()), DAO,
-//                    preferredParent->getSrcAddress(), uniform(2, 4));
     }
+    /* Regardless of operational mode (storing, non-storing), forward DAO 'upwards'
+     * through the preferred parent till root is reached, see Section 6.4
+     */
+    if (!isRoot)
+        sendRplPacket(createDao(dao->getReachableDest()), DAO,
+            preferredParent->getSrcAddress(), uniform(1, 2));
     delete packet;
 }
 
@@ -384,20 +412,21 @@ void Rpl::processDis(Packet *packet, const Ptr<const Dis>& disPacket) {
 void Rpl::updatePreferredParent()
 {
     auto newPrefParent = objectiveFunction->getPreferredParent(candidateParents);
-    // if preferred parent has changed, update routing table
+    // if preferred parent has changed, update routing table accordingly
     if (checkPrefParentChanged(newPrefParent)) {
         updateRoutingTable(newPrefParent->getSrcAddress(), dodagId);
         EV_DETAIL << "Updated preferred parent to - " << newPrefParent->getSrcAddress() << endl;
-        // Reset trickle timer due to detected inconsistency
-//        trickleTimer->reset();
-        // TODO: Schedule DAO with proper delay, not just uniformly randomly
-//        sendRplPacket(createDao(getSelfAddress()), DAO, newPrefParent->getSrcAddress(), uniform(3, 5));
+        /* Reset trickle timer if inconsistency (preferred parent changed) is detected, i.e.
+         * maintain high topology convergence rate, see Section 8.3
+         */
+        trickleTimer->reset();
+        // TODO: Determine default DAO delay
+        if (daoEnabled)
+            sendRplPacket(createDao(getSelfAddress()), DAO, newPrefParent->getSrcAddress(), uniform(1, 2));
     }
+    if (pingEnabled)
+        pingPreferredParent(pingDelay * uniform(1, 2), newPrefParent->getSrcAddress());
     preferredParent = newPrefParent->dup();
-    // schedule ping request to verify preferred parent connectivity
-    if (!pingTimeoutMsg->isScheduled())
-        pingPreferredParent(pingDelay, newPrefParent->getSrcAddress());
-//    scheduleAt(simTime() + pingDelay + dblrand() * pingDelay, new cMessage("", PING_TRIGGER));
     // recalculate rank
     auto oldRank = rank;
     rank = objectiveFunction->calcRank(preferredParent);
@@ -407,12 +436,6 @@ void Rpl::updatePreferredParent()
 
 bool Rpl::checkPrefParentChanged(Dio* newPrefParent)
 {
-// debugging part
-//    if (preferredParent)
-//        EV_DETAIL << "Checking if preferred parent has changed: old addr - "
-//            << newPrefParent->getSrcAddress() << "; new addr - " << preferredParent->getSrcAddress();
-//    else
-//        EV_DETAIL << "Preferred parent is nullptr" << endl;
     return preferredParent == nullptr
             || (newPrefParent->getSrcAddress() != preferredParent->getSrcAddress());
 }
@@ -469,10 +492,13 @@ bool Rpl::checkUnknownDio(const Ptr<const Dio>& dio)
 
 void Rpl::addNeighbour(const Ptr<const Dio>& dio)
 {
-    // Check if DIO sender is already in a neighboring set (candidate or backup parent)
+    /* Maintain three sets of link-local nodes: backup parents, candidate parents
+     * and preferred parent. For each DIO heard, push/update sender node as entry to
+     * one of the sets, see Section 8.2.1
+     */
     auto dioCopy = dio->dup();
     auto dioSender = dioCopy->getSrcAddressForUpdate();
-    // TODO: Monitor backupParents and candidateParents map contents during simulation
+    // If DIO received from node with equal rank, consider this node a backup parent
     if (dio->getRank() == rank) {
         if (backupParents.find(dioSender) != backupParents.end())
             EV_DETAIL << "Backup parent entry updated, address - " << dioSender << endl;
@@ -480,6 +506,7 @@ void Rpl::addNeighbour(const Ptr<const Dio>& dio)
             EV_DETAIL << "New backup parent added, address - " << dioSender << endl;
         backupParents[dioSender] = dioCopy;
     }
+    // If DIO received from node with lower rank, consider this node a candidate parent
     if (dio->getRank() < rank) {
         if (candidateParents.find(dioSender) != candidateParents.end())
             EV_DETAIL << "Candidate parent entry updated, address - " << dioSender << endl;
@@ -489,21 +516,33 @@ void Rpl::addNeighbour(const Ptr<const Dio>& dio)
     }
 }
 
+Mop Rpl::getMopFromStr(std::string mopPar) {
+    if (mopPar.compare(std::string("storing")) == 0)
+        return STORING;
+    else if (mopPar.compare(std::string("non_storing")) == 0)
+        return NON_STORING;
+    else
+        throw cRuntimeError("Unknown mode of operation (mop) specified");
+}
+
 //
 // notification handling
 //
 
 void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
+    /* Process NUD timeout and remove route through unreachable parent
+     * from the routing table, Section 8.2.1 p.6
+     */
     Enter_Method("receiveChangeNotification");
     EV_DETAIL << "Processing signal - " << signalID << endl;
     if (signalID == linkBrokenSignal) {
         EV_WARN << "Received link break" << endl;
-//        Packet *datagram = check_and_cast<Packet *>(obj);
-//        const auto& networkHeader = findNetworkProtocolHeader(datagram);
-//        if (networkHeader != nullptr) {
-//            const L3Address& destination = networkHeader->getDestinationAddress();
-//            EV_DETAIL << "Connection with destination " << destination << " broken?" << endl;
+        Packet *datagram = check_and_cast<Packet *>(obj);
+        const auto& networkHeader = findNetworkProtocolHeader(datagram);
+        if (networkHeader != nullptr) {
+            const L3Address& destination = networkHeader->getDestinationAddress();
+            EV_DETAIL << "Connection with destination " << destination << " broken?" << endl;
 //            if (destination.getAddressType() == addressType) {
 //                IRoute *route = routingTable->findBestMatchingRoute(destination);
 //                if (route) {
@@ -511,7 +550,7 @@ void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
 //                    sendRerrForBrokenLink(route->getInterface(), nextHop);
 //                }
 //            }
-//        }
+        }
     }
 }
 
