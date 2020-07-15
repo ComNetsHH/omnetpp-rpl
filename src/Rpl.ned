@@ -38,8 +38,8 @@ module Rpl like IManetRouting
         bool isRoot = default(false);
         bool disabled = default(false);
         bool daoEnabled = default(true);
-        bool pingEnabled = default(true);
         string mop = default("non_storing");
+        string communicationMode = default("MP2P");  // 'P2MP', 'MP2P', 'P2P'
         string objectiveFunctionType = default("hopCount");	 // hopCount, ETX, energy, ...
 
     gates:

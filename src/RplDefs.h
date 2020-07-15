@@ -28,7 +28,6 @@ namespace inet {
 #define INF_RANK 0xFFFF
 #define ROOT_RANK 1
 #define DEFAULT_INSTANCE_ID 1
-#define DEFAULT_PREFIX_LENGTH 64
 
 // Trickle timer default parameter values, see Section 8.3.1
 #define DEFAULT_DIO_INTERVAL_MIN 0x03
@@ -39,15 +38,12 @@ namespace inet {
 #define DEFAULT_MIN_HOP_RANK_INCREASE 0x100
 
 const Ipv6Address LL_RPL_MULTICAST("FF02:0:0:0:0:0:0:1A");
-// temporary experimental ping delays
-#define DEFAULT_PING_TIMEOUT_DELAY 6 // seconds
 
 // Trickle timer and internal event types
 enum {
     TRICKLE_START,
     TRICKLE_INTERVAL_UPDATE_EVENT,
     TRICKLE_TRIGGER_EVENT,
-    PING_TIMEOUT    // temporary msg kind to ping preferred parent
 };
 
 } // namespace inet

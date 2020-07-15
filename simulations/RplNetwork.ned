@@ -22,12 +22,7 @@ network RplNetwork
         configurator: Ipv6FlatNetworkConfigurator {
             @display("p=550,150;is=s");
         }
-        //        configurator: Ipv4NetworkConfigurator {
-        //            @display("p=550,150;is=s");
-        //        }
-        //        host[numNodes]: RplRouter {
-        //            @display("i=device/pocketpc_s;p=218.43599,81.096");
-        //        }
+        
         sink: RplRouter {
             @display("i=device/pocketpc_s;p=149.112,75.864");
         }
@@ -43,7 +38,6 @@ network RplNetwork
         host4: RplRouter {
             @display("i=device/pocketpc_s;p=222.36,306.072");
         }
-        
 
     connections allowunconnected:
 

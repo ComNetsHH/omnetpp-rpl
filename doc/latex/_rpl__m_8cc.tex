@@ -1,0 +1,94 @@
+\hypertarget{_rpl__m_8cc}{}\doxysection{src/\+Rpl\+\_\+m.cc File Reference}
+\label{_rpl__m_8cc}\index{src/Rpl\_m.cc@{src/Rpl\_m.cc}}
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$sstream$>$}\newline
+{\ttfamily \#include $<$memory$>$}\newline
+{\ttfamily \#include \char`\"{}Rpl\+\_\+m.\+h\char`\"{}}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classinet_1_1_rpl_header_descriptor}{inet\+::\+Rpl\+Header\+Descriptor}}
+\item 
+class \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor}{inet\+::\+Rpl\+Packet\+Descriptor}}
+\item 
+class \mbox{\hyperlink{classinet_1_1_dio_descriptor}{inet\+::\+Dio\+Descriptor}}
+\item 
+class \mbox{\hyperlink{classinet_1_1_dao_descriptor}{inet\+::\+Dao\+Descriptor}}
+\item 
+class \mbox{\hyperlink{classinet_1_1_dis_descriptor}{inet\+::\+Dis\+Descriptor}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+ \mbox{\hyperlink{namespaceomnetpp}{omnetpp}}
+\item 
+ \mbox{\hyperlink{namespaceinet}{inet}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename T , typename A $>$ }\\void \mbox{\hyperlink{namespaceomnetpp_aa55507da29724bc32cb1377349b22c87}{omnetpp\+::do\+Parsim\+Packing}} (omnetpp\+::c\+Comm\+Buffer $\ast$buffer, const std\+::vector$<$ T, A $>$ \&v)
+\item 
+{\footnotesize template$<$typename T , typename A $>$ }\\void \mbox{\hyperlink{namespaceomnetpp_a5d85de2bce765edaa5f7b1651f94f37c}{omnetpp\+::do\+Parsim\+Unpacking}} (omnetpp\+::c\+Comm\+Buffer $\ast$buffer, std\+::vector$<$ T, A $>$ \&v)
+\item 
+{\footnotesize template$<$typename T , typename A $>$ }\\void \mbox{\hyperlink{namespaceomnetpp_a1043d9829c084411066b9e9469d75942}{omnetpp\+::do\+Parsim\+Packing}} (omnetpp\+::c\+Comm\+Buffer $\ast$buffer, const std\+::list$<$ T, A $>$ \&l)
+\item 
+{\footnotesize template$<$typename T , typename A $>$ }\\void \mbox{\hyperlink{namespaceomnetpp_a28632f95fc2029c95828ed30e379f9ee}{omnetpp\+::do\+Parsim\+Unpacking}} (omnetpp\+::c\+Comm\+Buffer $\ast$buffer, std\+::list$<$ T, A $>$ \&l)
+\item 
+{\footnotesize template$<$typename T , typename Tr , typename A $>$ }\\void \mbox{\hyperlink{namespaceomnetpp_a44c0e632aecd37f539392e96147deef0}{omnetpp\+::do\+Parsim\+Packing}} (omnetpp\+::c\+Comm\+Buffer $\ast$buffer, const std\+::set$<$ T, Tr, A $>$ \&s)
+\item 
+{\footnotesize template$<$typename T , typename Tr , typename A $>$ }\\void \mbox{\hyperlink{namespaceomnetpp_a8ae2ca4f89c4d2f8a95512b5b2936c79}{omnetpp\+::do\+Parsim\+Unpacking}} (omnetpp\+::c\+Comm\+Buffer $\ast$buffer, std\+::set$<$ T, Tr, A $>$ \&s)
+\item 
+{\footnotesize template$<$typename K , typename V , typename Tr , typename A $>$ }\\void \mbox{\hyperlink{namespaceomnetpp_ae14adea382a91da2e1157d74981a946b}{omnetpp\+::do\+Parsim\+Packing}} (omnetpp\+::c\+Comm\+Buffer $\ast$buffer, const std\+::map$<$ K, V, Tr, A $>$ \&m)
+\item 
+{\footnotesize template$<$typename K , typename V , typename Tr , typename A $>$ }\\void \mbox{\hyperlink{namespaceomnetpp_a6fd2557203871e46db43fa9c63968117}{omnetpp\+::do\+Parsim\+Unpacking}} (omnetpp\+::c\+Comm\+Buffer $\ast$buffer, std\+::map$<$ K, V, Tr, A $>$ \&m)
+\item 
+{\footnotesize template$<$typename T $>$ }\\void \mbox{\hyperlink{namespaceomnetpp_a55066a1505082b338d233957ee65f0ac}{omnetpp\+::do\+Parsim\+Array\+Packing}} (omnetpp\+::c\+Comm\+Buffer $\ast$b, const T $\ast$t, int n)
+\item 
+{\footnotesize template$<$typename T $>$ }\\void \mbox{\hyperlink{namespaceomnetpp_aace4e02d3cd181249cf81a4bf8827fa7}{omnetpp\+::do\+Parsim\+Array\+Unpacking}} (omnetpp\+::c\+Comm\+Buffer $\ast$b, T $\ast$t, int n)
+\item 
+{\footnotesize template$<$typename T $>$ }\\void \mbox{\hyperlink{namespaceomnetpp_a41f5f036ca92034bc3b29ad1f9f96903}{omnetpp\+::do\+Parsim\+Packing}} (omnetpp\+::c\+Comm\+Buffer $\ast$, const T \&t)
+\item 
+{\footnotesize template$<$typename T $>$ }\\void \mbox{\hyperlink{namespaceomnetpp_a7336b297a32484942d52667dae7c7248}{omnetpp\+::do\+Parsim\+Unpacking}} (omnetpp\+::c\+Comm\+Buffer $\ast$, T \&t)
+\item 
+{\footnotesize template$<$typename T , typename A $>$ }\\std\+::ostream \& \mbox{\hyperlink{namespaceinet_aaf39e1701d71645816234ceccb808271}{inet\+::operator$<$$<$}} (std\+::ostream \&out, const std\+::vector$<$ T, A $>$ \&vec)
+\item 
+{\footnotesize template$<$typename T $>$ }\\std\+::ostream \& \mbox{\hyperlink{namespaceinet_a829e7da6316c0615fe2a816359a6b912}{inet\+::operator$<$$<$}} (std\+::ostream \&out, const std\+::shared\+\_\+ptr$<$ T $>$ \&t)
+\item 
+{\footnotesize template$<$typename T $>$ }\\std\+::ostream \& \mbox{\hyperlink{namespaceinet_a13de8a39a52ef662c7cfd8c793293167}{inet\+::operator$<$$<$}} (std\+::ostream \&out, const T \&)
+\item 
+e \mbox{\hyperlink{namespaceinet_aec795588b99b1c60ea827f7c3f126b4d}{inet\+::insert}} (D\+IO, \char`\"{}D\+IO\char`\"{})
+\item 
+e \mbox{\hyperlink{namespaceinet_a6376234d6e4478e53344c9db5e7efe8b}{inet\+::insert}} (D\+AO, \char`\"{}D\+AO\char`\"{})
+\item 
+e \mbox{\hyperlink{namespaceinet_a2cb7b75ab03e0e9c9c839472e507abaa}{inet\+::insert}} (D\+A\+O\+\_\+\+A\+CK, \char`\"{}D\+A\+O\+\_\+\+A\+CK\char`\"{})
+\item 
+e \mbox{\hyperlink{namespaceinet_a93f1bd51aaed58cf65e37a0abe1dc6a8}{inet\+::insert}} (P\+I\+NG, \char`\"{}P\+I\+NG\char`\"{})
+\item 
+e \mbox{\hyperlink{namespaceinet_a41e02b4db5f40958917a76aa4731acad}{inet\+::insert}} (P\+I\+N\+G\+\_\+\+A\+CK, \char`\"{}P\+I\+N\+G\+\_\+\+A\+CK\char`\"{})
+\item 
+\mbox{\hyperlink{namespaceinet_ad8aa0b6baf21ff0d10cb426755c2ec01}{inet\+::\+E\+X\+E\+C\+U\+T\+E\+\_\+\+O\+N\+\_\+\+S\+T\+A\+R\+T\+UP}} (omnetpp\+::c\+Enum $\ast$e=omnetpp\+::c\+Enum\+::find(\char`\"{}inet\+::\+Ocp\char`\"{});if(!e) omnetpp\+::enums.\+get\+Instance() -\/$>$add(e=new omnetpp\+::c\+Enum(\char`\"{}inet\+::\+Ocp\char`\"{}));e-\/$>$insert(E\+TX, \char`\"{}E\+TX\char`\"{});e-\/$>$insert(H\+O\+P\+\_\+\+C\+O\+U\+NT, \char`\"{}H\+O\+P\+\_\+\+C\+O\+U\+NT\char`\"{});e-\/$>$insert(E\+N\+E\+R\+GY, \char`\"{}E\+N\+E\+R\+GY\char`\"{});) Register\+\_\+\+Class(Rpl\+Header) Rpl\+Header
+\item 
+\mbox{\hyperlink{namespaceinet_aae43484b4e52d505e511fe7907f918f6}{inet\+::\+Register\+\_\+\+Class\+Descriptor}} (Rpl\+Header\+Descriptor) Rpl\+Header\+Descriptor
+\item 
+\mbox{\hyperlink{namespaceinet_abf40134bf0452cf86f3c9982877c64dd}{inet\+::\+Register\+\_\+\+Class}} (Rpl\+Packet) Rpl\+Packet
+\item 
+\mbox{\hyperlink{namespaceinet_a81ee2540bc4e2a36bf6a4f0844833714}{inet\+::\+Register\+\_\+\+Class\+Descriptor}} (Rpl\+Packet\+Descriptor) Rpl\+Packet\+Descriptor
+\item 
+\mbox{\hyperlink{namespaceinet_ab42157923830371cc4ed4ae93f3ae545}{inet\+::\+Register\+\_\+\+Class}} (Dio) Dio
+\item 
+\mbox{\hyperlink{namespaceinet_a1a6eb3e02f6decf6ba4773e5ed049eba}{inet\+::\+Register\+\_\+\+Class\+Descriptor}} (Dio\+Descriptor) Dio\+Descriptor
+\item 
+\mbox{\hyperlink{namespaceinet_ad717f8aa5d55188080298622a0298384}{inet\+::\+Register\+\_\+\+Class}} (Dao) Dao
+\item 
+\mbox{\hyperlink{namespaceinet_a1ffca9141bd091a1c7b05e67c5487669}{inet\+::\+Register\+\_\+\+Class\+Descriptor}} (Dao\+Descriptor) Dao\+Descriptor
+\item 
+\mbox{\hyperlink{namespaceinet_ac2b0a91b3d32a9aa53ea6d22fa2b1741}{inet\+::\+Register\+\_\+\+Class}} (Dis) Dis
+\item 
+\mbox{\hyperlink{namespaceinet_af7d28a95b74622aad77286bcfdd7821c}{inet\+::\+Register\+\_\+\+Class\+Descriptor}} (Dis\+Descriptor) Dis\+Descriptor
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+E\+X\+E\+C\+U\+T\+E\+\_\+\+O\+N\+\_\+\+S\+T\+A\+R\+T\+UP(omnetpp\+::c\+Enum $\ast$e=omnetpp\+::c\+Enum\+::find(\char`\"{}inet\+::\+Mop\char`\"{});if(!e) omnetpp\+::enums.\+get\+Instance() -\/$>$add(e=new omnetpp\+::c\+Enum(\char`\"{}inet\+::\+Mop\char`\"{}));e-\/$>$insert(N\+O\+N\+\_\+\+S\+T\+O\+R\+I\+NG, \char`\"{}N\+O\+N\+\_\+\+S\+T\+O\+R\+I\+NG\char`\"{});e-\/$>$insert(S\+T\+O\+R\+I\+NG, \char`\"{}S\+T\+O\+R\+I\+NG\char`\"{});) E\+X\+E\+C\+U\+T\+E\+\_\+\+O\+N\+\_\+\+S\+T\+A\+R\+T\+UP(omnetpp if(!e) omnetpp e \mbox{\hyperlink{namespaceinet_a913402109cd8eaa5b90f3ec5d62b4049}{inet\+::insert}} (D\+IS, \char`\"{}D\+IS\char`\"{})
+\end{DoxyCompactItemize}

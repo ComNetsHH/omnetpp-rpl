@@ -43,8 +43,8 @@ TrickleTimer::~TrickleTimer() {
 
 void TrickleTimer::stop() {
     ctrlMsgReceivedCounter = 0;
-    cancelEvent(trickleTriggerEvent);
-    cancelEvent(intervalTriggerEvent);
+    cancelAndDelete(trickleTriggerEvent);
+    cancelAndDelete(intervalTriggerEvent);
 }
 
 void TrickleTimer::initialize() {
@@ -91,8 +91,7 @@ void TrickleTimer::processSelfMessage(cMessage *message)
             break;
         }
         case TRICKLE_TRIGGER_EVENT: {
-            auto triggerMsg = new cMessage("Trickle timer notification for external module", TRICKLE_TRIGGER_EVENT);
-            send(triggerMsg, "rpModule$o");
+            send(new cMessage("", TRICKLE_TRIGGER_EVENT), "rpModule$o");
             break;
         }
         default: {
