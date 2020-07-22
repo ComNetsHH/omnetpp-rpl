@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['ping_517',['PING',['../namespaceinet.html#aeccc687bfd4a9c672ccab097bc03aa68a1ad2c672a8295e7e1b48fec1d6f204b1',1,'inet']]],
-  ['ping_5fack_518',['PING_ACK',['../namespaceinet.html#aeccc687bfd4a9c672ccab097bc03aa68a754ca7dd71b3086755d659554e0d151d',1,'inet']]]
+  ['trickle_5finterval_5fupdate_5fevent_505',['TRICKLE_INTERVAL_UPDATE_EVENT',['../namespaceinet.html#a86e112193b2e639d7dfe1930a65ab1fea78d40cb3706ad77128ffceef95e772de',1,'inet']]],
+  ['trickle_5fstart_506',['TRICKLE_START',['../namespaceinet.html#a86e112193b2e639d7dfe1930a65ab1fea6f2afc45b03df70338aa25fb8c90c38d',1,'inet']]],
+  ['trickle_5ftrigger_5fevent_507',['TRICKLE_TRIGGER_EVENT',['../namespaceinet.html#a86e112193b2e639d7dfe1930a65ab1fea4f47bf62bc7389156107e78665a7a240',1,'inet']]]
 ];

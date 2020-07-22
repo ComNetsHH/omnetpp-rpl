@@ -25,6 +25,7 @@
 #include <map>
 #include <vector>
 
+#include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
@@ -47,6 +48,8 @@ namespace inet {
 class Rpl : public RoutingProtocolBase, public cListener
 {
   private:
+
+    /** Environment */
     IInterfaceTable *interfaceTable;
     Ipv6RoutingTable *routingTable;
     InterfaceEntry *interfaceEntryPtr;
@@ -54,21 +57,29 @@ class Rpl : public RoutingProtocolBase, public cListener
     ObjectiveFunction *objectiveFunction;
     TrickleTimer *trickleTimer;
     cModule *host;
+
+    /** RPL configuration, some parameters are adjustable, see NED file */
     uint8_t dodagVersion;
     Ipv6Address dodagId;
     uint8_t instanceId;
     double daoDelay;
     double defaultPrefParentLifetime;
-    Mop mop;
     bool isRoot;
     bool daoEnabled;
+    bool storing;
     uint16_t rank;
+    uint8_t dtsn;
     Dio *preferredParent;
     Dio *backupParent;
-    Packet *packetInProcessing;
     std::string objectiveFunctionType;
     std::map<Ipv6Address, Dio *> backupParents;
     std::map<Ipv6Address, Dio *> candidateParents;
+
+    /** Statistics collection */
+    simsignal_t dioReceivedSignal;
+    simsignal_t daoReceivedSignal;
+    simsignal_t parentChangedSignal;
+    simsignal_t parentUnreachableSignal;
 
   public:
     Rpl();
@@ -78,7 +89,6 @@ class Rpl : public RoutingProtocolBase, public cListener
     // module interface
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     void initialize(int stage) override;
-//    void handleMessage(cMessage *message) override;
     void handleMessageWhenUp(cMessage *message) override;
 
   private:
@@ -86,7 +96,8 @@ class Rpl : public RoutingProtocolBase, public cListener
     void processSelfMessage(cMessage *message);
     void processMessage(cMessage *message);
 
-    // handling generic packets
+    /* Handling generic packets */
+
     /**
      * Send packet via 'ipOut' gate with specified delay
      *
@@ -103,7 +114,8 @@ class Rpl : public RoutingProtocolBase, public cListener
      */
     void processTrickleTimerMsg(cMessage *message);
 
-    // handling RPL packets
+    /* Handling RPL packets */
+
     /**
      * Process DIO packet by inspecting it's source @see checkUnknownDio(),
      * joining a DODAG if not yet a part of one, (re)starting trickle timer,
@@ -182,10 +194,12 @@ class Rpl : public RoutingProtocolBase, public cListener
     void addNeighbour(const Ptr<const Dio>& dio);
 
     /**
-     * Delete route going through preferred parent as next hop to the DODAG root
-     * from the routing table
+     * Delete preferred parent and related info:
+     *  - route with it as a next-hop from the routing table
+     *  - erase corresponding entry from the candidate parent list
      */
-    void deletePrefParentRoute();
+    void deletePrefParent() { deletePrefParent(false); };
+    void deletePrefParent(bool poisoned);
 
     /**
      * Update preferred parent on each DIO reception by invoking
@@ -193,16 +207,18 @@ class Rpl : public RoutingProtocolBase, public cListener
      * If necessary (@see checkPrefParentChanged()), update routing table @see updateRoutingTable()
      * and reset trickle timer, see Section 8.3
      */
-    void updatePreferredParent();
+    void updatePreferredParent() { updatePreferredParent(false); };
 
-    // lifecycle
+    void updatePreferredParent(bool useBackups);
+
+    /* Lifecycle */
     virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
     virtual void handleStopOperation(LifecycleOperation *operation) override { stop(); }
     virtual void handleCrashOperation(LifecycleOperation *operation) override  { stop(); }
     void start();
     void stop();
 
-    // utility
+    /* Utility */
     /**
      * Check whether DIO comes from an uknown DODAG or has different
      * RPL instance id
@@ -211,17 +227,6 @@ class Rpl : public RoutingProtocolBase, public cListener
      * @return true if DIO sender stems from an unknown DODAG
      */
     bool checkUnknownDio(const Ptr<const Dio>& dio);
-    // temporary method, for debugging only
-    int getPrefixLengthForCommMode() { return par("communicationMode").stdstringValue().compare(std::string("MP2P")) == 0 ? 0 : 64; }
-
-
-    /**
-     * Get Mode of Operation enum value from the string .ini parameter
-     *
-     * @param mopPar string value of the module parameter
-     * @return enum value corresponding to the specified mode of operation
-     */
-    Mop getMopFromStr(std::string mopPar);
 
     /**
      * Get address of the default network interface
@@ -241,6 +246,7 @@ class Rpl : public RoutingProtocolBase, public cListener
      * false otherwise
      */
     bool checkPrefParentChanged(Dio* newPrefParent);
+    void checkDupEntry(std::map<Ipv6Address, Dio *> &parentSet, const Ipv6Address &key);
 
     /**
      * Check if destination advertised in DAO is already stored in the routing table
@@ -252,20 +258,24 @@ class Rpl : public RoutingProtocolBase, public cListener
     bool checkDestAlreadyKnown(const Ipv6Address &dest);
 
     /**
-     * Leave DODAG in case preferred parent has been detected unreachable
+     * Detach from DODAG in case preferred parent has been detected unreachable
      * and candidate parent set is empty. Suppress (see Section 8.2.2.1) all former DODAG info:
      *  - rank
      *  - dodagId
      *  - backup parents
      *  - sub-dodag @see poisonSubDodag()
      */
-    void leaveDodag();
+    void detachFromDodag();
 
     /**
      * Poison node's sub-dodag by advertising rank of INF_RANK to enable them
      * joining a new DODAG (or updated DODAG version), see Section 8.2.2.5
      */
     void poisonSubDodag();
+    /**
+     * Check if INF_RANK is advertised in DIO and whether it comes from preferred parent
+     */
+    bool checkPoisonedParent(const Ptr<const Dio>& dio);
 
     /**
      * Handle signals by implementing @see cListener interface to

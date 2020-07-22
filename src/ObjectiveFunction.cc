@@ -45,7 +45,7 @@ ObjectiveFunction::~ObjectiveFunction() {
 }
 
 Dio* ObjectiveFunction::getPreferredParent(std::map<Ipv6Address, Dio *> candidateParents) {
-    // determine lowest rank parent
+    // determine parent with lowest rank
     Dio *preferredParent = candidateParents.begin()->second;
     uint16_t minRank = preferredParent->getRank();
     for (std::pair<Ipv6Address, Dio *> candidate : candidateParents) {

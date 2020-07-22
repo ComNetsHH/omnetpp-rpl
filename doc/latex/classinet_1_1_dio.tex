@@ -2,7 +2,7 @@
 \label{classinet_1_1_dio}\index{inet::Dio@{inet::Dio}}
 
 
-Class generated from {\ttfamily Rpl.\+msg\+:76} by nedtool.  
+Class generated from {\ttfamily Rpl.\+msg\+:71} by nedtool.  
 
 
 
@@ -40,9 +40,9 @@ virtual uint16\+\_\+t \mbox{\hyperlink{classinet_1_1_dio_a17f6ea5dcd4fbf232c9e11
 \item 
 virtual void \mbox{\hyperlink{classinet_1_1_dio_aafd43ae14a1d97d94fc3fd6909b50861}{set\+Rank}} (uint16\+\_\+t \mbox{\hyperlink{classinet_1_1_dio_a122739ecf14734d53a0307505ebb2ae6}{rank}})
 \item 
-virtual \mbox{\hyperlink{namespaceinet_a2755c3e315d13b7cae7d5f1bd4c5b982}{inet\+::\+Mop}} \mbox{\hyperlink{classinet_1_1_dio_ada446411afebf1e70417fee5fc96fa06}{get\+Mop}} () const
+virtual bool \mbox{\hyperlink{classinet_1_1_dio_aaee596f8ecb6a078021a879e5e632758}{get\+Storing}} () const
 \item 
-virtual void \mbox{\hyperlink{classinet_1_1_dio_ac72e4c2c2000be853ce29100b3b98267}{set\+Mop}} (\mbox{\hyperlink{namespaceinet_a2755c3e315d13b7cae7d5f1bd4c5b982}{inet\+::\+Mop}} \mbox{\hyperlink{classinet_1_1_dio_a9b0e7240d3eceebf64c5c5d574cebbe8}{mop}})
+virtual void \mbox{\hyperlink{classinet_1_1_dio_aff3cc2aef636c57c8fd5e109c7c6f950}{set\+Storing}} (bool \mbox{\hyperlink{classinet_1_1_dio_a408d48dedc42c4ea4d9b195fec681ce8}{storing}})
 \item 
 virtual bool \mbox{\hyperlink{classinet_1_1_dio_a6f82938bf01831de1e28befacf5a4a8e}{get\+Grounded}} () const
 \item 
@@ -67,14 +67,6 @@ virtual void \mbox{\hyperlink{classinet_1_1_dio_a87ed703fd193d4bc2bb79f1161d5e55
 virtual \mbox{\hyperlink{namespaceinet_af7057eca4ffe384b78820662618a7e00}{inet\+::\+Ocp}} \mbox{\hyperlink{classinet_1_1_dio_aa305f5ab547dbb0856b261c891fa5611}{get\+Ocp}} () const
 \item 
 virtual void \mbox{\hyperlink{classinet_1_1_dio_a7ddc82e410397e85d9a9200a2ce8afe5}{set\+Ocp}} (\mbox{\hyperlink{namespaceinet_af7057eca4ffe384b78820662618a7e00}{inet\+::\+Ocp}} \mbox{\hyperlink{classinet_1_1_dio_aaac60cf85674c07a8f3b76d0ca759190}{ocp}})
-\item 
-virtual double \mbox{\hyperlink{classinet_1_1_dio_ae4d8b85496a48f8097ddc342a8d1fdcd}{get\+Lifetime}} () const
-\item 
-virtual void \mbox{\hyperlink{classinet_1_1_dio_ab846485386ca7d16e2de06fa5b0d802a}{set\+Lifetime}} (double \mbox{\hyperlink{classinet_1_1_dio_a85f5814886f3f0a69d473c4f11aab59a}{lifetime}})
-\item 
-virtual double \mbox{\hyperlink{classinet_1_1_dio_a8eb169db96ea9fe2b4ada7b43f721140}{get\+Metric}} () const
-\item 
-virtual void \mbox{\hyperlink{classinet_1_1_dio_ac8e983228a7cfddb7dca379a53790795}{set\+Metric}} (double \mbox{\hyperlink{classinet_1_1_dio_af3b4e070976181a9ef2d5db5b222d839}{metric}})
 \end{DoxyCompactItemize}
 \doxysubsection*{Protected Member Functions}
 \begin{DoxyCompactItemize}
@@ -88,7 +80,7 @@ uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_dio_ab9adde959166c55037ba9e38fc2f790
 \item 
 uint16\+\_\+t \mbox{\hyperlink{classinet_1_1_dio_a122739ecf14734d53a0307505ebb2ae6}{rank}} = 0
 \item 
-\mbox{\hyperlink{namespaceinet_a2755c3e315d13b7cae7d5f1bd4c5b982}{inet\+::\+Mop}} \mbox{\hyperlink{classinet_1_1_dio_a9b0e7240d3eceebf64c5c5d574cebbe8}{mop}} = static\+\_\+cast$<$\mbox{\hyperlink{namespaceinet_a2755c3e315d13b7cae7d5f1bd4c5b982}{inet\+::\+Mop}}$>$(-\/1)
+bool \mbox{\hyperlink{classinet_1_1_dio_a408d48dedc42c4ea4d9b195fec681ce8}{storing}} = false
 \item 
 bool \mbox{\hyperlink{classinet_1_1_dio_a5679e6ff30527637b3e43d6b48a0df58}{grounded}} = false
 \item 
@@ -101,10 +93,6 @@ int \mbox{\hyperlink{classinet_1_1_dio_a61185dc0914ff883b0e9a4fa19741037}{dio\+R
 int \mbox{\hyperlink{classinet_1_1_dio_ab5d3af08f741c3eb2277af4695f9ccff}{dio\+Num\+Doublings}} = 0
 \item 
 \mbox{\hyperlink{namespaceinet_af7057eca4ffe384b78820662618a7e00}{inet\+::\+Ocp}} \mbox{\hyperlink{classinet_1_1_dio_aaac60cf85674c07a8f3b76d0ca759190}{ocp}} = static\+\_\+cast$<$\mbox{\hyperlink{namespaceinet_af7057eca4ffe384b78820662618a7e00}{inet\+::\+Ocp}}$>$(-\/1)
-\item 
-double \mbox{\hyperlink{classinet_1_1_dio_a85f5814886f3f0a69d473c4f11aab59a}{lifetime}} = 0
-\item 
-double \mbox{\hyperlink{classinet_1_1_dio_af3b4e070976181a9ef2d5db5b222d839}{metric}} = 0
 \end{DoxyCompactItemize}
 \doxysubsection*{Private Member Functions}
 \begin{DoxyCompactItemize}
@@ -114,19 +102,24 @@ void \mbox{\hyperlink{classinet_1_1_dio_a3170127327b69cee5c3b649629268b4b}{copy}
 
 
 \doxysubsection{Detailed Description}
-Class generated from {\ttfamily Rpl.\+msg\+:76} by nedtool. 
+Class generated from {\ttfamily Rpl.\+msg\+:71} by nedtool. 
 
 
 \begin{DoxyPre}
 // DODAG Information Option
 class \mbox{\hyperlink{classinet_1_1_dio}{Dio}} extends \mbox{\hyperlink{classinet_1_1_rpl_packet}{RplPacket}}
 \{
+    // DODAG version number, may be incremented by the root to trigger topology refresh 
     uint8\_t dodagVersion;
-    uint16\_t rank;                  // Node's rank
-    Mop mop;                        // Mode of operation               
-    bool grounded;
-    uint8\_t dtsn;                   // Destination Advertisement Trigger Sequence Number
-                                    // for downward routing\end{DoxyPre}
+    uint16\_t rank;                  // Node's rank within the DODAG 
+    bool storing;                   // Mode of operation: storing / non-\/storing                
+    bool grounded;                  // DODAG grounded flag, indicates whether sink is connected to backbone\end{DoxyPre}
+
+
+
+\begin{DoxyPre}    // Destination Advertisement Trigger Sequence Number, 
+    // may be incremented to trigger downward routes update
+    uint8\_t dtsn;\end{DoxyPre}
 
 
 
@@ -134,19 +127,10 @@ class \mbox{\hyperlink{classinet_1_1_dio}{Dio}} extends \mbox{\hyperlink{classin
     int minInterval;
     int dioRedundancyConst;
     int dioNumDoublings;
-    Ocp ocp;\end{DoxyPre}
-
-
-
-\begin{DoxyPre}    double lifetime;                  // Path lifetime
-    double metric;
+    Ocp ocp;
 \}
 \end{DoxyPre}
  
-
-Definition at line 230 of file Rpl\+\_\+m.\+h.
-
-
 
 \doxysubsection{Constructor \& Destructor Documentation}
 \mbox{\Hypertarget{classinet_1_1_dio_af334188788d6ce6583d8ba3164fa62ab}\label{classinet_1_1_dio_af334188788d6ce6583d8ba3164fa62ab}} 
@@ -161,19 +145,11 @@ Definition at line 230 of file Rpl\+\_\+m.\+h.
 \doxysubsubsection{\texorpdfstring{Dio()}{Dio()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily inet\+::\+Dio\+::\+Dio (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_dio}{Dio}} \&}]{other }\end{DoxyParamCaption})}
 
-
-
-Definition at line 911 of file Rpl\+\_\+m.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_dio_a013f6b9352a287783b5e363ad998b90b}\label{classinet_1_1_dio_a013f6b9352a287783b5e363ad998b90b}} 
 \index{inet::Dio@{inet::Dio}!````~Dio@{$\sim$Dio}}
 \index{````~Dio@{$\sim$Dio}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{$\sim$Dio()}{~Dio()}}
 {\footnotesize\ttfamily inet\+::\+Dio\+::$\sim$\+Dio (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 916 of file Rpl\+\_\+m.\+cc.
 
 
 
@@ -183,10 +159,6 @@ Definition at line 916 of file Rpl\+\_\+m.\+cc.
 \index{copy@{copy}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{copy()}{copy()}}
 {\footnotesize\ttfamily void inet\+::\+Dio\+::copy (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_dio}{Dio}} \&}]{other }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
-
-
-
-Definition at line 928 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_a7dbd438abe28853164dd5b33f38b9fea}\label{classinet_1_1_dio_a7dbd438abe28853164dd5b33f38b9fea}} 
 \index{inet::Dio@{inet::Dio}!dup@{dup}}
@@ -198,19 +170,11 @@ Definition at line 928 of file Rpl\+\_\+m.\+cc.
 
 Reimplemented from \mbox{\hyperlink{classinet_1_1_rpl_packet_af4e5f00325d40ebd9c4eb1bf7505a056}{inet\+::\+Rpl\+Packet}}.
 
-
-
-Definition at line 257 of file Rpl\+\_\+m.\+h.
-
 \mbox{\Hypertarget{classinet_1_1_dio_a2c01f0154927258c88c4e553d635733d}\label{classinet_1_1_dio_a2c01f0154927258c88c4e553d635733d}} 
 \index{inet::Dio@{inet::Dio}!getDioNumDoublings@{getDioNumDoublings}}
 \index{getDioNumDoublings@{getDioNumDoublings}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{getDioNumDoublings()}{getDioNumDoublings()}}
 {\footnotesize\ttfamily int inet\+::\+Dio\+::get\+Dio\+Num\+Doublings (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 1052 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_ad44e1ac36479dc886889e9a289867ee4}\label{classinet_1_1_dio_ad44e1ac36479dc886889e9a289867ee4}} 
 \index{inet::Dio@{inet::Dio}!getDioRedundancyConst@{getDioRedundancyConst}}
@@ -218,19 +182,11 @@ Definition at line 1052 of file Rpl\+\_\+m.\+cc.
 \doxysubsubsection{\texorpdfstring{getDioRedundancyConst()}{getDioRedundancyConst()}}
 {\footnotesize\ttfamily int inet\+::\+Dio\+::get\+Dio\+Redundancy\+Const (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
 
-
-
-Definition at line 1041 of file Rpl\+\_\+m.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_dio_ad2bb5a388acd8b191637b9205a749265}\label{classinet_1_1_dio_ad2bb5a388acd8b191637b9205a749265}} 
 \index{inet::Dio@{inet::Dio}!getDodagVersion@{getDodagVersion}}
 \index{getDodagVersion@{getDodagVersion}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{getDodagVersion()}{getDodagVersion()}}
 {\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Dio\+::get\+Dodag\+Version (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 975 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_a2822b6f9dab34954b6e0aab190dc9bc2}\label{classinet_1_1_dio_a2822b6f9dab34954b6e0aab190dc9bc2}} 
 \index{inet::Dio@{inet::Dio}!getDtsn@{getDtsn}}
@@ -238,39 +194,11 @@ Definition at line 975 of file Rpl\+\_\+m.\+cc.
 \doxysubsubsection{\texorpdfstring{getDtsn()}{getDtsn()}}
 {\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Dio\+::get\+Dtsn (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
 
-
-
-Definition at line 1019 of file Rpl\+\_\+m.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_dio_a6f82938bf01831de1e28befacf5a4a8e}\label{classinet_1_1_dio_a6f82938bf01831de1e28befacf5a4a8e}} 
 \index{inet::Dio@{inet::Dio}!getGrounded@{getGrounded}}
 \index{getGrounded@{getGrounded}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{getGrounded()}{getGrounded()}}
 {\footnotesize\ttfamily bool inet\+::\+Dio\+::get\+Grounded (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 1008 of file Rpl\+\_\+m.\+cc.
-
-\mbox{\Hypertarget{classinet_1_1_dio_ae4d8b85496a48f8097ddc342a8d1fdcd}\label{classinet_1_1_dio_ae4d8b85496a48f8097ddc342a8d1fdcd}} 
-\index{inet::Dio@{inet::Dio}!getLifetime@{getLifetime}}
-\index{getLifetime@{getLifetime}!inet::Dio@{inet::Dio}}
-\doxysubsubsection{\texorpdfstring{getLifetime()}{getLifetime()}}
-{\footnotesize\ttfamily double inet\+::\+Dio\+::get\+Lifetime (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 1074 of file Rpl\+\_\+m.\+cc.
-
-\mbox{\Hypertarget{classinet_1_1_dio_a8eb169db96ea9fe2b4ada7b43f721140}\label{classinet_1_1_dio_a8eb169db96ea9fe2b4ada7b43f721140}} 
-\index{inet::Dio@{inet::Dio}!getMetric@{getMetric}}
-\index{getMetric@{getMetric}!inet::Dio@{inet::Dio}}
-\doxysubsubsection{\texorpdfstring{getMetric()}{getMetric()}}
-{\footnotesize\ttfamily double inet\+::\+Dio\+::get\+Metric (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 1085 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_a2c340b7b09a99e574f7a800b95c7ca27}\label{classinet_1_1_dio_a2c340b7b09a99e574f7a800b95c7ca27}} 
 \index{inet::Dio@{inet::Dio}!getMinInterval@{getMinInterval}}
@@ -278,29 +206,11 @@ Definition at line 1085 of file Rpl\+\_\+m.\+cc.
 \doxysubsubsection{\texorpdfstring{getMinInterval()}{getMinInterval()}}
 {\footnotesize\ttfamily int inet\+::\+Dio\+::get\+Min\+Interval (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
 
-
-
-Definition at line 1030 of file Rpl\+\_\+m.\+cc.
-
-\mbox{\Hypertarget{classinet_1_1_dio_ada446411afebf1e70417fee5fc96fa06}\label{classinet_1_1_dio_ada446411afebf1e70417fee5fc96fa06}} 
-\index{inet::Dio@{inet::Dio}!getMop@{getMop}}
-\index{getMop@{getMop}!inet::Dio@{inet::Dio}}
-\doxysubsubsection{\texorpdfstring{getMop()}{getMop()}}
-{\footnotesize\ttfamily \mbox{\hyperlink{namespaceinet_a2755c3e315d13b7cae7d5f1bd4c5b982}{inet\+::\+Mop}} inet\+::\+Dio\+::get\+Mop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 997 of file Rpl\+\_\+m.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_dio_aa305f5ab547dbb0856b261c891fa5611}\label{classinet_1_1_dio_aa305f5ab547dbb0856b261c891fa5611}} 
 \index{inet::Dio@{inet::Dio}!getOcp@{getOcp}}
 \index{getOcp@{getOcp}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{getOcp()}{getOcp()}}
 {\footnotesize\ttfamily \mbox{\hyperlink{namespaceinet_af7057eca4ffe384b78820662618a7e00}{inet\+::\+Ocp}} inet\+::\+Dio\+::get\+Ocp (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 1063 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_a17f6ea5dcd4fbf232c9e11ce572fd248}\label{classinet_1_1_dio_a17f6ea5dcd4fbf232c9e11ce572fd248}} 
 \index{inet::Dio@{inet::Dio}!getRank@{getRank}}
@@ -308,19 +218,17 @@ Definition at line 1063 of file Rpl\+\_\+m.\+cc.
 \doxysubsubsection{\texorpdfstring{getRank()}{getRank()}}
 {\footnotesize\ttfamily uint16\+\_\+t inet\+::\+Dio\+::get\+Rank (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
 
-
-
-Definition at line 986 of file Rpl\+\_\+m.\+cc.
+\mbox{\Hypertarget{classinet_1_1_dio_aaee596f8ecb6a078021a879e5e632758}\label{classinet_1_1_dio_aaee596f8ecb6a078021a879e5e632758}} 
+\index{inet::Dio@{inet::Dio}!getStoring@{getStoring}}
+\index{getStoring@{getStoring}!inet::Dio@{inet::Dio}}
+\doxysubsubsection{\texorpdfstring{getStoring()}{getStoring()}}
+{\footnotesize\ttfamily bool inet\+::\+Dio\+::get\+Storing (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
 
 \mbox{\Hypertarget{classinet_1_1_dio_aef400136ed2c92c1ba16924cd475a99f}\label{classinet_1_1_dio_aef400136ed2c92c1ba16924cd475a99f}} 
 \index{inet::Dio@{inet::Dio}!operator=@{operator=}}
 \index{operator=@{operator=}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{operator=()}{operator=()}}
 {\footnotesize\ttfamily \mbox{\hyperlink{classinet_1_1_dio}{Dio}} \& inet\+::\+Dio\+::operator= (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_dio}{Dio}} \&}]{other }\end{DoxyParamCaption})}
-
-
-
-Definition at line 920 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_a3b45c29ccc9ba15141ba214201550030}\label{classinet_1_1_dio_a3b45c29ccc9ba15141ba214201550030}} 
 \index{inet::Dio@{inet::Dio}!operator==@{operator==}}
@@ -338,10 +246,6 @@ Definition at line 920 of file Rpl\+\_\+m.\+cc.
 
 Reimplemented from \mbox{\hyperlink{classinet_1_1_rpl_packet_af4b0907e2cb8b2cbc34e46197d8cc90f}{inet\+::\+Rpl\+Packet}}.
 
-
-
-Definition at line 943 of file Rpl\+\_\+m.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_dio_a924015c0580f686930d44d0959b8cfa8}\label{classinet_1_1_dio_a924015c0580f686930d44d0959b8cfa8}} 
 \index{inet::Dio@{inet::Dio}!parsimUnpack@{parsimUnpack}}
 \index{parsimUnpack@{parsimUnpack}!inet::Dio@{inet::Dio}}
@@ -352,19 +256,11 @@ Definition at line 943 of file Rpl\+\_\+m.\+cc.
 
 Reimplemented from \mbox{\hyperlink{classinet_1_1_rpl_packet_abd805006838257db74c8803b3696984a}{inet\+::\+Rpl\+Packet}}.
 
-
-
-Definition at line 959 of file Rpl\+\_\+m.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_dio_a87ed703fd193d4bc2bb79f1161d5e559}\label{classinet_1_1_dio_a87ed703fd193d4bc2bb79f1161d5e559}} 
 \index{inet::Dio@{inet::Dio}!setDioNumDoublings@{setDioNumDoublings}}
 \index{setDioNumDoublings@{setDioNumDoublings}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{setDioNumDoublings()}{setDioNumDoublings()}}
 {\footnotesize\ttfamily void inet\+::\+Dio\+::set\+Dio\+Num\+Doublings (\begin{DoxyParamCaption}\item[{int}]{dio\+Num\+Doublings }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 1057 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_aec7220b155811e1f8025a6751afdfb58}\label{classinet_1_1_dio_aec7220b155811e1f8025a6751afdfb58}} 
 \index{inet::Dio@{inet::Dio}!setDioRedundancyConst@{setDioRedundancyConst}}
@@ -372,19 +268,11 @@ Definition at line 1057 of file Rpl\+\_\+m.\+cc.
 \doxysubsubsection{\texorpdfstring{setDioRedundancyConst()}{setDioRedundancyConst()}}
 {\footnotesize\ttfamily void inet\+::\+Dio\+::set\+Dio\+Redundancy\+Const (\begin{DoxyParamCaption}\item[{int}]{dio\+Redundancy\+Const }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
 
-
-
-Definition at line 1046 of file Rpl\+\_\+m.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_dio_add670812ab653de297ceef0c66aa73ca}\label{classinet_1_1_dio_add670812ab653de297ceef0c66aa73ca}} 
 \index{inet::Dio@{inet::Dio}!setDodagVersion@{setDodagVersion}}
 \index{setDodagVersion@{setDodagVersion}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{setDodagVersion()}{setDodagVersion()}}
 {\footnotesize\ttfamily void inet\+::\+Dio\+::set\+Dodag\+Version (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{dodag\+Version }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 980 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_a6572925fcf86356bb3cddd715a256d18}\label{classinet_1_1_dio_a6572925fcf86356bb3cddd715a256d18}} 
 \index{inet::Dio@{inet::Dio}!setDtsn@{setDtsn}}
@@ -392,39 +280,11 @@ Definition at line 980 of file Rpl\+\_\+m.\+cc.
 \doxysubsubsection{\texorpdfstring{setDtsn()}{setDtsn()}}
 {\footnotesize\ttfamily void inet\+::\+Dio\+::set\+Dtsn (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{dtsn }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
 
-
-
-Definition at line 1024 of file Rpl\+\_\+m.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_dio_a1a29b11aa7dd4cff4b6f7cfef12bf9f7}\label{classinet_1_1_dio_a1a29b11aa7dd4cff4b6f7cfef12bf9f7}} 
 \index{inet::Dio@{inet::Dio}!setGrounded@{setGrounded}}
 \index{setGrounded@{setGrounded}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{setGrounded()}{setGrounded()}}
 {\footnotesize\ttfamily void inet\+::\+Dio\+::set\+Grounded (\begin{DoxyParamCaption}\item[{bool}]{grounded }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 1013 of file Rpl\+\_\+m.\+cc.
-
-\mbox{\Hypertarget{classinet_1_1_dio_ab846485386ca7d16e2de06fa5b0d802a}\label{classinet_1_1_dio_ab846485386ca7d16e2de06fa5b0d802a}} 
-\index{inet::Dio@{inet::Dio}!setLifetime@{setLifetime}}
-\index{setLifetime@{setLifetime}!inet::Dio@{inet::Dio}}
-\doxysubsubsection{\texorpdfstring{setLifetime()}{setLifetime()}}
-{\footnotesize\ttfamily void inet\+::\+Dio\+::set\+Lifetime (\begin{DoxyParamCaption}\item[{double}]{lifetime }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 1079 of file Rpl\+\_\+m.\+cc.
-
-\mbox{\Hypertarget{classinet_1_1_dio_ac8e983228a7cfddb7dca379a53790795}\label{classinet_1_1_dio_ac8e983228a7cfddb7dca379a53790795}} 
-\index{inet::Dio@{inet::Dio}!setMetric@{setMetric}}
-\index{setMetric@{setMetric}!inet::Dio@{inet::Dio}}
-\doxysubsubsection{\texorpdfstring{setMetric()}{setMetric()}}
-{\footnotesize\ttfamily void inet\+::\+Dio\+::set\+Metric (\begin{DoxyParamCaption}\item[{double}]{metric }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 1090 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_a7e869b464bdd19c620c62daba5349c80}\label{classinet_1_1_dio_a7e869b464bdd19c620c62daba5349c80}} 
 \index{inet::Dio@{inet::Dio}!setMinInterval@{setMinInterval}}
@@ -432,29 +292,11 @@ Definition at line 1090 of file Rpl\+\_\+m.\+cc.
 \doxysubsubsection{\texorpdfstring{setMinInterval()}{setMinInterval()}}
 {\footnotesize\ttfamily void inet\+::\+Dio\+::set\+Min\+Interval (\begin{DoxyParamCaption}\item[{int}]{min\+Interval }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
 
-
-
-Definition at line 1035 of file Rpl\+\_\+m.\+cc.
-
-\mbox{\Hypertarget{classinet_1_1_dio_ac72e4c2c2000be853ce29100b3b98267}\label{classinet_1_1_dio_ac72e4c2c2000be853ce29100b3b98267}} 
-\index{inet::Dio@{inet::Dio}!setMop@{setMop}}
-\index{setMop@{setMop}!inet::Dio@{inet::Dio}}
-\doxysubsubsection{\texorpdfstring{setMop()}{setMop()}}
-{\footnotesize\ttfamily void inet\+::\+Dio\+::set\+Mop (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespaceinet_a2755c3e315d13b7cae7d5f1bd4c5b982}{inet\+::\+Mop}}}]{mop }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 1002 of file Rpl\+\_\+m.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_dio_a7ddc82e410397e85d9a9200a2ce8afe5}\label{classinet_1_1_dio_a7ddc82e410397e85d9a9200a2ce8afe5}} 
 \index{inet::Dio@{inet::Dio}!setOcp@{setOcp}}
 \index{setOcp@{setOcp}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{setOcp()}{setOcp()}}
 {\footnotesize\ttfamily void inet\+::\+Dio\+::set\+Ocp (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespaceinet_af7057eca4ffe384b78820662618a7e00}{inet\+::\+Ocp}}}]{ocp }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
-
-
-
-Definition at line 1068 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_aafd43ae14a1d97d94fc3fd6909b50861}\label{classinet_1_1_dio_aafd43ae14a1d97d94fc3fd6909b50861}} 
 \index{inet::Dio@{inet::Dio}!setRank@{setRank}}
@@ -462,9 +304,11 @@ Definition at line 1068 of file Rpl\+\_\+m.\+cc.
 \doxysubsubsection{\texorpdfstring{setRank()}{setRank()}}
 {\footnotesize\ttfamily void inet\+::\+Dio\+::set\+Rank (\begin{DoxyParamCaption}\item[{uint16\+\_\+t}]{rank }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
 
-
-
-Definition at line 991 of file Rpl\+\_\+m.\+cc.
+\mbox{\Hypertarget{classinet_1_1_dio_aff3cc2aef636c57c8fd5e109c7c6f950}\label{classinet_1_1_dio_aff3cc2aef636c57c8fd5e109c7c6f950}} 
+\index{inet::Dio@{inet::Dio}!setStoring@{setStoring}}
+\index{setStoring@{setStoring}!inet::Dio@{inet::Dio}}
+\doxysubsubsection{\texorpdfstring{setStoring()}{setStoring()}}
+{\footnotesize\ttfamily void inet\+::\+Dio\+::set\+Storing (\begin{DoxyParamCaption}\item[{bool}]{storing }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
 
 
 
@@ -475,19 +319,11 @@ Definition at line 991 of file Rpl\+\_\+m.\+cc.
 \doxysubsubsection{\texorpdfstring{dioNumDoublings}{dioNumDoublings}}
 {\footnotesize\ttfamily int inet\+::\+Dio\+::dio\+Num\+Doublings = 0\hspace{0.3cm}{\ttfamily [protected]}}
 
-
-
-Definition at line 240 of file Rpl\+\_\+m.\+h.
-
 \mbox{\Hypertarget{classinet_1_1_dio_a61185dc0914ff883b0e9a4fa19741037}\label{classinet_1_1_dio_a61185dc0914ff883b0e9a4fa19741037}} 
 \index{inet::Dio@{inet::Dio}!dioRedundancyConst@{dioRedundancyConst}}
 \index{dioRedundancyConst@{dioRedundancyConst}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{dioRedundancyConst}{dioRedundancyConst}}
 {\footnotesize\ttfamily int inet\+::\+Dio\+::dio\+Redundancy\+Const = 0\hspace{0.3cm}{\ttfamily [protected]}}
-
-
-
-Definition at line 239 of file Rpl\+\_\+m.\+h.
 
 \mbox{\Hypertarget{classinet_1_1_dio_ab9adde959166c55037ba9e38fc2f7902}\label{classinet_1_1_dio_ab9adde959166c55037ba9e38fc2f7902}} 
 \index{inet::Dio@{inet::Dio}!dodagVersion@{dodagVersion}}
@@ -495,19 +331,11 @@ Definition at line 239 of file Rpl\+\_\+m.\+h.
 \doxysubsubsection{\texorpdfstring{dodagVersion}{dodagVersion}}
 {\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Dio\+::dodag\+Version = 0\hspace{0.3cm}{\ttfamily [protected]}}
 
-
-
-Definition at line 233 of file Rpl\+\_\+m.\+h.
-
 \mbox{\Hypertarget{classinet_1_1_dio_a506073193f4e0b40deb6a90491ed906a}\label{classinet_1_1_dio_a506073193f4e0b40deb6a90491ed906a}} 
 \index{inet::Dio@{inet::Dio}!dtsn@{dtsn}}
 \index{dtsn@{dtsn}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{dtsn}{dtsn}}
 {\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Dio\+::dtsn = 0\hspace{0.3cm}{\ttfamily [protected]}}
-
-
-
-Definition at line 237 of file Rpl\+\_\+m.\+h.
 
 \mbox{\Hypertarget{classinet_1_1_dio_a5679e6ff30527637b3e43d6b48a0df58}\label{classinet_1_1_dio_a5679e6ff30527637b3e43d6b48a0df58}} 
 \index{inet::Dio@{inet::Dio}!grounded@{grounded}}
@@ -515,49 +343,11 @@ Definition at line 237 of file Rpl\+\_\+m.\+h.
 \doxysubsubsection{\texorpdfstring{grounded}{grounded}}
 {\footnotesize\ttfamily bool inet\+::\+Dio\+::grounded = false\hspace{0.3cm}{\ttfamily [protected]}}
 
-
-
-Definition at line 236 of file Rpl\+\_\+m.\+h.
-
-\mbox{\Hypertarget{classinet_1_1_dio_a85f5814886f3f0a69d473c4f11aab59a}\label{classinet_1_1_dio_a85f5814886f3f0a69d473c4f11aab59a}} 
-\index{inet::Dio@{inet::Dio}!lifetime@{lifetime}}
-\index{lifetime@{lifetime}!inet::Dio@{inet::Dio}}
-\doxysubsubsection{\texorpdfstring{lifetime}{lifetime}}
-{\footnotesize\ttfamily double inet\+::\+Dio\+::lifetime = 0\hspace{0.3cm}{\ttfamily [protected]}}
-
-
-
-Definition at line 242 of file Rpl\+\_\+m.\+h.
-
-\mbox{\Hypertarget{classinet_1_1_dio_af3b4e070976181a9ef2d5db5b222d839}\label{classinet_1_1_dio_af3b4e070976181a9ef2d5db5b222d839}} 
-\index{inet::Dio@{inet::Dio}!metric@{metric}}
-\index{metric@{metric}!inet::Dio@{inet::Dio}}
-\doxysubsubsection{\texorpdfstring{metric}{metric}}
-{\footnotesize\ttfamily double inet\+::\+Dio\+::metric = 0\hspace{0.3cm}{\ttfamily [protected]}}
-
-
-
-Definition at line 243 of file Rpl\+\_\+m.\+h.
-
 \mbox{\Hypertarget{classinet_1_1_dio_a21fa20cf66124edaee0c8c988418992f}\label{classinet_1_1_dio_a21fa20cf66124edaee0c8c988418992f}} 
 \index{inet::Dio@{inet::Dio}!minInterval@{minInterval}}
 \index{minInterval@{minInterval}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{minInterval}{minInterval}}
 {\footnotesize\ttfamily int inet\+::\+Dio\+::min\+Interval = 0\hspace{0.3cm}{\ttfamily [protected]}}
-
-
-
-Definition at line 238 of file Rpl\+\_\+m.\+h.
-
-\mbox{\Hypertarget{classinet_1_1_dio_a9b0e7240d3eceebf64c5c5d574cebbe8}\label{classinet_1_1_dio_a9b0e7240d3eceebf64c5c5d574cebbe8}} 
-\index{inet::Dio@{inet::Dio}!mop@{mop}}
-\index{mop@{mop}!inet::Dio@{inet::Dio}}
-\doxysubsubsection{\texorpdfstring{mop}{mop}}
-{\footnotesize\ttfamily \mbox{\hyperlink{namespaceinet_a2755c3e315d13b7cae7d5f1bd4c5b982}{inet\+::\+Mop}} inet\+::\+Dio\+::mop = static\+\_\+cast$<$\mbox{\hyperlink{namespaceinet_a2755c3e315d13b7cae7d5f1bd4c5b982}{inet\+::\+Mop}}$>$(-\/1)\hspace{0.3cm}{\ttfamily [protected]}}
-
-
-
-Definition at line 235 of file Rpl\+\_\+m.\+h.
 
 \mbox{\Hypertarget{classinet_1_1_dio_aaac60cf85674c07a8f3b76d0ca759190}\label{classinet_1_1_dio_aaac60cf85674c07a8f3b76d0ca759190}} 
 \index{inet::Dio@{inet::Dio}!ocp@{ocp}}
@@ -565,19 +355,17 @@ Definition at line 235 of file Rpl\+\_\+m.\+h.
 \doxysubsubsection{\texorpdfstring{ocp}{ocp}}
 {\footnotesize\ttfamily \mbox{\hyperlink{namespaceinet_af7057eca4ffe384b78820662618a7e00}{inet\+::\+Ocp}} inet\+::\+Dio\+::ocp = static\+\_\+cast$<$\mbox{\hyperlink{namespaceinet_af7057eca4ffe384b78820662618a7e00}{inet\+::\+Ocp}}$>$(-\/1)\hspace{0.3cm}{\ttfamily [protected]}}
 
-
-
-Definition at line 241 of file Rpl\+\_\+m.\+h.
-
 \mbox{\Hypertarget{classinet_1_1_dio_a122739ecf14734d53a0307505ebb2ae6}\label{classinet_1_1_dio_a122739ecf14734d53a0307505ebb2ae6}} 
 \index{inet::Dio@{inet::Dio}!rank@{rank}}
 \index{rank@{rank}!inet::Dio@{inet::Dio}}
 \doxysubsubsection{\texorpdfstring{rank}{rank}}
 {\footnotesize\ttfamily uint16\+\_\+t inet\+::\+Dio\+::rank = 0\hspace{0.3cm}{\ttfamily [protected]}}
 
-
-
-Definition at line 234 of file Rpl\+\_\+m.\+h.
+\mbox{\Hypertarget{classinet_1_1_dio_a408d48dedc42c4ea4d9b195fec681ce8}\label{classinet_1_1_dio_a408d48dedc42c4ea4d9b195fec681ce8}} 
+\index{inet::Dio@{inet::Dio}!storing@{storing}}
+\index{storing@{storing}!inet::Dio@{inet::Dio}}
+\doxysubsubsection{\texorpdfstring{storing}{storing}}
+{\footnotesize\ttfamily bool inet\+::\+Dio\+::storing = false\hspace{0.3cm}{\ttfamily [protected]}}
 
 
 

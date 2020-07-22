@@ -26,6 +26,17 @@ import inet.routing.contract.IManetRouting;
 module Rpl like IManetRouting
 {
     parameters:
+        // statistics collection
+        @signal[dioReceived](type=Dio);
+        @signal[daoReceived](type=Dao);
+        @signal[parentChanged](type=Dio);
+        @signal[parentUnreachable](type=Dio);
+        @statistic[dioReceived](title = "DIO packets received"; source="dioReceived"; record=count; interpolationmode=none);  
+        @statistic[daoReceived](title = "DAO packets received"; source="daoReceived"; record=count; interpolationmode=none);
+        @statistic[parentChanged](title = "Preferred parent has changed"; source="parentChanged"; record=count; interpolationmode=none);
+        @statistic[parentUnreachable](title = "Preferred parent unreachability detected"; source="parentUnreachable"; record=count; interpolationmode=none);
+        
+        
         // properties
         @class("inet::Rpl");
         @display("i=block/routing");
@@ -38,8 +49,8 @@ module Rpl like IManetRouting
         bool isRoot = default(false);
         bool disabled = default(false);
         bool daoEnabled = default(true);
-        string mop = default("non_storing");
-        string communicationMode = default("MP2P");  // 'P2MP', 'MP2P', 'P2P'
+        bool storing = default(false);
+        bool subDodagPoisoning = default(true);
         string objectiveFunctionType = default("hopCount");	 // hopCount, ETX, energy, ...
 
     gates:

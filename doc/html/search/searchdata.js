@@ -4,10 +4,10 @@ var indexSectionsWithContent =
   1: "dort",
   2: "io",
   3: "ort",
-  4: "acdefghilnoprstu~",
-  5: "bcdghilmnoprst",
-  6: "fmor",
-  7: "defhnpst",
+  4: "acdfghilnoprstu~",
+  5: "bcdghimnoprst",
+  6: "for",
+  7: "defhpt",
   8: "dimr"
 };
 

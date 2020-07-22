@@ -42,6 +42,7 @@ TrickleTimer::~TrickleTimer() {
 }
 
 void TrickleTimer::stop() {
+    EV_DETAIL << "Trickle timer stopped " << endl;
     ctrlMsgReceivedCounter = 0;
     cancelAndDelete(trickleTriggerEvent);
     cancelAndDelete(intervalTriggerEvent);

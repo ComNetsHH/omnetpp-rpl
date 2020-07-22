@@ -61,10 +61,14 @@ void \mbox{\hyperlink{classinet_1_1_rpl_ae977a14cb585dd5bec9470d9b6e132f3}{updat
 \begin{DoxyCompactList}\small\item\em Update routing table with new route to destination reachable via next hop. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classinet_1_1_rpl_a6c21e6953b65f334f851290b37a3deb8}{add\+Neighbour}} (const Ptr$<$ const \mbox{\hyperlink{classinet_1_1_dio}{Dio}} $>$ \&dio)
 \begin{DoxyCompactList}\small\item\em Add node (represented by most recent D\+IO packet) to one of the neighboring sets\+: \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{classinet_1_1_rpl_ae05c7d33515bc357f1054fc46c84e26a}{delete\+Pref\+Parent\+Route}} ()
-\begin{DoxyCompactList}\small\item\em Delete route going through preferred parent as next hop to the D\+O\+D\+AG root from the routing table. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classinet_1_1_rpl_a9f807c3f7e49a2137ac71e0b8eb1ec1b}{delete\+Pref\+Parent}} ()
+\begin{DoxyCompactList}\small\item\em Delete preferred parent and related info\+: \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classinet_1_1_rpl_a5eecf0f8621509b14dc0f5d96b2cca45}{delete\+Pref\+Parent}} (bool poisoned)
+\item 
 void \mbox{\hyperlink{classinet_1_1_rpl_ab12b94c484d147b13ae7183ba1e6e2cd}{update\+Preferred\+Parent}} ()
 \begin{DoxyCompactList}\small\item\em Update preferred parent on each D\+IO reception by invoking objective function recalculation for candidate neighbors set. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classinet_1_1_rpl_a3dcc1f3cc2f67bd9d7f4e98c1536bed1}{update\+Preferred\+Parent}} (bool use\+Backups)
+\item 
 virtual void \mbox{\hyperlink{classinet_1_1_rpl_a997e684c93d1211df53e7339e01fb6f9}{handle\+Start\+Operation}} (Lifecycle\+Operation $\ast$operation) override
 \item 
 virtual void \mbox{\hyperlink{classinet_1_1_rpl_a688eafdf3007f93eda776ae66ddbdbcc}{handle\+Stop\+Operation}} (Lifecycle\+Operation $\ast$operation) override
@@ -77,27 +81,27 @@ void \mbox{\hyperlink{classinet_1_1_rpl_a4922fe5e28f79fcb08d0879300785daa}{stop}
 \item 
 bool \mbox{\hyperlink{classinet_1_1_rpl_a6d1ea82beff5d34c8ea666845d468c10}{check\+Unknown\+Dio}} (const Ptr$<$ const \mbox{\hyperlink{classinet_1_1_dio}{Dio}} $>$ \&dio)
 \begin{DoxyCompactList}\small\item\em Check whether D\+IO comes from an uknown D\+O\+D\+AG or has different R\+PL instance id. \end{DoxyCompactList}\item 
-int \mbox{\hyperlink{classinet_1_1_rpl_ac11366f29d87338c091de73143253e02}{get\+Prefix\+Length\+For\+Comm\+Mode}} ()
-\item 
-\mbox{\hyperlink{namespaceinet_a2755c3e315d13b7cae7d5f1bd4c5b982}{Mop}} \mbox{\hyperlink{classinet_1_1_rpl_aeb20428e40a107faaa838083a3163a30}{get\+Mop\+From\+Str}} (std\+::string mop\+Par)
-\begin{DoxyCompactList}\small\item\em Get Mode of Operation enum value from the string .ini parameter. \end{DoxyCompactList}\item 
 Ipv6\+Address \mbox{\hyperlink{classinet_1_1_rpl_a3affe06bc0f5bcf06a253ad25eaecbbd}{get\+Self\+Address}} ()
 \begin{DoxyCompactList}\small\item\em Get address of the default network interface. \end{DoxyCompactList}\item 
 bool \mbox{\hyperlink{classinet_1_1_rpl_a561dc3bfe02323249069c0540c1bc6bb}{check\+Pref\+Parent\+Changed}} (\mbox{\hyperlink{classinet_1_1_dio}{Dio}} $\ast$new\+Pref\+Parent)
 \begin{DoxyCompactList}\small\item\em Check if node\textquotesingle{}s preferred parent has changed after recalculating via objective function to determine whether routing table updates are necessary as well display corresponding log information. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classinet_1_1_rpl_a094f5a3851df40fcceb323e78222814d}{check\+Dup\+Entry}} (std\+::map$<$ Ipv6\+Address, \mbox{\hyperlink{classinet_1_1_dio}{Dio}} $\ast$ $>$ \&parent\+Set, const Ipv6\+Address \&key)
+\item 
 bool \mbox{\hyperlink{classinet_1_1_rpl_ac92a1ad3b8597130c2974a4728ea5322}{check\+Dest\+Already\+Known}} (const Ipv6\+Address \&dest)
 \begin{DoxyCompactList}\small\item\em Check if destination advertised in D\+AO is already stored in the routing table and shouldn\textquotesingle{}t be forwarded upwards through the D\+O\+D\+AG. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{classinet_1_1_rpl_a192e207cf7cabab2c9c51ab1d142def9}{leave\+Dodag}} ()
-\begin{DoxyCompactList}\small\item\em Leave D\+O\+D\+AG in case preferred parent has been detected unreachable and candidate parent set is empty. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classinet_1_1_rpl_a329c467e9fa9b653e85e5c2e264df881}{detach\+From\+Dodag}} ()
+\begin{DoxyCompactList}\small\item\em Detach from D\+O\+D\+AG in case preferred parent has been detected unreachable and candidate parent set is empty. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classinet_1_1_rpl_a0bc9fc8edc7a43a44826e6c664dc2568}{poison\+Sub\+Dodag}} ()
 \begin{DoxyCompactList}\small\item\em Poison node\textquotesingle{}s sub-\/dodag by advertising rank of I\+N\+F\+\_\+\+R\+A\+NK to enable them joining a new D\+O\+D\+AG (or updated D\+O\+D\+AG version), see Section 8.\+2.\+2.\+5. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classinet_1_1_rpl_ac90742b655787cb2d21d81f0565b133a}{check\+Poisoned\+Parent}} (const Ptr$<$ const \mbox{\hyperlink{classinet_1_1_dio}{Dio}} $>$ \&dio)
+\begin{DoxyCompactList}\small\item\em Check if I\+N\+F\+\_\+\+R\+A\+NK is advertised in D\+IO and whether it comes from preferred parent. \end{DoxyCompactList}\item 
 virtual void \mbox{\hyperlink{classinet_1_1_rpl_af36d9f3e01ad828483fd9024e28d9c9f}{receive\+Signal}} (c\+Component $\ast$source, simsignal\+\_\+t signal\+ID, c\+Object $\ast$obj, c\+Object $\ast$details) override
 \begin{DoxyCompactList}\small\item\em Handle signals by implementing. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsection*{Private Attributes}
 \begin{DoxyCompactItemize}
 \item 
 I\+Interface\+Table $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_a019af34cf0fd9ff2a21e3804b9c39a16}{interface\+Table}}
-\item 
+\begin{DoxyCompactList}\small\item\em Environment. \end{DoxyCompactList}\item 
 Ipv6\+Routing\+Table $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_a4b1adce2a6d199b8e98432259e3f6648}{routing\+Table}}
 \item 
 Interface\+Entry $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_abd5707d11f4b0f3d52bf1c369a75a259}{interface\+Entry\+Ptr}}
@@ -111,7 +115,7 @@ I\+Netfilter $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_a9a3a41f6bd53a8b92fccbc4d
 c\+Module $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_a70ac33cc4623af823e9f5b42c3706ebf}{host}}
 \item 
 uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_afdec4fbff27292c6075387077a61a2c1}{dodag\+Version}}
-\item 
+\begin{DoxyCompactList}\small\item\em R\+PL configuration, some parameters are adjustable, see N\+ED file. \end{DoxyCompactList}\item 
 Ipv6\+Address \mbox{\hyperlink{classinet_1_1_rpl_ae7cce64ebdd7c067b49c31cb9f19b985}{dodag\+Id}}
 \item 
 uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_ae5db498513d7ee0a2f95a411faf7309d}{instance\+Id}}
@@ -120,33 +124,34 @@ double \mbox{\hyperlink{classinet_1_1_rpl_a00d9ef3f2b8cf05188e7bf00124b4e01}{dao
 \item 
 double \mbox{\hyperlink{classinet_1_1_rpl_a6ffbe499dcca73d4e558f8451e4d1c72}{default\+Pref\+Parent\+Lifetime}}
 \item 
-\mbox{\hyperlink{namespaceinet_a2755c3e315d13b7cae7d5f1bd4c5b982}{Mop}} \mbox{\hyperlink{classinet_1_1_rpl_abc47665b28cc4014d2adf4aadcf3fbec}{mop}}
-\item 
 bool \mbox{\hyperlink{classinet_1_1_rpl_aa6b66811f22469e94ce95ad556de705c}{is\+Root}}
 \item 
 bool \mbox{\hyperlink{classinet_1_1_rpl_ac5f6c26d9f8f155a8054bdb813d0eda1}{dao\+Enabled}}
 \item 
+bool \mbox{\hyperlink{classinet_1_1_rpl_a17ef933c022c89e49926e7c28c6b97a1}{storing}}
+\item 
 uint16\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_a007e9e596cd7403da1d256ab24514775}{rank}}
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_abe55fd3e237ade0aa061f79b44528c16}{dtsn}}
 \item 
 \mbox{\hyperlink{classinet_1_1_dio}{Dio}} $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_a8e10ecc60ee74a194e193d8f0f179325}{preferred\+Parent}}
 \item 
 \mbox{\hyperlink{classinet_1_1_dio}{Dio}} $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_a14691b5f53e04099784e84b6d215c4cd}{backup\+Parent}}
-\item 
-Packet $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_aaf4040700c20a8eb7571c7da631b3a8e}{packet\+In\+Processing}}
 \item 
 std\+::string \mbox{\hyperlink{classinet_1_1_rpl_a549831c064dfde3d78bc6b44da748d43}{objective\+Function\+Type}}
 \item 
 std\+::map$<$ Ipv6\+Address, \mbox{\hyperlink{classinet_1_1_dio}{Dio}} $\ast$ $>$ \mbox{\hyperlink{classinet_1_1_rpl_aaee71b18c1b7a116ce28c86f6b779d59}{backup\+Parents}}
 \item 
 std\+::map$<$ Ipv6\+Address, \mbox{\hyperlink{classinet_1_1_dio}{Dio}} $\ast$ $>$ \mbox{\hyperlink{classinet_1_1_rpl_aae60153cec8f9093a503ed5981a9c4f6}{candidate\+Parents}}
+\item 
+simsignal\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_a8c8d1f9edfab15f34e5e945c7d8f0a6b}{dio\+Received\+Signal}}
+\begin{DoxyCompactList}\small\item\em Statistics collection. \end{DoxyCompactList}\item 
+simsignal\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_ad590c6f2c92172cf06a9c1866f3a9dd1}{dao\+Received\+Signal}}
+\item 
+simsignal\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_a215f74962d2a4255a772d5b3a61f0f8a}{parent\+Changed\+Signal}}
+\item 
+simsignal\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_a939e69b8d34acd39bd2fe509469a95c0}{parent\+Unreachable\+Signal}}
 \end{DoxyCompactItemize}
-
-
-\doxysubsection{Detailed Description}
-
-
-Definition at line 47 of file Rpl.\+h.
-
 
 
 \doxysubsection{Constructor \& Destructor Documentation}
@@ -156,19 +161,11 @@ Definition at line 47 of file Rpl.\+h.
 \doxysubsubsection{\texorpdfstring{Rpl()}{Rpl()}}
 {\footnotesize\ttfamily inet\+::\+Rpl\+::\+Rpl (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
-
-
-Definition at line 42 of file Rpl.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_ac6d62e1a7b6e9dc32175a3d2cd90812a}\label{classinet_1_1_rpl_ac6d62e1a7b6e9dc32175a3d2cd90812a}} 
 \index{inet::Rpl@{inet::Rpl}!````~Rpl@{$\sim$Rpl}}
 \index{````~Rpl@{$\sim$Rpl}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{$\sim$Rpl()}{~Rpl()}}
 {\footnotesize\ttfamily inet\+::\+Rpl\+::$\sim$\+Rpl (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
-
-
-
-Definition at line 61 of file Rpl.\+cc.
 
 
 
@@ -197,18 +194,14 @@ Add node (represented by most recent D\+IO packet) to one of the neighboring set
 Maintain following sets of link-\/local nodes\+:
 \begin{DoxyItemize}
 \item backup parents
-\item candidate parents where preferred parent is chosen from the candidate parent set, see Section 8.\+2.\+1
+\item candidate parents where preferred parent is chosen from the candidate parent set, see R\+F\+C6560, 8.\+2.\+1.
 \end{DoxyItemize}
 
 In current implementation, neighbor data is represented by most recent D\+IO packet received from it.
 
 If D\+IO sender has equal rank, consider this node as a backup parent
 
-If D\+IO sender has lower rank, consider this node as a candidate parent
-
-Definition at line 466 of file Rpl.\+cc.
-
-\mbox{\Hypertarget{classinet_1_1_rpl_ac92a1ad3b8597130c2974a4728ea5322}\label{classinet_1_1_rpl_ac92a1ad3b8597130c2974a4728ea5322}} 
+If D\+IO sender has lower rank, consider this node as a candidate parent\mbox{\Hypertarget{classinet_1_1_rpl_ac92a1ad3b8597130c2974a4728ea5322}\label{classinet_1_1_rpl_ac92a1ad3b8597130c2974a4728ea5322}} 
 \index{inet::Rpl@{inet::Rpl}!checkDestAlreadyKnown@{checkDestAlreadyKnown}}
 \index{checkDestAlreadyKnown@{checkDestAlreadyKnown}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{checkDestAlreadyKnown()}{checkDestAlreadyKnown()}}
@@ -226,9 +219,21 @@ Check if destination advertised in D\+AO is already stored in the routing table 
 \begin{DoxyReturn}{Returns}
 
 \end{DoxyReturn}
+\mbox{\Hypertarget{classinet_1_1_rpl_a094f5a3851df40fcceb323e78222814d}\label{classinet_1_1_rpl_a094f5a3851df40fcceb323e78222814d}} 
+\index{inet::Rpl@{inet::Rpl}!checkDupEntry@{checkDupEntry}}
+\index{checkDupEntry@{checkDupEntry}!inet::Rpl@{inet::Rpl}}
+\doxysubsubsection{\texorpdfstring{checkDupEntry()}{checkDupEntry()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+::check\+Dup\+Entry (\begin{DoxyParamCaption}\item[{std\+::map$<$ Ipv6\+Address, \mbox{\hyperlink{classinet_1_1_dio}{Dio}} $\ast$ $>$ \&}]{parent\+Set,  }\item[{const Ipv6\+Address \&}]{key }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classinet_1_1_rpl_ac90742b655787cb2d21d81f0565b133a}\label{classinet_1_1_rpl_ac90742b655787cb2d21d81f0565b133a}} 
+\index{inet::Rpl@{inet::Rpl}!checkPoisonedParent@{checkPoisonedParent}}
+\index{checkPoisonedParent@{checkPoisonedParent}!inet::Rpl@{inet::Rpl}}
+\doxysubsubsection{\texorpdfstring{checkPoisonedParent()}{checkPoisonedParent()}}
+{\footnotesize\ttfamily bool inet\+::\+Rpl\+::check\+Poisoned\+Parent (\begin{DoxyParamCaption}\item[{const Ptr$<$ const \mbox{\hyperlink{classinet_1_1_dio}{Dio}} $>$ \&}]{dio }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
 
 
-Definition at line 452 of file Rpl.\+cc.
+
+Check if I\+N\+F\+\_\+\+R\+A\+NK is advertised in D\+IO and whether it comes from preferred parent. 
 
 \mbox{\Hypertarget{classinet_1_1_rpl_a561dc3bfe02323249069c0540c1bc6bb}\label{classinet_1_1_rpl_a561dc3bfe02323249069c0540c1bc6bb}} 
 \index{inet::Rpl@{inet::Rpl}!checkPrefParentChanged@{checkPrefParentChanged}}
@@ -248,10 +253,6 @@ Check if node\textquotesingle{}s preferred parent has changed after recalculatin
 \begin{DoxyReturn}{Returns}
 True if new preferred parent address differs from the one currently stored, false otherwise 
 \end{DoxyReturn}
-
-
-Definition at line 395 of file Rpl.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_a6d1ea82beff5d34c8ea666845d468c10}\label{classinet_1_1_rpl_a6d1ea82beff5d34c8ea666845d468c10}} 
 \index{inet::Rpl@{inet::Rpl}!checkUnknownDio@{checkUnknownDio}}
 \index{checkUnknownDio@{checkUnknownDio}!inet::Rpl@{inet::Rpl}}
@@ -270,10 +271,6 @@ Check whether D\+IO comes from an uknown D\+O\+D\+AG or has different R\+PL inst
 \begin{DoxyReturn}{Returns}
 true if D\+IO sender stems from an unknown D\+O\+D\+AG 
 \end{DoxyReturn}
-
-
-Definition at line 461 of file Rpl.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_a5b54d7788f1a0b353c77bf0d2a8eeee5}\label{classinet_1_1_rpl_a5b54d7788f1a0b353c77bf0d2a8eeee5}} 
 \index{inet::Rpl@{inet::Rpl}!createDao@{createDao}}
 \index{createDao@{createDao}!inet::Rpl@{inet::Rpl}}
@@ -292,10 +289,6 @@ Create D\+AO packet advertising destination reachability.
 \begin{DoxyReturn}{Returns}
 initialized D\+AO packet object 
 \end{DoxyReturn}
-
-
-Definition at line 273 of file Rpl.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_ae4dfe21bd983efb55d052483bd11953b}\label{classinet_1_1_rpl_ae4dfe21bd983efb55d052483bd11953b}} 
 \index{inet::Rpl@{inet::Rpl}!createDio@{createDio}}
 \index{createDio@{createDio}!inet::Rpl@{inet::Rpl}}
@@ -309,57 +302,46 @@ Create D\+IO packet to broadcast D\+O\+D\+AG info and configuration parameters.
 \begin{DoxyReturn}{Returns}
 initialized D\+IO packet object 
 \end{DoxyReturn}
-
-
-Definition at line 260 of file Rpl.\+cc.
-
-\mbox{\Hypertarget{classinet_1_1_rpl_ae05c7d33515bc357f1054fc46c84e26a}\label{classinet_1_1_rpl_ae05c7d33515bc357f1054fc46c84e26a}} 
-\index{inet::Rpl@{inet::Rpl}!deletePrefParentRoute@{deletePrefParentRoute}}
-\index{deletePrefParentRoute@{deletePrefParentRoute}!inet::Rpl@{inet::Rpl}}
-\doxysubsubsection{\texorpdfstring{deletePrefParentRoute()}{deletePrefParentRoute()}}
-{\footnotesize\ttfamily void inet\+::\+Rpl\+::delete\+Pref\+Parent\+Route (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+\mbox{\Hypertarget{classinet_1_1_rpl_a9f807c3f7e49a2137ac71e0b8eb1ec1b}\label{classinet_1_1_rpl_a9f807c3f7e49a2137ac71e0b8eb1ec1b}} 
+\index{inet::Rpl@{inet::Rpl}!deletePrefParent@{deletePrefParent}}
+\index{deletePrefParent@{deletePrefParent}!inet::Rpl@{inet::Rpl}}
+\doxysubsubsection{\texorpdfstring{deletePrefParent()}{deletePrefParent()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+::delete\+Pref\+Parent (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
 
 
 
-Delete route going through preferred parent as next hop to the D\+O\+D\+AG root from the routing table. 
+Delete preferred parent and related info\+: 
+
+
+\begin{DoxyItemize}
+\item route with it as a next-\/hop from the routing table
+\item erase corresponding entry from the candidate parent list 
+\end{DoxyItemize}\mbox{\Hypertarget{classinet_1_1_rpl_a5eecf0f8621509b14dc0f5d96b2cca45}\label{classinet_1_1_rpl_a5eecf0f8621509b14dc0f5d96b2cca45}} 
+\index{inet::Rpl@{inet::Rpl}!deletePrefParent@{deletePrefParent}}
+\index{deletePrefParent@{deletePrefParent}!inet::Rpl@{inet::Rpl}}
+\doxysubsubsection{\texorpdfstring{deletePrefParent()}{deletePrefParent()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+::delete\+Pref\+Parent (\begin{DoxyParamCaption}\item[{bool}]{poisoned }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classinet_1_1_rpl_a329c467e9fa9b653e85e5c2e264df881}\label{classinet_1_1_rpl_a329c467e9fa9b653e85e5c2e264df881}} 
+\index{inet::Rpl@{inet::Rpl}!detachFromDodag@{detachFromDodag}}
+\index{detachFromDodag@{detachFromDodag}!inet::Rpl@{inet::Rpl}}
+\doxysubsubsection{\texorpdfstring{detachFromDodag()}{detachFromDodag()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+::detach\+From\+Dodag (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
 
 
 
-Definition at line 429 of file Rpl.\+cc.
+Detach from D\+O\+D\+AG in case preferred parent has been detected unreachable and candidate parent set is empty. 
 
-\mbox{\Hypertarget{classinet_1_1_rpl_aeb20428e40a107faaa838083a3163a30}\label{classinet_1_1_rpl_aeb20428e40a107faaa838083a3163a30}} 
-\index{inet::Rpl@{inet::Rpl}!getMopFromStr@{getMopFromStr}}
-\index{getMopFromStr@{getMopFromStr}!inet::Rpl@{inet::Rpl}}
-\doxysubsubsection{\texorpdfstring{getMopFromStr()}{getMopFromStr()}}
-{\footnotesize\ttfamily \mbox{\hyperlink{namespaceinet_a2755c3e315d13b7cae7d5f1bd4c5b982}{Mop}} inet\+::\+Rpl\+::get\+Mop\+From\+Str (\begin{DoxyParamCaption}\item[{std\+::string}]{mop\+Par }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+Suppress (see Section 8.\+2.\+2.\+1) all former D\+O\+D\+AG info\+:
+\begin{DoxyItemize}
+\item rank
+\item dodag\+Id
+\item backup parents
+\item sub-\/dodag \begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{classinet_1_1_rpl_a0bc9fc8edc7a43a44826e6c664dc2568}{poison\+Sub\+Dodag()}} 
+\end{DoxySeeAlso}
 
-
-
-Get Mode of Operation enum value from the string .ini parameter. 
-
-
-\begin{DoxyParams}{Parameters}
-{\em mop\+Par} & string value of the module parameter \\
-\hline
-\end{DoxyParams}
-\begin{DoxyReturn}{Returns}
-enum value corresponding to the specified mode of operation 
-\end{DoxyReturn}
-
-
-Definition at line 497 of file Rpl.\+cc.
-
-\mbox{\Hypertarget{classinet_1_1_rpl_ac11366f29d87338c091de73143253e02}\label{classinet_1_1_rpl_ac11366f29d87338c091de73143253e02}} 
-\index{inet::Rpl@{inet::Rpl}!getPrefixLengthForCommMode@{getPrefixLengthForCommMode}}
-\index{getPrefixLengthForCommMode@{getPrefixLengthForCommMode}!inet::Rpl@{inet::Rpl}}
-\doxysubsubsection{\texorpdfstring{getPrefixLengthForCommMode()}{getPrefixLengthForCommMode()}}
-{\footnotesize\ttfamily int inet\+::\+Rpl\+::get\+Prefix\+Length\+For\+Comm\+Mode (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
-
-
-
-Definition at line 215 of file Rpl.\+h.
-
-\mbox{\Hypertarget{classinet_1_1_rpl_a3affe06bc0f5bcf06a253ad25eaecbbd}\label{classinet_1_1_rpl_a3affe06bc0f5bcf06a253ad25eaecbbd}} 
+\end{DoxyItemize}If node\textquotesingle{}s parent set turns empty, node is no longer associated with the D\+O\+D\+AG and suppresses former D\+O\+D\+AG data by clearing dodag\+Id, instance\+Id, parent sets, setting it\textquotesingle{}s rank to I\+NF etc. see R\+F\+C6560, 8.\+2.\+2.\+1.\mbox{\Hypertarget{classinet_1_1_rpl_a3affe06bc0f5bcf06a253ad25eaecbbd}\label{classinet_1_1_rpl_a3affe06bc0f5bcf06a253ad25eaecbbd}} 
 \index{inet::Rpl@{inet::Rpl}!getSelfAddress@{getSelfAddress}}
 \index{getSelfAddress@{getSelfAddress}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{getSelfAddress()}{getSelfAddress()}}
@@ -372,19 +354,11 @@ Get address of the default network interface.
 \begin{DoxyReturn}{Returns}
 ipv6 address set by autoconfigurator 
 \end{DoxyReturn}
-
-
-Definition at line 447 of file Rpl.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_a81beb5a78b99ce75db86e5b9dc38d072}\label{classinet_1_1_rpl_a81beb5a78b99ce75db86e5b9dc38d072}} 
 \index{inet::Rpl@{inet::Rpl}!handleCrashOperation@{handleCrashOperation}}
 \index{handleCrashOperation@{handleCrashOperation}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{handleCrashOperation()}{handleCrashOperation()}}
 {\footnotesize\ttfamily virtual void inet\+::\+Rpl\+::handle\+Crash\+Operation (\begin{DoxyParamCaption}\item[{Lifecycle\+Operation $\ast$}]{operation }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [override]}, {\ttfamily [private]}, {\ttfamily [virtual]}}
-
-
-
-Definition at line 201 of file Rpl.\+h.
 
 \mbox{\Hypertarget{classinet_1_1_rpl_a904c89ac1f23bcd2b237643c8f5ef6cc}\label{classinet_1_1_rpl_a904c89ac1f23bcd2b237643c8f5ef6cc}} 
 \index{inet::Rpl@{inet::Rpl}!handleMessageWhenUp@{handleMessageWhenUp}}
@@ -392,19 +366,11 @@ Definition at line 201 of file Rpl.\+h.
 \doxysubsubsection{\texorpdfstring{handleMessageWhenUp()}{handleMessageWhenUp()}}
 {\footnotesize\ttfamily void inet\+::\+Rpl\+::handle\+Message\+When\+Up (\begin{DoxyParamCaption}\item[{c\+Message $\ast$}]{message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [protected]}}
 
-
-
-Definition at line 123 of file Rpl.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_a997e684c93d1211df53e7339e01fb6f9}\label{classinet_1_1_rpl_a997e684c93d1211df53e7339e01fb6f9}} 
 \index{inet::Rpl@{inet::Rpl}!handleStartOperation@{handleStartOperation}}
 \index{handleStartOperation@{handleStartOperation}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{handleStartOperation()}{handleStartOperation()}}
 {\footnotesize\ttfamily virtual void inet\+::\+Rpl\+::handle\+Start\+Operation (\begin{DoxyParamCaption}\item[{Lifecycle\+Operation $\ast$}]{operation }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [override]}, {\ttfamily [private]}, {\ttfamily [virtual]}}
-
-
-
-Definition at line 199 of file Rpl.\+h.
 
 \mbox{\Hypertarget{classinet_1_1_rpl_a688eafdf3007f93eda776ae66ddbdbcc}\label{classinet_1_1_rpl_a688eafdf3007f93eda776ae66ddbdbcc}} 
 \index{inet::Rpl@{inet::Rpl}!handleStopOperation@{handleStopOperation}}
@@ -412,52 +378,17 @@ Definition at line 199 of file Rpl.\+h.
 \doxysubsubsection{\texorpdfstring{handleStopOperation()}{handleStopOperation()}}
 {\footnotesize\ttfamily virtual void inet\+::\+Rpl\+::handle\+Stop\+Operation (\begin{DoxyParamCaption}\item[{Lifecycle\+Operation $\ast$}]{operation }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [override]}, {\ttfamily [private]}, {\ttfamily [virtual]}}
 
-
-
-Definition at line 200 of file Rpl.\+h.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_a890a84798f8972c0a462b37e372d368c}\label{classinet_1_1_rpl_a890a84798f8972c0a462b37e372d368c}} 
 \index{inet::Rpl@{inet::Rpl}!initialize@{initialize}}
 \index{initialize@{initialize}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{initialize()}{initialize()}}
 {\footnotesize\ttfamily void inet\+::\+Rpl\+::initialize (\begin{DoxyParamCaption}\item[{int}]{stage }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [protected]}}
 
-
-
-Definition at line 67 of file Rpl.\+cc.
-
-\mbox{\Hypertarget{classinet_1_1_rpl_a192e207cf7cabab2c9c51ab1d142def9}\label{classinet_1_1_rpl_a192e207cf7cabab2c9c51ab1d142def9}} 
-\index{inet::Rpl@{inet::Rpl}!leaveDodag@{leaveDodag}}
-\index{leaveDodag@{leaveDodag}!inet::Rpl@{inet::Rpl}}
-\doxysubsubsection{\texorpdfstring{leaveDodag()}{leaveDodag()}}
-{\footnotesize\ttfamily void inet\+::\+Rpl\+::leave\+Dodag (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
-
-
-
-Leave D\+O\+D\+AG in case preferred parent has been detected unreachable and candidate parent set is empty. 
-
-Suppress (see Section 8.\+2.\+2.\+1) all former D\+O\+D\+AG info\+:
-\begin{DoxyItemize}
-\item rank
-\item dodag\+Id
-\item backup parents
-\item sub-\/dodag \begin{DoxySeeAlso}{See also}
-\mbox{\hyperlink{classinet_1_1_rpl_a0bc9fc8edc7a43a44826e6c664dc2568}{poison\+Sub\+Dodag()}} 
-\end{DoxySeeAlso}
-
-\end{DoxyItemize}If node\textquotesingle{}s parent set turns empty, node is no longer associated with the D\+O\+D\+AG and suppresses former D\+O\+D\+AG data by clearing dodag\+Id, instance\+Id, parent sets, setting it\textquotesingle{}s rank to I\+NF etc. see Section 8.\+2.\+2.\+1.
-
-Definition at line 136 of file Rpl.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_ad252ecc61227293e2f74fb38ba624946}\label{classinet_1_1_rpl_ad252ecc61227293e2f74fb38ba624946}} 
 \index{inet::Rpl@{inet::Rpl}!numInitStages@{numInitStages}}
 \index{numInitStages@{numInitStages}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{numInitStages()}{numInitStages()}}
 {\footnotesize\ttfamily virtual int inet\+::\+Rpl\+::num\+Init\+Stages (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [override]}, {\ttfamily [protected]}, {\ttfamily [virtual]}}
-
-
-
-Definition at line 79 of file Rpl.\+h.
 
 \mbox{\Hypertarget{classinet_1_1_rpl_a0bc9fc8edc7a43a44826e6c664dc2568}\label{classinet_1_1_rpl_a0bc9fc8edc7a43a44826e6c664dc2568}} 
 \index{inet::Rpl@{inet::Rpl}!poisonSubDodag@{poisonSubDodag}}
@@ -486,13 +417,9 @@ Process D\+AO packet advertising node\textquotesingle{}s reachability, update ro
 {\em dao} & decapsulated D\+AO packet for processing \\
 \hline
 \end{DoxyParams}
-Update routing table with information about reachable destinations from D\+AO if storing mode is enabled or receiver is root, see Section 3.\+3
+If node is root or operates in storing mode update routing table with destinations from D\+AO see R\+F\+C6560, 3.\+3.
 
-Regardless of mode of operation (storing, non-\/storing), forward D\+AO \textquotesingle{}upwards\textquotesingle{} via the preferred parent, so that root learns advertised destination reachability see Section 6.\+4
-
-Definition at line 324 of file Rpl.\+cc.
-
-\mbox{\Hypertarget{classinet_1_1_rpl_a305ea85a98e1eb699638b08b025b6843}\label{classinet_1_1_rpl_a305ea85a98e1eb699638b08b025b6843}} 
+Forward D\+AO \textquotesingle{}upwards\textquotesingle{} via preferred parent to advertise destination to the root, see R\+F\+C6560, 6.\+4.\mbox{\Hypertarget{classinet_1_1_rpl_a305ea85a98e1eb699638b08b025b6843}\label{classinet_1_1_rpl_a305ea85a98e1eb699638b08b025b6843}} 
 \index{inet::Rpl@{inet::Rpl}!processDaoAck@{processDaoAck}}
 \index{processDaoAck@{processDaoAck}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{processDaoAck()}{processDaoAck()}}
@@ -509,10 +436,6 @@ Process D\+A\+O\+\_\+\+A\+CK packet if dao\+Ack\+Requried flag is set.
 {\em dao\+Ack} & decapsulated D\+A\+O\+\_\+\+A\+CK packet for processing \\
 \hline
 \end{DoxyParams}
-
-
-Definition at line 359 of file Rpl.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_a64317ba87a6ec69d08c673d08493d23b}\label{classinet_1_1_rpl_a64317ba87a6ec69d08c673d08493d23b}} 
 \index{inet::Rpl@{inet::Rpl}!processDio@{processDio}}
 \index{processDio@{processDio}!inet::Rpl@{inet::Rpl}}
@@ -535,19 +458,15 @@ Process D\+IO packet by inspecting it\textquotesingle{}s source.
 {\em dio} & decapsulated D\+IO packet for processing \\
 \hline
 \end{DoxyParams}
-If dodag\+Version has been incremented by the root, join newer D\+O\+D\+AG by emptying neighbor sets (candidate and backup parents) and start forwarding updated D\+O\+D\+AG information via D\+I\+Os, see Section 8.\+2.\+2.\+1.
+Immediately check if I\+N\+F\+\_\+\+R\+A\+NK is advertised, and the advertising node is a preferred parent, in case \textquotesingle{}poisoning\textquotesingle{} detected, delete preferred parent and remove it from candidate neighbors
 
-Definition at line 287 of file Rpl.\+cc.
+If dodag\+Version has been incremented by the root, join newer D\+O\+D\+AG by emptying neighbor sets (candidate and backup parents) and start forwarding updated D\+O\+D\+AG information via D\+I\+Os, see R\+F\+C6560, 8.\+2.\+2.\+1.
 
-\mbox{\Hypertarget{classinet_1_1_rpl_ab74857bcd3b8d264f948adc914e100e8}\label{classinet_1_1_rpl_ab74857bcd3b8d264f948adc914e100e8}} 
+If Destination Advertisement Trigger Sequence Number has been incremented by parent update node\textquotesingle{}s own D\+T\+SN and unicast D\+AO to refresh downward routes\mbox{\Hypertarget{classinet_1_1_rpl_ab74857bcd3b8d264f948adc914e100e8}\label{classinet_1_1_rpl_ab74857bcd3b8d264f948adc914e100e8}} 
 \index{inet::Rpl@{inet::Rpl}!processDis@{processDis}}
 \index{processDis@{processDis}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{processDis()}{processDis()}}
 {\footnotesize\ttfamily void inet\+::\+Rpl\+::process\+Dis (\begin{DoxyParamCaption}\item[{Packet $\ast$}]{packet,  }\item[{const Ptr$<$ const \mbox{\hyperlink{classinet_1_1_dis}{Dis}} $>$ \&}]{dis }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
-
-
-
-Definition at line 364 of file Rpl.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_rpl_aaa897945e62ed32b1aa45a9d41787549}\label{classinet_1_1_rpl_aaa897945e62ed32b1aa45a9d41787549}} 
 \index{inet::Rpl@{inet::Rpl}!processMessage@{processMessage}}
@@ -555,29 +474,17 @@ Definition at line 364 of file Rpl.\+cc.
 \doxysubsubsection{\texorpdfstring{processMessage()}{processMessage()}}
 {\footnotesize\ttfamily void inet\+::\+Rpl\+::process\+Message (\begin{DoxyParamCaption}\item[{c\+Message $\ast$}]{message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
 
-
-
-Definition at line 156 of file Rpl.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_ac2e3b58ef35dafc26a1d8f3c8d5b9db8}\label{classinet_1_1_rpl_ac2e3b58ef35dafc26a1d8f3c8d5b9db8}} 
 \index{inet::Rpl@{inet::Rpl}!processPacket@{processPacket}}
 \index{processPacket@{processPacket}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{processPacket()}{processPacket()}}
 {\footnotesize\ttfamily void inet\+::\+Rpl\+::process\+Packet (\begin{DoxyParamCaption}\item[{Packet $\ast$}]{packet }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
 
-
-
-Definition at line 192 of file Rpl.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_a2f46c4efce2adb3dad9ec6ea36de8fc2}\label{classinet_1_1_rpl_a2f46c4efce2adb3dad9ec6ea36de8fc2}} 
 \index{inet::Rpl@{inet::Rpl}!processSelfMessage@{processSelfMessage}}
 \index{processSelfMessage@{processSelfMessage}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{processSelfMessage()}{processSelfMessage()}}
 {\footnotesize\ttfamily void inet\+::\+Rpl\+::process\+Self\+Message (\begin{DoxyParamCaption}\item[{c\+Message $\ast$}]{message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
-
-
-
-Definition at line 132 of file Rpl.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_rpl_a40bb8ab3eaf5575b942004148c03132c}\label{classinet_1_1_rpl_a40bb8ab3eaf5575b942004148c03132c}} 
 \index{inet::Rpl@{inet::Rpl}!processTrickleTimerMsg@{processTrickleTimerMsg}}
@@ -594,13 +501,9 @@ Process message from trickle timer to start D\+IO broadcast.
 {\em message} & notification message with kind assigned from enum \\
 \hline
 \end{DoxyParams}
-Process signal from trickle timer module, indicating D\+IO broadcast event, see Section 8.\+3
+Process signal from trickle timer module, indicating D\+IO broadcast event, see R\+F\+C6560, 8.\+3
 
-Broadcast D\+IO only if number of D\+I\+Os heard from other nodes $<$= redundancy\+Constant (k), see R\+F\+C6206 Section 4.\+2 p.\+4
-
-Definition at line 167 of file Rpl.\+cc.
-
-\mbox{\Hypertarget{classinet_1_1_rpl_af36d9f3e01ad828483fd9024e28d9c9f}\label{classinet_1_1_rpl_af36d9f3e01ad828483fd9024e28d9c9f}} 
+Broadcast D\+IO only if number of D\+I\+Os heard from other nodes $<$= redundancy\+Constant (k), see R\+F\+C6206, 4.\+2\mbox{\Hypertarget{classinet_1_1_rpl_af36d9f3e01ad828483fd9024e28d9c9f}\label{classinet_1_1_rpl_af36d9f3e01ad828483fd9024e28d9c9f}} 
 \index{inet::Rpl@{inet::Rpl}!receiveSignal@{receiveSignal}}
 \index{receiveSignal@{receiveSignal}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{receiveSignal()}{receiveSignal()}}
@@ -626,13 +529,9 @@ c\+Listener interface to get notified when M\+AC layer reports link break
 \end{DoxyParams}
 Upon receiving broken link signal from M\+AC layer, check whether preferred parent is unreachable
 
-If preferred parent unreachbility detected, remove route with it as a next hop from the routing table and select new preferred parent from the candidate set.
+If preferred parent unreachability detected, remove route with it as a next hop from the routing table and select new preferred parent from the candidate set.
 
-If candidate parent set is empty, leave current D\+O\+D\+AG (becoming either floating D\+O\+D\+AG on it\textquotesingle{}s own or waiting for D\+IO to join a new one)
-
-Definition at line 510 of file Rpl.\+cc.
-
-\mbox{\Hypertarget{classinet_1_1_rpl_adc70232a3fb24ccc3c1048da88997d7d}\label{classinet_1_1_rpl_adc70232a3fb24ccc3c1048da88997d7d}} 
+If candidate parent set is empty, leave current D\+O\+D\+AG (becoming either floating D\+O\+D\+AG or poison child routes)\mbox{\Hypertarget{classinet_1_1_rpl_adc70232a3fb24ccc3c1048da88997d7d}\label{classinet_1_1_rpl_adc70232a3fb24ccc3c1048da88997d7d}} 
 \index{inet::Rpl@{inet::Rpl}!sendPacket@{sendPacket}}
 \index{sendPacket@{sendPacket}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{sendPacket()}{sendPacket()}}
@@ -649,19 +548,11 @@ Send packet via \textquotesingle{}ip\+Out\textquotesingle{} gate with specified 
 {\em delay} & transmission delay \\
 \hline
 \end{DoxyParams}
-
-
-Definition at line 230 of file Rpl.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_ad75dab7c06482232980bf2d1f6d676dd}\label{classinet_1_1_rpl_ad75dab7c06482232980bf2d1f6d676dd}} 
 \index{inet::Rpl@{inet::Rpl}!sendRplPacket@{sendRplPacket}}
 \index{sendRplPacket@{sendRplPacket}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{sendRplPacket()}{sendRplPacket()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily void inet\+::\+Rpl\+::send\+Rpl\+Packet (\begin{DoxyParamCaption}\item[{const Ptr$<$ \mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}} $>$ \&}]{packet,  }\item[{\mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68}{Rpl\+Packet\+Code}}}]{code,  }\item[{const L3\+Address \&}]{next\+Hop }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
-
-
-
-Definition at line 145 of file Rpl.\+h.
 
 \mbox{\Hypertarget{classinet_1_1_rpl_a099e52d42668681490182466e32b3efe}\label{classinet_1_1_rpl_a099e52d42668681490182466e32b3efe}} 
 \index{inet::Rpl@{inet::Rpl}!sendRplPacket@{sendRplPacket}}
@@ -687,19 +578,11 @@ Send R\+PL packet (.
 {\em delay} & transmission delay before sending packet from outgoing gate \\
 \hline
 \end{DoxyParams}
-
-
-Definition at line 242 of file Rpl.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_a66d0db6ce357a3302d154ab7e99510e9}\label{classinet_1_1_rpl_a66d0db6ce357a3302d154ab7e99510e9}} 
 \index{inet::Rpl@{inet::Rpl}!start@{start}}
 \index{start@{start}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{start()}{start()}}
 {\footnotesize\ttfamily void inet\+::\+Rpl\+::start (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
-
-
-
-Definition at line 93 of file Rpl.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_rpl_a4922fe5e28f79fcb08d0879300785daa}\label{classinet_1_1_rpl_a4922fe5e28f79fcb08d0879300785daa}} 
 \index{inet::Rpl@{inet::Rpl}!stop@{stop}}
@@ -707,15 +590,11 @@ Definition at line 93 of file Rpl.\+cc.
 \doxysubsubsection{\texorpdfstring{stop()}{stop()}}
 {\footnotesize\ttfamily void inet\+::\+Rpl\+::stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
 
-
-
-Definition at line 115 of file Rpl.\+cc.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_ab12b94c484d147b13ae7183ba1e6e2cd}\label{classinet_1_1_rpl_ab12b94c484d147b13ae7183ba1e6e2cd}} 
 \index{inet::Rpl@{inet::Rpl}!updatePreferredParent@{updatePreferredParent}}
 \index{updatePreferredParent@{updatePreferredParent}!inet::Rpl@{inet::Rpl}}
-\doxysubsubsection{\texorpdfstring{updatePreferredParent()}{updatePreferredParent()}}
-{\footnotesize\ttfamily void inet\+::\+Rpl\+::update\+Preferred\+Parent (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+\doxysubsubsection{\texorpdfstring{updatePreferredParent()}{updatePreferredParent()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+::update\+Preferred\+Parent (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
 
 
 
@@ -726,21 +605,21 @@ If necessary (\begin{DoxySeeAlso}{See also}
 
 \mbox{\hyperlink{classinet_1_1_rpl_aa6375499e401e792714fa39600b61e61}{update\+Routing\+Table()}} and reset trickle timer, see Section 8.\+3 
 \end{DoxySeeAlso}
+\mbox{\Hypertarget{classinet_1_1_rpl_a3dcc1f3cc2f67bd9d7f4e98c1536bed1}\label{classinet_1_1_rpl_a3dcc1f3cc2f67bd9d7f4e98c1536bed1}} 
+\index{inet::Rpl@{inet::Rpl}!updatePreferredParent@{updatePreferredParent}}
+\index{updatePreferredParent@{updatePreferredParent}!inet::Rpl@{inet::Rpl}}
+\doxysubsubsection{\texorpdfstring{updatePreferredParent()}{updatePreferredParent()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+::update\+Preferred\+Parent (\begin{DoxyParamCaption}\item[{bool}]{use\+Backups }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
 If a better preferred parent is advertised (based on the objective function), update default route to D\+O\+D\+AG sink with new next\+Hop
 
-Reset trickle timer due to inconsistency (preferred parent changed) detected, thus maintaining higher topology reactivity and convergence rate, see Section 8.\+3
+Reset trickle timer due to inconsistency (preferred parent changed) detected, thus maintaining higher topology reactivity and convergence rate, see R\+F\+C6560, 8.\+3.
 
-Definition at line 368 of file Rpl.\+cc.
-
-\mbox{\Hypertarget{classinet_1_1_rpl_aa6375499e401e792714fa39600b61e61}\label{classinet_1_1_rpl_aa6375499e401e792714fa39600b61e61}} 
+Recalculate rank using the objective function\mbox{\Hypertarget{classinet_1_1_rpl_aa6375499e401e792714fa39600b61e61}\label{classinet_1_1_rpl_aa6375499e401e792714fa39600b61e61}} 
 \index{inet::Rpl@{inet::Rpl}!updateRoutingTable@{updateRoutingTable}}
 \index{updateRoutingTable@{updateRoutingTable}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{updateRoutingTable()}{updateRoutingTable()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily void inet\+::\+Rpl\+::update\+Routing\+Table (\begin{DoxyParamCaption}\item[{const Ipv6\+Address \&}]{next\+Hop,  }\item[{const Ipv6\+Address \&}]{dest }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
-
-
-
-Definition at line 164 of file Rpl.\+h.
 
 \mbox{\Hypertarget{classinet_1_1_rpl_ae977a14cb585dd5bec9470d9b6e132f3}\label{classinet_1_1_rpl_ae977a14cb585dd5bec9470d9b6e132f3}} 
 \index{inet::Rpl@{inet::Rpl}!updateRoutingTable@{updateRoutingTable}}
@@ -761,11 +640,7 @@ Update routing table with new route to destination reachable via next hop.
 {\em is\+Default\+Route} & if next hop represents preferred parent, set this route as default \\
 \hline
 \end{DoxyParams}
-
-
-Definition at line 406 of file Rpl.\+cc.
-
-
+If route through preferred parent is being added, set it as default route
 
 \doxysubsection{Member Data Documentation}
 \mbox{\Hypertarget{classinet_1_1_rpl_a14691b5f53e04099784e84b6d215c4cd}\label{classinet_1_1_rpl_a14691b5f53e04099784e84b6d215c4cd}} 
@@ -774,19 +649,11 @@ Definition at line 406 of file Rpl.\+cc.
 \doxysubsubsection{\texorpdfstring{backupParent}{backupParent}}
 {\footnotesize\ttfamily \mbox{\hyperlink{classinet_1_1_dio}{Dio}}$\ast$ inet\+::\+Rpl\+::backup\+Parent\hspace{0.3cm}{\ttfamily [private]}}
 
-
-
-Definition at line 67 of file Rpl.\+h.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_aaee71b18c1b7a116ce28c86f6b779d59}\label{classinet_1_1_rpl_aaee71b18c1b7a116ce28c86f6b779d59}} 
 \index{inet::Rpl@{inet::Rpl}!backupParents@{backupParents}}
 \index{backupParents@{backupParents}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{backupParents}{backupParents}}
 {\footnotesize\ttfamily std\+::map$<$Ipv6\+Address, \mbox{\hyperlink{classinet_1_1_dio}{Dio}} $\ast$$>$ inet\+::\+Rpl\+::backup\+Parents\hspace{0.3cm}{\ttfamily [private]}}
-
-
-
-Definition at line 70 of file Rpl.\+h.
 
 \mbox{\Hypertarget{classinet_1_1_rpl_aae60153cec8f9093a503ed5981a9c4f6}\label{classinet_1_1_rpl_aae60153cec8f9093a503ed5981a9c4f6}} 
 \index{inet::Rpl@{inet::Rpl}!candidateParents@{candidateParents}}
@@ -794,19 +661,11 @@ Definition at line 70 of file Rpl.\+h.
 \doxysubsubsection{\texorpdfstring{candidateParents}{candidateParents}}
 {\footnotesize\ttfamily std\+::map$<$Ipv6\+Address, \mbox{\hyperlink{classinet_1_1_dio}{Dio}} $\ast$$>$ inet\+::\+Rpl\+::candidate\+Parents\hspace{0.3cm}{\ttfamily [private]}}
 
-
-
-Definition at line 71 of file Rpl.\+h.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_a00d9ef3f2b8cf05188e7bf00124b4e01}\label{classinet_1_1_rpl_a00d9ef3f2b8cf05188e7bf00124b4e01}} 
 \index{inet::Rpl@{inet::Rpl}!daoDelay@{daoDelay}}
 \index{daoDelay@{daoDelay}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{daoDelay}{daoDelay}}
 {\footnotesize\ttfamily double inet\+::\+Rpl\+::dao\+Delay\hspace{0.3cm}{\ttfamily [private]}}
-
-
-
-Definition at line 60 of file Rpl.\+h.
 
 \mbox{\Hypertarget{classinet_1_1_rpl_ac5f6c26d9f8f155a8054bdb813d0eda1}\label{classinet_1_1_rpl_ac5f6c26d9f8f155a8054bdb813d0eda1}} 
 \index{inet::Rpl@{inet::Rpl}!daoEnabled@{daoEnabled}}
@@ -814,9 +673,11 @@ Definition at line 60 of file Rpl.\+h.
 \doxysubsubsection{\texorpdfstring{daoEnabled}{daoEnabled}}
 {\footnotesize\ttfamily bool inet\+::\+Rpl\+::dao\+Enabled\hspace{0.3cm}{\ttfamily [private]}}
 
-
-
-Definition at line 64 of file Rpl.\+h.
+\mbox{\Hypertarget{classinet_1_1_rpl_ad590c6f2c92172cf06a9c1866f3a9dd1}\label{classinet_1_1_rpl_ad590c6f2c92172cf06a9c1866f3a9dd1}} 
+\index{inet::Rpl@{inet::Rpl}!daoReceivedSignal@{daoReceivedSignal}}
+\index{daoReceivedSignal@{daoReceivedSignal}!inet::Rpl@{inet::Rpl}}
+\doxysubsubsection{\texorpdfstring{daoReceivedSignal}{daoReceivedSignal}}
+{\footnotesize\ttfamily simsignal\+\_\+t inet\+::\+Rpl\+::dao\+Received\+Signal\hspace{0.3cm}{\ttfamily [private]}}
 
 \mbox{\Hypertarget{classinet_1_1_rpl_a6ffbe499dcca73d4e558f8451e4d1c72}\label{classinet_1_1_rpl_a6ffbe499dcca73d4e558f8451e4d1c72}} 
 \index{inet::Rpl@{inet::Rpl}!defaultPrefParentLifetime@{defaultPrefParentLifetime}}
@@ -824,19 +685,21 @@ Definition at line 64 of file Rpl.\+h.
 \doxysubsubsection{\texorpdfstring{defaultPrefParentLifetime}{defaultPrefParentLifetime}}
 {\footnotesize\ttfamily double inet\+::\+Rpl\+::default\+Pref\+Parent\+Lifetime\hspace{0.3cm}{\ttfamily [private]}}
 
+\mbox{\Hypertarget{classinet_1_1_rpl_a8c8d1f9edfab15f34e5e945c7d8f0a6b}\label{classinet_1_1_rpl_a8c8d1f9edfab15f34e5e945c7d8f0a6b}} 
+\index{inet::Rpl@{inet::Rpl}!dioReceivedSignal@{dioReceivedSignal}}
+\index{dioReceivedSignal@{dioReceivedSignal}!inet::Rpl@{inet::Rpl}}
+\doxysubsubsection{\texorpdfstring{dioReceivedSignal}{dioReceivedSignal}}
+{\footnotesize\ttfamily simsignal\+\_\+t inet\+::\+Rpl\+::dio\+Received\+Signal\hspace{0.3cm}{\ttfamily [private]}}
 
 
-Definition at line 61 of file Rpl.\+h.
+
+Statistics collection. 
 
 \mbox{\Hypertarget{classinet_1_1_rpl_ae7cce64ebdd7c067b49c31cb9f19b985}\label{classinet_1_1_rpl_ae7cce64ebdd7c067b49c31cb9f19b985}} 
 \index{inet::Rpl@{inet::Rpl}!dodagId@{dodagId}}
 \index{dodagId@{dodagId}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{dodagId}{dodagId}}
 {\footnotesize\ttfamily Ipv6\+Address inet\+::\+Rpl\+::dodag\+Id\hspace{0.3cm}{\ttfamily [private]}}
-
-
-
-Definition at line 58 of file Rpl.\+h.
 
 \mbox{\Hypertarget{classinet_1_1_rpl_afdec4fbff27292c6075387077a61a2c1}\label{classinet_1_1_rpl_afdec4fbff27292c6075387077a61a2c1}} 
 \index{inet::Rpl@{inet::Rpl}!dodagVersion@{dodagVersion}}
@@ -846,7 +709,13 @@ Definition at line 58 of file Rpl.\+h.
 
 
 
-Definition at line 57 of file Rpl.\+h.
+R\+PL configuration, some parameters are adjustable, see N\+ED file. 
+
+\mbox{\Hypertarget{classinet_1_1_rpl_abe55fd3e237ade0aa061f79b44528c16}\label{classinet_1_1_rpl_abe55fd3e237ade0aa061f79b44528c16}} 
+\index{inet::Rpl@{inet::Rpl}!dtsn@{dtsn}}
+\index{dtsn@{dtsn}!inet::Rpl@{inet::Rpl}}
+\doxysubsubsection{\texorpdfstring{dtsn}{dtsn}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Rpl\+::dtsn\hspace{0.3cm}{\ttfamily [private]}}
 
 \mbox{\Hypertarget{classinet_1_1_rpl_a70ac33cc4623af823e9f5b42c3706ebf}\label{classinet_1_1_rpl_a70ac33cc4623af823e9f5b42c3706ebf}} 
 \index{inet::Rpl@{inet::Rpl}!host@{host}}
@@ -854,29 +723,17 @@ Definition at line 57 of file Rpl.\+h.
 \doxysubsubsection{\texorpdfstring{host}{host}}
 {\footnotesize\ttfamily c\+Module$\ast$ inet\+::\+Rpl\+::host\hspace{0.3cm}{\ttfamily [private]}}
 
-
-
-Definition at line 56 of file Rpl.\+h.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_ae5db498513d7ee0a2f95a411faf7309d}\label{classinet_1_1_rpl_ae5db498513d7ee0a2f95a411faf7309d}} 
 \index{inet::Rpl@{inet::Rpl}!instanceId@{instanceId}}
 \index{instanceId@{instanceId}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{instanceId}{instanceId}}
 {\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Rpl\+::instance\+Id\hspace{0.3cm}{\ttfamily [private]}}
 
-
-
-Definition at line 59 of file Rpl.\+h.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_abd5707d11f4b0f3d52bf1c369a75a259}\label{classinet_1_1_rpl_abd5707d11f4b0f3d52bf1c369a75a259}} 
 \index{inet::Rpl@{inet::Rpl}!interfaceEntryPtr@{interfaceEntryPtr}}
 \index{interfaceEntryPtr@{interfaceEntryPtr}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{interfaceEntryPtr}{interfaceEntryPtr}}
 {\footnotesize\ttfamily Interface\+Entry$\ast$ inet\+::\+Rpl\+::interface\+Entry\+Ptr\hspace{0.3cm}{\ttfamily [private]}}
-
-
-
-Definition at line 52 of file Rpl.\+h.
 
 \mbox{\Hypertarget{classinet_1_1_rpl_a019af34cf0fd9ff2a21e3804b9c39a16}\label{classinet_1_1_rpl_a019af34cf0fd9ff2a21e3804b9c39a16}} 
 \index{inet::Rpl@{inet::Rpl}!interfaceTable@{interfaceTable}}
@@ -886,7 +743,7 @@ Definition at line 52 of file Rpl.\+h.
 
 
 
-Definition at line 50 of file Rpl.\+h.
+Environment. 
 
 \mbox{\Hypertarget{classinet_1_1_rpl_aa6b66811f22469e94ce95ad556de705c}\label{classinet_1_1_rpl_aa6b66811f22469e94ce95ad556de705c}} 
 \index{inet::Rpl@{inet::Rpl}!isRoot@{isRoot}}
@@ -894,29 +751,11 @@ Definition at line 50 of file Rpl.\+h.
 \doxysubsubsection{\texorpdfstring{isRoot}{isRoot}}
 {\footnotesize\ttfamily bool inet\+::\+Rpl\+::is\+Root\hspace{0.3cm}{\ttfamily [private]}}
 
-
-
-Definition at line 63 of file Rpl.\+h.
-
-\mbox{\Hypertarget{classinet_1_1_rpl_abc47665b28cc4014d2adf4aadcf3fbec}\label{classinet_1_1_rpl_abc47665b28cc4014d2adf4aadcf3fbec}} 
-\index{inet::Rpl@{inet::Rpl}!mop@{mop}}
-\index{mop@{mop}!inet::Rpl@{inet::Rpl}}
-\doxysubsubsection{\texorpdfstring{mop}{mop}}
-{\footnotesize\ttfamily \mbox{\hyperlink{namespaceinet_a2755c3e315d13b7cae7d5f1bd4c5b982}{Mop}} inet\+::\+Rpl\+::mop\hspace{0.3cm}{\ttfamily [private]}}
-
-
-
-Definition at line 62 of file Rpl.\+h.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_a9a3a41f6bd53a8b92fccbc4d353ca47a}\label{classinet_1_1_rpl_a9a3a41f6bd53a8b92fccbc4d353ca47a}} 
 \index{inet::Rpl@{inet::Rpl}!networkProtocol@{networkProtocol}}
 \index{networkProtocol@{networkProtocol}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{networkProtocol}{networkProtocol}}
 {\footnotesize\ttfamily I\+Netfilter$\ast$ inet\+::\+Rpl\+::network\+Protocol\hspace{0.3cm}{\ttfamily [private]}}
-
-
-
-Definition at line 53 of file Rpl.\+h.
 
 \mbox{\Hypertarget{classinet_1_1_rpl_aceb86be400cc2b6f0ac596f4e29e87f2}\label{classinet_1_1_rpl_aceb86be400cc2b6f0ac596f4e29e87f2}} 
 \index{inet::Rpl@{inet::Rpl}!objectiveFunction@{objectiveFunction}}
@@ -924,29 +763,23 @@ Definition at line 53 of file Rpl.\+h.
 \doxysubsubsection{\texorpdfstring{objectiveFunction}{objectiveFunction}}
 {\footnotesize\ttfamily \mbox{\hyperlink{classinet_1_1_objective_function}{Objective\+Function}}$\ast$ inet\+::\+Rpl\+::objective\+Function\hspace{0.3cm}{\ttfamily [private]}}
 
-
-
-Definition at line 54 of file Rpl.\+h.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_a549831c064dfde3d78bc6b44da748d43}\label{classinet_1_1_rpl_a549831c064dfde3d78bc6b44da748d43}} 
 \index{inet::Rpl@{inet::Rpl}!objectiveFunctionType@{objectiveFunctionType}}
 \index{objectiveFunctionType@{objectiveFunctionType}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{objectiveFunctionType}{objectiveFunctionType}}
 {\footnotesize\ttfamily std\+::string inet\+::\+Rpl\+::objective\+Function\+Type\hspace{0.3cm}{\ttfamily [private]}}
 
+\mbox{\Hypertarget{classinet_1_1_rpl_a215f74962d2a4255a772d5b3a61f0f8a}\label{classinet_1_1_rpl_a215f74962d2a4255a772d5b3a61f0f8a}} 
+\index{inet::Rpl@{inet::Rpl}!parentChangedSignal@{parentChangedSignal}}
+\index{parentChangedSignal@{parentChangedSignal}!inet::Rpl@{inet::Rpl}}
+\doxysubsubsection{\texorpdfstring{parentChangedSignal}{parentChangedSignal}}
+{\footnotesize\ttfamily simsignal\+\_\+t inet\+::\+Rpl\+::parent\+Changed\+Signal\hspace{0.3cm}{\ttfamily [private]}}
 
-
-Definition at line 69 of file Rpl.\+h.
-
-\mbox{\Hypertarget{classinet_1_1_rpl_aaf4040700c20a8eb7571c7da631b3a8e}\label{classinet_1_1_rpl_aaf4040700c20a8eb7571c7da631b3a8e}} 
-\index{inet::Rpl@{inet::Rpl}!packetInProcessing@{packetInProcessing}}
-\index{packetInProcessing@{packetInProcessing}!inet::Rpl@{inet::Rpl}}
-\doxysubsubsection{\texorpdfstring{packetInProcessing}{packetInProcessing}}
-{\footnotesize\ttfamily Packet$\ast$ inet\+::\+Rpl\+::packet\+In\+Processing\hspace{0.3cm}{\ttfamily [private]}}
-
-
-
-Definition at line 68 of file Rpl.\+h.
+\mbox{\Hypertarget{classinet_1_1_rpl_a939e69b8d34acd39bd2fe509469a95c0}\label{classinet_1_1_rpl_a939e69b8d34acd39bd2fe509469a95c0}} 
+\index{inet::Rpl@{inet::Rpl}!parentUnreachableSignal@{parentUnreachableSignal}}
+\index{parentUnreachableSignal@{parentUnreachableSignal}!inet::Rpl@{inet::Rpl}}
+\doxysubsubsection{\texorpdfstring{parentUnreachableSignal}{parentUnreachableSignal}}
+{\footnotesize\ttfamily simsignal\+\_\+t inet\+::\+Rpl\+::parent\+Unreachable\+Signal\hspace{0.3cm}{\ttfamily [private]}}
 
 \mbox{\Hypertarget{classinet_1_1_rpl_a8e10ecc60ee74a194e193d8f0f179325}\label{classinet_1_1_rpl_a8e10ecc60ee74a194e193d8f0f179325}} 
 \index{inet::Rpl@{inet::Rpl}!preferredParent@{preferredParent}}
@@ -954,19 +787,11 @@ Definition at line 68 of file Rpl.\+h.
 \doxysubsubsection{\texorpdfstring{preferredParent}{preferredParent}}
 {\footnotesize\ttfamily \mbox{\hyperlink{classinet_1_1_dio}{Dio}}$\ast$ inet\+::\+Rpl\+::preferred\+Parent\hspace{0.3cm}{\ttfamily [private]}}
 
-
-
-Definition at line 66 of file Rpl.\+h.
-
 \mbox{\Hypertarget{classinet_1_1_rpl_a007e9e596cd7403da1d256ab24514775}\label{classinet_1_1_rpl_a007e9e596cd7403da1d256ab24514775}} 
 \index{inet::Rpl@{inet::Rpl}!rank@{rank}}
 \index{rank@{rank}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{rank}{rank}}
 {\footnotesize\ttfamily uint16\+\_\+t inet\+::\+Rpl\+::rank\hspace{0.3cm}{\ttfamily [private]}}
-
-
-
-Definition at line 65 of file Rpl.\+h.
 
 \mbox{\Hypertarget{classinet_1_1_rpl_a4b1adce2a6d199b8e98432259e3f6648}\label{classinet_1_1_rpl_a4b1adce2a6d199b8e98432259e3f6648}} 
 \index{inet::Rpl@{inet::Rpl}!routingTable@{routingTable}}
@@ -974,19 +799,17 @@ Definition at line 65 of file Rpl.\+h.
 \doxysubsubsection{\texorpdfstring{routingTable}{routingTable}}
 {\footnotesize\ttfamily Ipv6\+Routing\+Table$\ast$ inet\+::\+Rpl\+::routing\+Table\hspace{0.3cm}{\ttfamily [private]}}
 
-
-
-Definition at line 51 of file Rpl.\+h.
+\mbox{\Hypertarget{classinet_1_1_rpl_a17ef933c022c89e49926e7c28c6b97a1}\label{classinet_1_1_rpl_a17ef933c022c89e49926e7c28c6b97a1}} 
+\index{inet::Rpl@{inet::Rpl}!storing@{storing}}
+\index{storing@{storing}!inet::Rpl@{inet::Rpl}}
+\doxysubsubsection{\texorpdfstring{storing}{storing}}
+{\footnotesize\ttfamily bool inet\+::\+Rpl\+::storing\hspace{0.3cm}{\ttfamily [private]}}
 
 \mbox{\Hypertarget{classinet_1_1_rpl_ad36e2726e78da6004bd0083cbffef9ea}\label{classinet_1_1_rpl_ad36e2726e78da6004bd0083cbffef9ea}} 
 \index{inet::Rpl@{inet::Rpl}!trickleTimer@{trickleTimer}}
 \index{trickleTimer@{trickleTimer}!inet::Rpl@{inet::Rpl}}
 \doxysubsubsection{\texorpdfstring{trickleTimer}{trickleTimer}}
 {\footnotesize\ttfamily \mbox{\hyperlink{classinet_1_1_trickle_timer}{Trickle\+Timer}}$\ast$ inet\+::\+Rpl\+::trickle\+Timer\hspace{0.3cm}{\ttfamily [private]}}
-
-
-
-Definition at line 55 of file Rpl.\+h.
 
 
 

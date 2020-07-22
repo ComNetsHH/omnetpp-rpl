@@ -33,11 +33,6 @@ cplusplus {{
 namespace inet;
 
 
-enum Mop {
-    NON_STORING = 0;
-    STORING = 1;
-};
-
 enum RplPacketCode {
     DIS = 0;
     DIO = 1;
@@ -74,21 +69,21 @@ class RplPacket extends FieldsChunk {
 
 // DODAG Information Option
 class Dio extends RplPacket {
+    // DODAG version number, may be incremented by the root to trigger topology refresh 
     uint8_t dodagVersion;       	
-	uint16_t rank;            	 	// Node's rank
-    Mop mop;					    // Mode of operation               
-    bool grounded;              		   
-    uint8_t dtsn;                 	// Destination Advertisement Trigger Sequence Number
-    								// for downward routing       
+	uint16_t rank;            	 	// Node's rank within the DODAG 
+    bool storing;					// Mode of operation: storing / non-storing                
+    bool grounded;              	// DODAG grounded flag, indicates whether sink is connected to backbone	   
+    
+    // Destination Advertisement Trigger Sequence Number, 
+    // may be incremented to trigger downward routes update
+    uint8_t dtsn;                 	       
    
 	// Trickle timer parameters (DAG Configuration Option)
     int minInterval;           
     int dioRedundancyConst;              
     int dioNumDoublings;						
     Ocp ocp;                
-    
-    double lifetime;                  // Path lifetime
-    double metric;
 }
 
 

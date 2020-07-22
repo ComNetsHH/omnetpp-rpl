@@ -24,17 +24,19 @@
 
 namespace inet {
 
-// RPL root default parameters
+/** RPL default parameters, see RFC6550, 17 */
 #define INF_RANK 0xFFFF
 #define ROOT_RANK 1
-#define DEFAULT_INSTANCE_ID 1
+#define DEFAULT_RPL_INSTANCE_ID 1
+#define DEFAULT_INIT_DODAG_VERSION 0
+#define DEFAULT_DAO_DELAY 1
 
-// Trickle timer default parameter values, see Section 8.3.1
+/** Trickle timer default parameter values, see RFC6550, 8.3.1 */
 #define DEFAULT_DIO_INTERVAL_MIN 0x03
 #define DEFAULT_DIO_REDUNDANCY_CONST 0x03
 #define DEFAULT_DIO_INTERVAL_DOUBLINGS 0x14
 
-// Objective Function parameters
+// Objective function parameters
 #define DEFAULT_MIN_HOP_RANK_INCREASE 0x100
 
 const Ipv6Address LL_RPL_MULTICAST("FF02:0:0:0:0:0:0:1A");
