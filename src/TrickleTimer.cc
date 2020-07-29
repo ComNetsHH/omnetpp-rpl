@@ -29,11 +29,10 @@ Define_Module(TrickleTimer);
 TrickleTimer::TrickleTimer() :
     trickleTriggerEvent(nullptr),
     intervalTriggerEvent(nullptr),
-    minInterval(DEFAULT_DIO_INTERVAL_MIN),
     numDoublings(DEFAULT_DIO_INTERVAL_DOUBLINGS),
-    currentInterval(DEFAULT_DIO_INTERVAL_MIN),
     redundancyConst(DEFAULT_DIO_REDUNDANCY_CONST),
-    ctrlMsgReceivedCounter(0)
+    started(false),
+    ctrlMsgReceivedCtn(0)
 {
 }
 
@@ -42,24 +41,30 @@ TrickleTimer::~TrickleTimer() {
 }
 
 void TrickleTimer::stop() {
-    EV_DETAIL << "Trickle timer stopped " << endl;
-    ctrlMsgReceivedCounter = 0;
-    cancelAndDelete(trickleTriggerEvent);
-    cancelAndDelete(intervalTriggerEvent);
-}
-
-void TrickleTimer::initialize() {
-    maxInterval = minInterval * (2 ^ numDoublings);
-    EV_DETAIL << "Trickle timer module initialized";
+    try {
+        cancelAndDelete(trickleTriggerEvent);
+        cancelAndDelete(intervalTriggerEvent);
+    }
+    catch (...) {
+        EV_WARN << "Exception while deleting trickle timer's internal events" << endl;
+    }
 
 }
 
 void TrickleTimer::start() {
     Enter_Method("TrickleTimer::start()");
     EV_INFO << "Trickle timer started" << endl;
+    started = true;
+    minInterval = DEFAULT_DIO_INTERVAL_MIN;
+    currentInterval = minInterval;
+    maxInterval = minInterval * (pow(2, numDoublings));
+    ctrlMsgReceivedCtn = 0;
+
     intervalTriggerEvent = new cMessage("Trickle timer current interval ended",
-            TRICKLE_INTERVAL_UPDATE_EVENT);
-    trickleTriggerEvent = new cMessage("Trickle timer trigger self-msg", TRICKLE_TRIGGER_EVENT);
+                    TRICKLE_INTERVAL_UPDATE_EVENT);
+    trickleTriggerEvent = new cMessage("Trickle timer trigger self-msg",
+                TRICKLE_TRIGGER_EVENT);
+
     scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
     scheduleNext();
 }
@@ -84,7 +89,7 @@ void TrickleTimer::processSelfMessage(cMessage *message)
         case TRICKLE_INTERVAL_UPDATE_EVENT: {
             if (currentInterval < maxInterval)
                 currentInterval *= 2;
-            ctrlMsgReceivedCounter = 0;
+            ctrlMsgReceivedCtn = 0;
             scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
             scheduleNext();
             EV_INFO << "Trickle interval doubled, current = " <<
@@ -104,22 +109,48 @@ void TrickleTimer::processSelfMessage(cMessage *message)
 
 void TrickleTimer::scheduleNext() {
     unsigned long delay = currentInterval/2 + intrand(currentInterval/2);
-    scheduleAt(simTime() + delay, trickleTriggerEvent);
-    EV_DETAIL << "DIO broadcast scheduled with delay - " << delay << endl;
+    try {
+        scheduleAt(simTime() + delay, trickleTriggerEvent);
+        EV_DETAIL << "DIO broadcast scheduled with delay - " << delay << endl;
+    } catch (std::exception &e) {
+        EV_WARN << "Exception while scheduling next DIO: " << e.what() << endl;
+    }
+}
+
+bool TrickleTimer::hasStarted() {
+    Enter_Method_Silent("TrickleTimer::hasStarted()");
+    return started;
+}
+
+bool TrickleTimer::checkRedundancyConst() {
+    Enter_Method_Silent("TrickleTimer::checkRedundancyConst()");
+    return ctrlMsgReceivedCtn < redundancyConst;
 }
 
 void TrickleTimer::reset() {
     Enter_Method_Silent("TrickleTimer::reset()");
-    EV_DETAIL << "Trickle timer reset" << endl;
-    if (intervalTriggerEvent)
-        cancelEvent(intervalTriggerEvent);
-    if (trickleTriggerEvent)
-        cancelEvent(trickleTriggerEvent);
+    ctrlMsgReceivedCtn = 0;
     currentInterval = minInterval;
-    scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
+    try {
+        cancelEvent(intervalTriggerEvent);
+        cancelEvent(trickleTriggerEvent);
+        scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
+        EV_DETAIL << "Trickle timer reset" << endl;
+    }
+    catch (std::exception &e) {
+        EV_WARN << "Exception: " << e.what() <<" while resetting trickle timer, currentInterval = "
+            << currentInterval << "; \n next interval doubling would be scheduled at "
+            << simTime() + currentInterval << endl;
+    }
     scheduleNext();
 }
 
+void TrickleTimer::suspend() {
+    Enter_Method_Silent("TrickleTimer::suspend()");
+    cancelEvent(intervalTriggerEvent);
+    cancelEvent(trickleTriggerEvent);
+    EV_DETAIL << "Trickle timer suspended " << endl;
+}
 
 } // namespace inet
 

@@ -29,9 +29,11 @@ precompiled_*.h.*
 /tutorials/*/cache/
 /tutorials/*/data/
 /tutorials/wireless/html/
-/tests/*/work/
-/tests/*/*/work/
-/tests/*/results*/
+/simulations/results
+/test*/*/work/
+/test*/*/*/work/
+/test*/*/results*/
+/test/work
 *.html
 *.log
 *.sim
@@ -54,6 +56,7 @@ precompiled_*.h.*
 
 # ignore binary files
 rpl
+rpl_dbg
 run
 out/
 *.so

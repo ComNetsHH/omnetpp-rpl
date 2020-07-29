@@ -50,7 +50,8 @@ module Rpl like IManetRouting
         bool disabled = default(false);
         bool daoEnabled = default(true);
         bool storing = default(false);
-        bool subDodagPoisoning = default(true);
+        bool poisoning = default(true);
+        bool verbose = default(false);
         string objectiveFunctionType = default("hopCount");	 // hopCount, ETX, energy, ...
 
     gates:

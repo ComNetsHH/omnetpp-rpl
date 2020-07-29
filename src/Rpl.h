@@ -81,6 +81,12 @@ class Rpl : public RoutingProtocolBase, public cListener
     simsignal_t parentChangedSignal;
     simsignal_t parentUnreachableSignal;
 
+    /** Misc */
+    bool floating;
+    bool verbose;
+    uint8_t prefixLength;
+
+
   public:
     Rpl();
     ~Rpl();
@@ -121,29 +127,26 @@ class Rpl : public RoutingProtocolBase, public cListener
      * joining a DODAG if not yet a part of one, (re)starting trickle timer,
      * and updating neighbor sets correspondingly @see updatePreferredParent(), addNeighbour()
      *
-     * @param packet encapsulated packet object with different protocol headers
-     * @param dio decapsulated DIO packet for processing
+     * @param dio DIO packet object for processing
      */
-    void processDio(Packet *packet, const Ptr<const Dio>& dio);
+    void processDio(const Ptr<const Dio>& dio);
 
     /**
      * Process DAO packet advertising node's reachability,
      * update routing table if destination advertised was unknown and
      * forward DAO further upwards until root is reached to enable P2P and P2MP communication
      *
-     * @param packet encapsulated packet object with different protocol headers
-     * @param dao decapsulated DAO packet for processing
+     * @param dao DAO packet object for processing
      */
-    void processDao(Packet *packet, const Ptr<const Dao>& dao);
+    void processDao(const Ptr<const Dao>& dao);
 
     /**
      * Process DAO_ACK packet if daoAckRequried flag is set
      *
-     * @param packet packet encapsulated packet object with different protocol headers
      * @param daoAck decapsulated DAO_ACK packet for processing
      */
-    void processDaoAck(Packet *packet, const Ptr<const Dao>& daoAck);
-    void processDis(Packet *packet, const Ptr<const Dis>& dis);
+    void processDaoAck(const Ptr<const Dao>& daoAck);
+    void processDis(const Ptr<const Dis>& dis);
 
     /**
      * Send RPL packet (@see createDao(), createDio(), createDis()) via 'ipOut'
@@ -245,7 +248,7 @@ class Rpl : public RoutingProtocolBase, public cListener
      * @return True if new preferred parent address differs from the one currently stored,
      * false otherwise
      */
-    bool checkPrefParentChanged(Dio* newPrefParent);
+    bool checkPrefParentChanged(const Ipv6Address &newPrefParentAddr);
     void checkDupEntry(std::map<Ipv6Address, Dio *> &parentSet, const Ipv6Address &key);
 
     /**
@@ -276,6 +279,20 @@ class Rpl : public RoutingProtocolBase, public cListener
      * Check if INF_RANK is advertised in DIO and whether it comes from preferred parent
      */
     bool checkPoisonedParent(const Ptr<const Dio>& dio);
+
+    /**
+     * Check if IPv6 address suffixes match given the prefix length
+     *
+     * @param addr1 first address for comparison
+     * @param addr2 second address for comparison
+     * @param prefixLength IPv6 prefix length, representing network + subnet id
+     * @return true on matching address' prefixes, false otherwise
+     */
+    bool matchesSuffix(const Ipv6Address &addr1, const Ipv6Address &addr2, int prefixLength);
+    bool matchesSuffix(const Ipv6Address &addr1, const Ipv6Address &addr2) {
+        return matchesSuffix(addr1, addr2, prefixLength);
+    };
+
 
     /**
      * Handle signals by implementing @see cListener interface to

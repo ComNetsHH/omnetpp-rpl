@@ -43,10 +43,12 @@ Rpl::Rpl() :
     isRoot(false),
     defaultPrefParentLifetime(10000),
     rank(INF_RANK),
+    prefixLength(112),
     dodagId(Ipv6Address::UNSPECIFIED_ADDRESS),
     objectiveFunctionType("hopCount"),
     daoDelay(DEFAULT_DAO_DELAY),
-    preferredParent(nullptr)
+    preferredParent(nullptr),
+    floating(false)
 {}
 
 Rpl::~Rpl()
@@ -68,11 +70,13 @@ void Rpl::initialize(int stage)
         isRoot = par("isRoot").boolValue();
         daoEnabled = par("daoEnabled").boolValue();
         host = getContainingNode(this);
+        objectiveFunction = new ObjectiveFunction(par("objectiveFunctionType").stdstringValue());
         dioReceivedSignal = registerSignal("dioReceived");
         daoReceivedSignal = registerSignal("daoReceived");
         parentChangedSignal = registerSignal("parentChanged");
         parentUnreachableSignal = registerSignal("parentUnreachable");
-        objectiveFunction = new ObjectiveFunction(par("objectiveFunctionType").stdstringValue());
+        verbose = par("verbose").boolValue();
+
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
@@ -141,11 +145,13 @@ void Rpl::detachFromDodag() {
     EV_DETAIL << "Candidate parent list empty, leaving DODAG" << endl;
     backupParents.erase(backupParents.begin(), backupParents.end());
     EV_DETAIL << "Backup parents list erased" << endl;
-    dodagId = Ipv6Address::UNSPECIFIED_ADDRESS;
     rank = INF_RANK;
-    trickleTimer->stop();
-    if (par("subDodagPoisoning").boolValue())
+    trickleTimer->suspend();
+    if (par("poisoning").boolValue())
         poisonSubDodag();
+    dodagId = Ipv6Address::UNSPECIFIED_ADDRESS;
+    floating = true;
+
 }
 
 void Rpl::poisonSubDodag() {
@@ -196,44 +202,46 @@ void Rpl::processTrickleTimerMsg(cMessage *message)
 
 void Rpl::processPacket(Packet *packet)
 {
-//    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
-//    auto protocol = packetProtocolTag->getProtocol();
-//    EV_DETAIL << "Received packet protocol - " << protocol->str() << endl;
     try {
+        auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
+        auto dispatchProtocol = packet->findTag<DispatchProtocolReq>();
+        auto protocol = packetProtocolTag->getProtocol();
+        if (verbose) {
+            EV_DETAIL << "Received packet dispatch protocol - " << dispatchProtocol->str() << endl;
+            EV_DETAIL << "Received packet protocol - " << protocol->str() << endl;
+        }
         auto rplHeader = packet->popAtFront<RplHeader>();
         auto rplBody = packet->peekData<RplPacket>();
         auto senderAddr = rplBody->getSrcAddress();
         switch (rplHeader->getIcmpv6Code()) {
             case DIO: {
-                processDio(packet, dynamicPtrCast<const Dio>(rplBody));
+                processDio(dynamicPtrCast<const Dio>(rplBody));
                 break;
             }
             case DAO: {
                 if (daoEnabled)
-                    processDao(packet, dynamicPtrCast<const Dao>(rplBody));
-                else {
+                    processDao(dynamicPtrCast<const Dao>(rplBody));
+                else
                     EV_DETAIL << "DAO support not enabled, discarding packet" << endl;
-                    delete packet;
-                }
                 break;
             }
             case DAO_ACK: {
-                processDaoAck(packet, dynamicPtrCast<const Dao>(rplBody));
+                processDaoAck(dynamicPtrCast<const Dao>(rplBody));
                 break;
             }
             case DIS: {
-                processDis(packet, dynamicPtrCast<const Dis>(rplBody));
+                processDis(dynamicPtrCast<const Dis>(rplBody));
                 break;
             }
-//            default: throw cRuntimeError("Unknown Rpl packet");
+    //            default: throw cRuntimeError("Unknown Rpl packet");
             default: EV_WARN << "Unknown Rpl packet" << endl;
         }
     }
-    catch (...) {
-        EV_WARN << "Implicit chunk serialization?" << endl;
-        delete packet;
+    catch (std::exception &e) {
+        EV_DETAIL << "Exception during packet proccesing - " << e.what() << endl;
     }
 
+    delete packet;
 }
 
 void Rpl::sendPacket(cPacket *packet, double delay)
@@ -277,6 +285,7 @@ const Ptr<Dio> Rpl::createDio()
     dio->setDodagVersion(dodagVersion);
     dio->setDodagId(dodagId);
     dio->setSrcAddress(getSelfAddress());
+    EV_DETAIL << "DIO created advertising DODAG with id - " << dio->getDodagId() << endl;
     return dio;
 }
 
@@ -293,82 +302,94 @@ const Ptr<Dao> Rpl::createDao(const Ipv6Address &reachableDest)
     return dao;
 }
 
-void Rpl::processDio(Packet *packet, const Ptr<const Dio>& dio)
+void Rpl::processDio(const Ptr<const Dio>& dio)
 {
-//        emit(dioReceivedSignal, dio->dup());
-        EV_INFO << "Processing DIO from " << dio->getSrcAddress() << endl;
-
-        // Join the DODAG advertised, if node's not a part of any DODAG yet
-        if (dodagId == Ipv6Address::UNSPECIFIED_ADDRESS) {
-            dodagId = dio->getDodagId();
-            dodagVersion = dio->getDodagVersion();
-            instanceId = dio->getInstanceId();
-            storing = dio->getStoring();
-            dtsn = dio->getDtsn();
-            // Start broadcasting DIOs forwarding DODAG control data
+    EV_DETAIL << "Processing DIO from " << dio->getSrcAddress() << endl;
+    emit(dioReceivedSignal, dio->dup());
+    // If node's not a part of any DODAG, join the one advertised
+    if (dodagId == Ipv6Address::UNSPECIFIED_ADDRESS) {
+        dodagId = dio->getDodagId();
+        dodagVersion = dio->getDodagVersion();
+        instanceId = dio->getInstanceId();
+        storing = dio->getStoring();
+        dtsn = dio->getDtsn();
+        EV_DETAIL << "Joined new DODAG with id - " << dodagId << endl;
+        // Start broadcasting DIOs, diffusing DODAG control data
+        if (trickleTimer->hasStarted())
+            trickleTimer->reset();
+        else
             trickleTimer->start();
-            EV_DETAIL << "Joined new DODAG with id - " << dodagId << endl;
-        } else {
-            /**
-             * Immediately check if INF_RANK is advertised, and the advertising node is a preferred parent,
-             * in case 'poisoning' detected, delete preferred parent and remove it from candidate neighbors
-             */
-            if (checkPoisonedParent(dio)) {
-                deletePrefParent(true);
-                // Temporary functionality, selecting a backup parent as new preferred,
-                // in case candidate set is empty, to be revised.
-                updatePreferredParent(candidateParents.empty() ? true : false);
-                delete packet;
-                return;
-            }
-        }
-        trickleTimer->incrementCtrlMsgReceivedCounter();
-        // Do not process DIO from unknown DAG/RPL instance or if receiver is root
-        if (checkUnknownDio(dio) || isRoot) {
-            EV_DETAIL << "Unknown DODAG/InstanceId, or receiver is root - discarding DIO" << endl;
-            delete packet;
+    } else {
+        /**
+         * Immediately check if INF_RANK is advertised, and the advertising node is a preferred parent,
+         * in case 'poisoning' detected, delete preferred parent and remove it from candidate neighbors
+         */
+        if (checkPoisonedParent(dio)) {
+            EV_DETAIL << "Received poisoned DIO from preferred parent - "
+                    << preferredParent->getSrcAddress() << endl;
+            deletePrefParent(true);
+//            // Temporary functionality, selecting a backup parent as a new preferred,
+//            // in case candidate set is empty, to be revised.
+            updatePreferredParent(candidateParents.empty() ? true : false);
             return;
         }
-        /**
-         * If dodagVersion has been incremented by the root, join newer DODAG
-         * by emptying neighbor sets (candidate and backup parents) and start
-         * forwarding updated DODAG information via DIOs, see RFC6560, 8.2.2.1.
-         */
-        if (dio->getDodagVersion() > dodagVersion) {
-            EV_DETAIL << "New DODAG version discovered, joining and clearing former parent sets" << endl;
-            backupParents.erase(backupParents.begin(), backupParents.end());
-            candidateParents.erase(candidateParents.begin(), candidateParents.end());
-            dodagVersion = dio->getDodagVersion();
-        } else if (dio->getDodagVersion() < dodagVersion)
-            EV_DETAIL << "Outdated DODAG version advertised, discarding DIO" << endl;
-        /**
-         * If Destination Advertisement Trigger Sequence Number has been incremented by parent
-         * update node's own DTSN and unicast DAO to refresh downward routes
-         */
-        if (dio->getDtsn() > dtsn) {
-            EV_DETAIL << "DTSN incremented, unicast DAO scheduled" << endl;
-            dtsn = dio->getDtsn();
-            sendRplPacket(createDao(getSelfAddress()), DAO, preferredParent->getSrcAddress(), daoDelay);
-        }
-        addNeighbour(dio);
-        updatePreferredParent();
-        delete packet;
+    }
+    trickleTimer->incrementCtrlMsgReceivedCounter();
+    // Do not process DIO from unknown DAG/RPL instance or if receiver is root
+    if (checkUnknownDio(dio) || isRoot) {
+        EV_DETAIL << "Unknown DODAG/InstanceId, or receiver is root - discarding DIO" << endl;
+        return;
+    }
+    /**
+     * If dodagVersion has been incremented by the root, join newer DODAG
+     * by emptying neighbor sets (candidate and backup parents) and start
+     * forwarding updated DODAG information via DIOs, see RFC6560, 8.2.2.1.
+     */
+    if (dio->getDodagVersion() > dodagVersion) {
+        EV_DETAIL << "New DODAG version discovered, joining and clearing former parent sets" << endl;
+        backupParents.erase(backupParents.begin(), backupParents.end());
+        candidateParents.erase(candidateParents.begin(), candidateParents.end());
+        dodagVersion = dio->getDodagVersion();
+    } else if (dio->getDodagVersion() < dodagVersion)
+        EV_DETAIL << "Outdated DODAG version advertised, discarding DIO" << endl;
+    /**
+     * If Destination Advertisement Trigger Sequence Number has been incremented by parent
+     * update node's own DTSN and unicast DAO to refresh downward routes
+     */
+    if (dio->getDtsn() > dtsn) {
+        EV_DETAIL << "DTSN incremented, unicast DAO scheduled" << endl;
+        dtsn = dio->getDtsn();
+        sendRplPacket(createDao(getSelfAddress()), DAO, preferredParent->getSrcAddress(), daoDelay);
+    }
+    addNeighbour(dio);
+    updatePreferredParent();
 }
 
 bool Rpl::checkPoisonedParent(const Ptr<const Dio>& dio) {
-//    EV_DETAIL << "Checking if poisoned DIO is received: " << endl;
-//    EV_DETAIL << "Advertised rank = " << dio->getRank() << endl;
-//    EV_DETAIL << "Sender addr - " << dio->getSrcAddress()
-//            << "; preferred parent - " << preferredParent->getSrcAddress() << endl;
+
+    EV_DETAIL << "Checking if poisoned DIO is received: " << endl;
+    EV_DETAIL << "Advertised INFINITE_RANK = "
+            << std::string(dio->getRank() == INF_RANK ? " True" : " False") << endl;
+    if (preferredParent && verbose) {
+        EV_DETAIL << "Sender addr - " << dio->getSrcAddress()
+                    << "; preferred parent - " << preferredParent->getSrcAddress() << endl;
+        EV_DETAIL << "Match? "
+                << std::string(matchesSuffix(preferredParent->getSrcAddress(), dio->getSrcAddress())
+                        ? " True" : " False") << endl;
+    } else
+        EV_WARN << "Pref. parent not set!" << endl;
+
     return preferredParent && dio->getRank() == INF_RANK
-            && preferredParent->getSrcAddress() == dio->getSrcAddress();
+            && matchesSuffix(preferredParent->getSrcAddress(), dio->getSrcAddress());
 }
 
-void Rpl::processDao(Packet *packet, const Ptr<const Dao>& dao) {
+void Rpl::processDao(const Ptr<const Dao>& dao) {
     emit(daoReceivedSignal, dao->dup());
+    auto daoSender = dao->getSrcAddress();
+    auto advertisedDest = dao->getReachableDest();
     if (dao->getDaoAckRequired()) {
-        sendRplPacket(createDao(Ipv6Address::UNSPECIFIED_ADDRESS), DAO_ACK, dao->getSrcAddress());
-        EV_DETAIL << "DAO_ACK sent back to " << dao->getSrcAddress() << endl;
+        sendRplPacket(createDao(Ipv6Address::UNSPECIFIED_ADDRESS), DAO_ACK, daoSender);
+        EV_DETAIL << "DAO_ACK sent back to " << daoSender << endl;
     }
 
     /**
@@ -378,51 +399,61 @@ void Rpl::processDao(Packet *packet, const Ptr<const Dao>& dao) {
      */
     if (storing || isRoot) {
         if (!checkDestAlreadyKnown(dao->getReachableDest())) {
-            updateRoutingTable(dao->getSrcAddress(), dao->getReachableDest());
-            EV_DETAIL << "Destination learned from DAO - " << dao->getReachableDest()
-                        << " reachable via " << dao->getSrcAddress() << endl;
+            updateRoutingTable(daoSender, advertisedDest);
+            EV_DETAIL << "Destination learned from DAO - " << advertisedDest
+                        << " reachable via " << daoSender << endl;
         }
     }
     /**
      * Forward DAO 'upwards' via preferred parent to advertise destination to the root,
      * see RFC6560, 6.4.
      */
-    if (!isRoot && preferredParent->getSrcAddress() != dao->getSrcAddress()) {
-        sendRplPacket(createDao(dao->getReachableDest()), DAO,
+    if (!isRoot && preferredParent && matchesSuffix(daoSender, preferredParent->getSrcAddress())) {
+        sendRplPacket(createDao(advertisedDest), DAO,
                 preferredParent->getSrcAddress(), daoDelay * (1 + uniform(0.1, 1)));
-        EV_DETAIL << "Forwarding DAO upwards advertising "
-                    << dao->getReachableDest() << " reachability" << endl;
+        EV_DETAIL << "Forwarding DAO upwards advertising " << advertisedDest << " reachability" << endl;
     }
-    delete packet;
 }
 
-void Rpl::processDaoAck(Packet *packet, const Ptr<const Dao>& daoAck) {
+bool Rpl::matchesSuffix(const Ipv6Address &addr1, const Ipv6Address &addr2, int prefixLength) {
+    if (verbose) {
+        EV_DETAIL << "Checking suffix match for: " << addr1 << " & " << addr2 << endl;
+        EV_DETAIL << "addr1.suffix - " << addr1.getSuffix(prefixLength) << " =? "
+                << "addr2.suffix - " << addr2.getSuffix(prefixLength) << endl
+                << std::string(addr1.getSuffix(prefixLength) == addr2.getSuffix(prefixLength) ? " True" : " False")
+                << endl;
+    }
+
+    return addr1.getSuffix(prefixLength) == addr2.getSuffix(prefixLength);
+}
+
+void Rpl::processDaoAck(const Ptr<const Dao>& daoAck) {
     EV_INFO << "Received DAO_ACK from " << daoAck->getSrcAddress() << endl;
-    delete packet;
 }
 
-void Rpl::processDis(Packet *packet, const Ptr<const Dis>& disPacket) {
+void Rpl::processDis(const Ptr<const Dis>& disPacket) {
     EV_INFO << "Processing DIS packet" << endl;
 }
 
 void Rpl::updatePreferredParent(bool useBackups)
 {
     auto newPrefParent = objectiveFunction->getPreferredParent(useBackups ? backupParents : candidateParents);
+    auto newPrefParentAddr = newPrefParent->getSrcAddress();
     /**
      * If a better preferred parent is advertised (based on the objective function),
      * update default route to DODAG sink with new nextHop
      */
-    if (checkPrefParentChanged(newPrefParent)) {
+    if (checkPrefParentChanged(newPrefParentAddr)) {
         emit(parentChangedSignal, newPrefParent->dup());
-        updateRoutingTable(newPrefParent->getSrcAddress(), dodagId, true);
-        EV_DETAIL << "Updated preferred parent to - " << newPrefParent->getSrcAddress() << endl;
+        updateRoutingTable(newPrefParentAddr, dodagId, true);
+        EV_DETAIL << "Updated preferred parent to - " << newPrefParentAddr << endl;
         /**
          * Reset trickle timer due to inconsistency (preferred parent changed) detected, thus
          * maintaining higher topology reactivity and convergence rate, see RFC6560, 8.3.
          */
         trickleTimer->reset();
         if (daoEnabled)
-            sendRplPacket(createDao(getSelfAddress()), DAO, newPrefParent->getSrcAddress(),
+            sendRplPacket(createDao(getSelfAddress()), DAO, newPrefParentAddr,
                     daoDelay * (1 + uniform(0.1, 1)));
     }
     preferredParent = newPrefParent->dup();
@@ -434,10 +465,16 @@ void Rpl::updatePreferredParent(bool useBackups)
         EV_DETAIL << "Updated rank = " << rank << endl;
 }
 
-bool Rpl::checkPrefParentChanged(Dio* newPrefParent)
+bool Rpl::checkPrefParentChanged(const Ipv6Address &newPrefParentAddr)
 {
-    return preferredParent == nullptr
-            || (newPrefParent->getSrcAddress() != preferredParent->getSrcAddress());
+    if (!preferredParent) {
+        EV_DETAIL << "Pref. parent is nullptr, HAS CHANGED " << endl;
+        return true;
+    }
+
+    return !matchesSuffix(newPrefParentAddr, preferredParent->getSrcAddress());
+
+
 }
 
 
@@ -450,45 +487,47 @@ void Rpl::updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest
     /** If route through preferred parent is being added, set it as default route */
     if (isDefaultRoute)
         routingTable->addDefaultRoute(nextHop, interfaceEntryPtr->getInterfaceId(), 500);
-    else {
-        auto route = routingTable->createRoute();
-        route->setSourceType(IRoute::MANET);
-        route->setPrefixLength(112);
-        route->setInterface(interfaceEntryPtr);
-        route->setDestination(dest);
-        route->setNextHop(nextHop);
-        routingTable->addRoute(route);
-    }
+    auto route = routingTable->createRoute();
+    route->setSourceType(IRoute::MANET);
+    route->setPrefixLength(prefixLength);
+    route->setInterface(interfaceEntryPtr);
+    route->setDestination(dest);
+    route->setNextHop(nextHop);
+    routingTable->addRoute(route);
+
 }
 
 
 void Rpl::deletePrefParent(bool poisoned)
 {
-    auto totalRoutes = routingTable->getNumRoutes();
     auto prefParentAddr = preferredParent->getSrcAddress();
     EV_DETAIL << "Preferred parent " << prefParentAddr << " unreachability detected"
             << (poisoned ? std::string(" through poisoning") : std::string(" ")) << endl;
     emit(parentUnreachableSignal, preferredParent);
+    routingTable->deleteDefaultRoutes(interfaceEntryPtr->getInterfaceId());
+    EV_DETAIL << "Deleted default route through unreachable preferred parent " << endl;
+    auto totalRoutes = routingTable->getNumRoutes();
     for (int i = 0; i < totalRoutes; i++) {
         auto ri = routingTable->getRoute(i);
-        if (ri->getNextHopAsGeneric().toIpv6().matches(prefParentAddr, 112)) {
+        auto nextHop = ri->getNextHop();
+        if (matchesSuffix(nextHop, prefParentAddr)) {
             routingTable->deleteRoute(ri);
-            EV_DETAIL << "Deleted route through unreachable preferred parent " << endl;
+            EV_DETAIL << "Deleted non-default route through unreachable preferred parent " << endl;
         }
     }
-    candidateParents.erase(prefParentAddr);
+    candidateParents.erase(prefParentAddr.getSuffix(prefixLength));
 //    checkDupEntry(candidateParents, preferredParent->getSrcAddress());
 
     // temporary part to detect duplicate parent entries in candidate parent set
-    Ipv6Address dupPrefParent;
-    EV_DETAIL << "Checking duplicate entry for " << prefParentAddr << endl;
-    for (auto parent : candidateParents) {
-        EV_DETAIL << parent.first << " ? " << prefParentAddr << endl;
-        if (parent.first.getSuffix(112).matches(prefParentAddr.getSuffix(112), 0)) {
-            dupPrefParent = parent.first;
-        }
-    }
-    candidateParents.erase(dupPrefParent);
+//    Ipv6Address dupPrefParent;
+//    EV_DETAIL << "Checking duplicate entry for " << prefParentAddr << endl;
+//    for (auto parent : candidateParents) {
+//        EV_DETAIL << parent.first << " ? " << prefParentAddr << endl;
+//        if (parent.first.getSuffix(prefixLength).matches(prefParentAddr.getSuffix(prefixLength), 0)) {
+//            dupPrefParent = parent.first;
+//        }
+//    }
+//    candidateParents.erase(dupPrefParent);
     preferredParent = nullptr;
     EV_DETAIL << "Erased preferred parent from candidate parents list" << endl;
 }
@@ -531,21 +570,21 @@ void Rpl::addNeighbour(const Ptr<const Dio>& dio)
      * DIO packet received from it.
      */
     auto dioCopy = dio->dup();
-    auto dioSender = dioCopy->getSrcAddressForUpdate();
+    auto dioSender = dio->getSrcAddress().getSuffix(prefixLength);
     /** If DIO sender has equal rank, consider this node as a backup parent */
     if (dio->getRank() == rank) {
         if (backupParents.find(dioSender) != backupParents.end())
-            EV_DETAIL << "Backup parent entry updated, address - " << dioSender << endl;
+            EV_DETAIL << "Backup parent entry updated, address suffix - " << dioSender << endl;
         else
-            EV_DETAIL << "New backup parent added, address - " << dioSender << endl;
+            EV_DETAIL << "New backup parent added, address suffix - " << dioSender << endl;
         backupParents[dioSender] = dioCopy;
     }
     /** If DIO sender has lower rank, consider this node as a candidate parent */
     if (dio->getRank() < rank) {
         if (candidateParents.find(dioSender) != candidateParents.end())
-            EV_DETAIL << "Candidate parent entry updated, address - " << dioSender << endl;
+            EV_DETAIL << "Candidate parent entry updated, address suffix - " << dioSender << endl;
         else
-            EV_DETAIL << "New candidate parent added, address - " << dioSender << endl;
+            EV_DETAIL << "New candidate parent added, address suffix - " << dioSender << endl;
         candidateParents[dioSender] = dioCopy;
     }
 }
@@ -567,8 +606,9 @@ void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
         Packet *datagram = check_and_cast<Packet *>(obj);
         const auto& networkHeader = findNetworkProtocolHeader(datagram);
         if (networkHeader != nullptr) {
-            const L3Address& destination = networkHeader->getDestinationAddress();
+            const Ipv6Address& destination = networkHeader->getDestinationAddress().toIpv6();
             EV_DETAIL << "Connection with destination " << destination << " broken?" << endl;
+            // TODO: Handle destination unreachabilty detection
             /**
              * If preferred parent unreachability detected, remove route with it as a
              * next hop from the routing table and select new preferred parent from the
@@ -578,12 +618,10 @@ void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
              * (becoming either floating DODAG or poison child routes)
              */
             if (!preferredParent) {
-                EV_DETAIL << "Preferred parent not defined, returning" << endl;
+                EV_DETAIL << "Preferred parent not set, returning" << endl;
                 return;
             }
-            EV_DETAIL << "Check if preferred parent - " << preferredParent->getSrcAddress()
-                    << " unreachable " << endl;
-            if (destination.matches(preferredParent->getSrcAddress(), 112)) {
+            if (matchesSuffix(destination, preferredParent->getSrcAddress())) {
                 deletePrefParent();
                 if (!candidateParents.empty())
                     updatePreferredParent();

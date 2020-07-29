@@ -50,25 +50,26 @@ class TrickleTimer : public cSimpleModule
     uint8_t numDoublings;
     int currentInterval;
     int maxInterval;
+    bool started;
     cMessage *trickleTriggerEvent;
     cMessage *trickleTriggerMsg;
     cMessage *intervalTriggerEvent;
 
     uint8_t redundancyConst;
-    uint8_t ctrlMsgReceivedCounter;
+    uint8_t ctrlMsgReceivedCtn;
 
   public:
     TrickleTimer();
     ~TrickleTimer();
 
     // lifecycle
-    void initialize();
     virtual void start();
     virtual void reset();
     virtual void stop();
+    virtual void suspend();
 
-    void incrementCtrlMsgReceivedCounter() { ctrlMsgReceivedCounter++; }
-    bool checkRedundancyConst() { return ctrlMsgReceivedCounter < redundancyConst; }
+    void incrementCtrlMsgReceivedCounter() { ctrlMsgReceivedCtn++; }
+    bool checkRedundancyConst();
     void scheduleNext();
     void updateInterval();
 
@@ -77,9 +78,9 @@ class TrickleTimer : public cSimpleModule
     void processSelfMessage(cMessage *message);
     void handleMessageWhenUp(cMessage *message);
 
-    uint8_t getCtrlMsgReceivedCounter() const { return ctrlMsgReceivedCounter;}
-    void setCtrlMsgReceivedCounter(uint8_t ctrlMsgReceivedCounter) {
-        this->ctrlMsgReceivedCounter = ctrlMsgReceivedCounter;
+    uint8_t getCtrlMsgReceivedCounter() const { return ctrlMsgReceivedCtn;}
+    void setCtrlMsgReceivedCounter(uint8_t ctrlMsgReceivedCtn) {
+        this->ctrlMsgReceivedCtn = ctrlMsgReceivedCtn;
     }
 
     int getCurrentInterval() const { return currentInterval; }
@@ -87,6 +88,8 @@ class TrickleTimer : public cSimpleModule
 
     uint8_t getNumDoublings() const { return numDoublings; }
     void setNumDoublings(uint8_t numDoublings) { this->numDoublings = numDoublings; }
+
+    bool hasStarted();
 
     uint8_t getRedundancyConst() const { return redundancyConst; }
     void setRedundancyConst(uint8_t redundancyConst) { this->redundancyConst = redundancyConst; }
