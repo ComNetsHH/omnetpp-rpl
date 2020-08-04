@@ -77,7 +77,8 @@ class Dio extends RplPacket {
     
     // Destination Advertisement Trigger Sequence Number, 
     // may be incremented to trigger downward routes update
-    uint8_t dtsn;                 	       
+    uint8_t dtsn;
+    uint8_t dioId;  // temporary field for debugging purposes   
    
 	// Trickle timer parameters (DAG Configuration Option)
     int minInterval;           

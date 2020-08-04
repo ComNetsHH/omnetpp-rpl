@@ -63,12 +63,13 @@ class TrickleTimer : public cSimpleModule
     ~TrickleTimer();
 
     // lifecycle
-    virtual void start();
+    void start() { start(false); };
+    void start(bool warmupDelay);
     virtual void reset();
     virtual void stop();
     virtual void suspend();
 
-    void incrementCtrlMsgReceivedCounter() { ctrlMsgReceivedCtn++; }
+    void ctrlMsgReceived() { ctrlMsgReceivedCtn++; }
     bool checkRedundancyConst();
     void scheduleNext();
     void updateInterval();
@@ -78,8 +79,8 @@ class TrickleTimer : public cSimpleModule
     void processSelfMessage(cMessage *message);
     void handleMessageWhenUp(cMessage *message);
 
-    uint8_t getCtrlMsgReceivedCounter() const { return ctrlMsgReceivedCtn;}
-    void setCtrlMsgReceivedCounter(uint8_t ctrlMsgReceivedCtn) {
+    uint8_t getCtrlMsgReceived() const { return ctrlMsgReceivedCtn;}
+    void setCtrlMsgReceived(uint8_t ctrlMsgReceivedCtn) {
         this->ctrlMsgReceivedCtn = ctrlMsgReceivedCtn;
     }
 

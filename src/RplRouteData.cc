@@ -19,40 +19,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __INET_RPLDEFS_H
-#define __INET_RPLDEFS_H
+#include "RplRouteData.h"
+#include "Rpl.h"
 
 namespace inet {
 
-/** RPL default parameters, see RFC6550, 17 */
-#define INF_RANK 0xFFFF
-#define ROOT_RANK 1
-#define RPL_DEFAULT_INSTANCE 1
-#define DEFAULT_INIT_DODAG_VERSION 0
-#define DEFAULT_DAO_DELAY 1
+RplRouteData::RplRouteData() {
+    dtsn = 0;
+    expirationTime = 0;
+    dodagId = Ipv6Address::UNSPECIFIED_ADDRESS;
+    instanceId = 0;
+}
 
-/** Trickle timer default parameter values, see RFC6550, 8.3.1 */
-#define DEFAULT_DIO_INTERVAL_MIN 0x03
-#define DEFAULT_DIO_REDUNDANCY_CONST 0x03
-#define DEFAULT_DIO_INTERVAL_DOUBLINGS 0x14
+RplRouteData::~RplRouteData() {
 
-// Objective function parameters
-#define DEFAULT_MIN_HOP_RANK_INCREASE 0x100
+}
 
-const Ipv6Address LL_RPL_MULTICAST("FF02:0:0:0:0:0:0:1A");
-
-// Trickle timer and internal event types
-enum {
-    TRICKLE_START,
-    TRICKLE_INTERVAL_UPDATE_EVENT,
-    TRICKLE_TRIGGER_EVENT,
+std::string RplRouteData::str() const
+{
+    std::ostringstream out;
+    out << "dodagId/RplInstance = " << getDodagId() << " - " << getInstanceId()
+        << ", \n sequenceNumber = " << getDtsn()
+        << ", \n expirationTime = " << getExpirationTime();
+    return out.str();
 };
 
-enum RPL_SELF_MSG {
-    DETACHED_TIMEOUT
-};
-
-} // namespace inet
-
-#endif
-
+}

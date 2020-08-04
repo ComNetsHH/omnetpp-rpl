@@ -19,9 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "TrickleTimer.h"
-#include "ObjectiveFunction.h"
-#include "RplDefs.h"
+#include "Rpl.h"
 
 namespace inet {
 
@@ -46,6 +44,14 @@ ObjectiveFunction::~ObjectiveFunction() {
 
 Dio* ObjectiveFunction::getPreferredParent(std::map<Ipv6Address, Dio *> candidateParents) {
     // determine parent with lowest rank
+    if (candidateParents.empty()) {
+        EV_WARN << "Couldn't determine preferred parent, provided set is empty" << endl;
+        return nullptr;
+    }
+
+    for (auto cp : candidateParents)
+        EV_DETAIL << cp.first << " - " << cp.second << endl;
+
     Dio *preferredParent = candidateParents.begin()->second;
     uint16_t minRank = preferredParent->getRank();
     for (std::pair<Ipv6Address, Dio *> candidate : candidateParents) {
@@ -60,8 +66,11 @@ Dio* ObjectiveFunction::getPreferredParent(std::map<Ipv6Address, Dio *> candidat
 }
 
 uint16_t ObjectiveFunction::calcRank(Dio* preferredParent) {
-    uint16_t prefParentRank = preferredParent->getRank();
+    if (!preferredParent)
+        throw cRuntimeError("Cannot calculate rank, preferredParent argument is null");
 
+    uint16_t prefParentRank = preferredParent->getRank();
+    /** Calculate node's rank based on the objective function policy */
     switch (type) {
         case HOP_COUNT:
             return prefParentRank + 1;

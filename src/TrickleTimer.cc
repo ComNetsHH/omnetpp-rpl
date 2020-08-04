@@ -19,7 +19,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "TrickleTimer.h"
 #include "Rpl.h"
 
 namespace inet {
@@ -51,12 +50,12 @@ void TrickleTimer::stop() {
 
 }
 
-void TrickleTimer::start() {
+void TrickleTimer::start(bool warmupDelay) {
     Enter_Method("TrickleTimer::start()");
     EV_INFO << "Trickle timer started" << endl;
     started = true;
     minInterval = DEFAULT_DIO_INTERVAL_MIN;
-    currentInterval = minInterval;
+    currentInterval = warmupDelay ? minInterval * 4 : minInterval;
     maxInterval = minInterval * (pow(2, numDoublings));
     ctrlMsgReceivedCtn = 0;
 
@@ -108,6 +107,7 @@ void TrickleTimer::processSelfMessage(cMessage *message)
 
 
 void TrickleTimer::scheduleNext() {
+    // TODO: Make delay float to allow more diverse transmission intervals
     unsigned long delay = currentInterval/2 + intrand(currentInterval/2);
     try {
         scheduleAt(simTime() + delay, trickleTriggerEvent);

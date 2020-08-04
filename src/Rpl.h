@@ -39,9 +39,9 @@
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "Rpl_m.h"
 #include "RplDefs.h"
+#include "RplRouteData.h"
 #include "TrickleTimer.h"
 #include "ObjectiveFunction.h"
-
 
 namespace inet {
 
@@ -63,7 +63,6 @@ class Rpl : public RoutingProtocolBase, public cListener
     Ipv6Address dodagId;
     uint8_t instanceId;
     double daoDelay;
-    double defaultPrefParentLifetime;
     bool isRoot;
     bool daoEnabled;
     bool storing;
@@ -84,12 +83,18 @@ class Rpl : public RoutingProtocolBase, public cListener
     /** Misc */
     bool floating;
     bool verbose;
+    uint8_t detachedTimeout; // temporary variable to suppress msg processing after just leaving the DODAG
+    cMessage *detachedTimeoutEvent; // temporary msg corresponding to triggering above functionality
     uint8_t prefixLength;
+    uint8_t dioIdCtn;
 
 
   public:
     Rpl();
     ~Rpl();
+
+    static std::string boolStr(bool cond, std::string positive, std::string negative);
+    static std::string boolStr(bool cond) { return boolStr(cond, "True", "False"); }
 
   protected:
     // module interface
@@ -174,18 +179,20 @@ class Rpl : public RoutingProtocolBase, public cListener
      * @return initialized DAO packet object
      */
     const Ptr<Dao> createDao(const Ipv6Address &reachableDest);
+    const Ptr<Dao> createDao() {return createDao(getSelfAddress()); };
 
-    // handling routing data and node's neighborhood sets
-    void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest) { updateRoutingTable(nextHop, dest, false); }
+
 
     /**
      * Update routing table with new route to destination reachable via next hop
      *
      * @param nextHop next hop address to reach the destination for findBestMatchingRoute()
      * @param dest discovered destination address being added to the routing table
-     * @param isDefaultRoute if next hop represents preferred parent, set this route as default
      */
-    void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, bool isDefaultRoute);
+    void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData);
+    void updateRoutingTable(Dao *dao);
+    void updateRoutingTable(const Ipv6Address &nextHop);
+    void purgeDaoRoutes();
 
     /**
      * Add node (represented by most recent DIO packet) to one of the neighboring sets:
@@ -210,9 +217,7 @@ class Rpl : public RoutingProtocolBase, public cListener
      * If necessary (@see checkPrefParentChanged()), update routing table @see updateRoutingTable()
      * and reset trickle timer, see Section 8.3
      */
-    void updatePreferredParent() { updatePreferredParent(false); };
-
-    void updatePreferredParent(bool useBackups);
+    void updatePreferredParent();
 
     /* Lifecycle */
     virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
@@ -249,16 +254,17 @@ class Rpl : public RoutingProtocolBase, public cListener
      * false otherwise
      */
     bool checkPrefParentChanged(const Ipv6Address &newPrefParentAddr);
-    void checkDupEntry(std::map<Ipv6Address, Dio *> &parentSet, const Ipv6Address &key);
+    void printmap(std::map<Ipv6Address, Dio *> neighbours);
 
     /**
-     * Check if destination advertised in DAO is already stored in the routing table
-     * and shouldn't be forwarded upwards through the DODAG
+     * Check if destination advertised in DAO is already stored in
+     * the routing table with the same nextHop address
      *
      * @param dest address of the advertised destination from DAO
+     * @param nextHop address of the next hop to this destination
      * @return
      */
-    bool checkDestAlreadyKnown(const Ipv6Address &dest);
+    bool checkDestKnown(const Ipv6Address &nextHop, const Ipv6Address &dest);
 
     /**
      * Detach from DODAG in case preferred parent has been detected unreachable
@@ -292,6 +298,8 @@ class Rpl : public RoutingProtocolBase, public cListener
     bool matchesSuffix(const Ipv6Address &addr1, const Ipv6Address &addr2) {
         return matchesSuffix(addr1, addr2, prefixLength);
     };
+
+    void printTags(Packet *packet);
 
 
     /**

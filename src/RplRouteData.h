@@ -19,40 +19,41 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __INET_RPLDEFS_H
-#define __INET_RPLDEFS_H
+#ifndef RPLROUTEDATA_H_
+#define RPLROUTEDATA_H_
+
+#include <omnetpp/cobject.h>
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 namespace inet {
 
-/** RPL default parameters, see RFC6550, 17 */
-#define INF_RANK 0xFFFF
-#define ROOT_RANK 1
-#define RPL_DEFAULT_INSTANCE 1
-#define DEFAULT_INIT_DODAG_VERSION 0
-#define DEFAULT_DAO_DELAY 1
+class RplRouteData: public omnetpp::cObject {
 
-/** Trickle timer default parameter values, see RFC6550, 8.3.1 */
-#define DEFAULT_DIO_INTERVAL_MIN 0x03
-#define DEFAULT_DIO_REDUNDANCY_CONST 0x03
-#define DEFAULT_DIO_INTERVAL_DOUBLINGS 0x14
+private:
+    Ipv6Address dodagId;
+    uint8_t instanceId;
+    uint8_t dtsn;
+    simtime_t expirationTime;
 
-// Objective function parameters
-#define DEFAULT_MIN_HOP_RANK_INCREASE 0x100
+public:
+    RplRouteData();
+    virtual ~RplRouteData();
 
-const Ipv6Address LL_RPL_MULTICAST("FF02:0:0:0:0:0:0:1A");
+    Ipv6Address getDodagId() const { return dodagId; }
+    void setDodagId(Ipv6Address dodagId) { this->dodagId = dodagId; }
 
-// Trickle timer and internal event types
-enum {
-    TRICKLE_START,
-    TRICKLE_INTERVAL_UPDATE_EVENT,
-    TRICKLE_TRIGGER_EVENT,
-};
+    uint8_t getDtsn() const { return dtsn; }
+    void setDtsn(uint8_t dtsn) { this->dtsn = dtsn; }
 
-enum RPL_SELF_MSG {
-    DETACHED_TIMEOUT
+    simtime_t getExpirationTime() const { return expirationTime; }
+    void setExpirationTime(simtime_t expirationTime) { this->expirationTime = expirationTime; }
+
+    uint8_t getInstanceId() const { return instanceId; }
+    void setInstanceId(uint8_t instanceId) { this->instanceId = instanceId; }
+
+    virtual std::string str() const;
 };
 
 } // namespace inet
 
-#endif
-
+#endif /* RPLROUTEDATA_H_ */
