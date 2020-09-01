@@ -45,7 +45,7 @@ dio->setRank(rank);
 addNeighbour(dio);
 addNeighbour(dio);
 dio->setRank(rank + 1);
-addNeighbour(dio);
+addNeighbour(dio);	
 EV << "\n.";
 
 %contains: stdout

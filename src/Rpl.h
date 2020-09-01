@@ -37,6 +37,10 @@
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/common/packet/chunk/Chunk.h"
+#include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/common/packet/dissector/ProtocolDissector.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "Rpl_m.h"
 #include "RplDefs.h"
 #include "RplRouteData.h"
@@ -45,7 +49,7 @@
 
 namespace inet {
 
-class Rpl : public RoutingProtocolBase, public cListener
+class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::HookBase
 {
   private:
 
@@ -301,6 +305,17 @@ class Rpl : public RoutingProtocolBase, public cListener
 
     void printTags(Packet *packet);
 
+    // handlers to insert/check RPL Packet Information header
+    // as part of a loop detection mechanism from RFC6550, 11.2
+    Result appendRpiHeader(Packet *datagram);
+    Result checkRpiHeader(Packet *datagram);
+//
+    // netfilter
+    virtual Result datagramPreRoutingHook(Packet *datagram) override { Enter_Method("datagramPreRoutingHook"); return checkRpiHeader(datagram); }
+    virtual Result datagramForwardHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return appendRpiHeader(datagram); }
 
     /**
      * Handle signals by implementing @see cListener interface to

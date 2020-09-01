@@ -101,4 +101,12 @@ class Dis extends RplPacket {
 
 }
 
+// RPL Information Packet header according to RFC 6550 11.2
+class RplPacketInfo extends RplPacket {
+    bool down;
+    bool rankError;
+    bool fwdError;
+    uint16_t senderRank;
+}
+
 

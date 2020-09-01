@@ -36,8 +36,11 @@ namespace inet {
 #define DEFAULT_DIO_REDUNDANCY_CONST 0x03
 #define DEFAULT_DIO_INTERVAL_DOUBLINGS 0x14
 
-// Objective function parameters
+/** Objective function parameters */
 #define DEFAULT_MIN_HOP_RANK_INCREASE 0x100
+
+/** Misc */
+#define DEFAULT_PARENT_LIFETIME 5000
 
 const Ipv6Address LL_RPL_MULTICAST("FF02:0:0:0:0:0:0:1A");
 

@@ -72,6 +72,7 @@ void Rpl::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
         routingTable = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule"), this);
         trickleTimer = check_and_cast<TrickleTimer *>(getModuleByPath("^.trickleTimer"));
         isRoot = par("isRoot").boolValue();
@@ -89,6 +90,7 @@ void Rpl::initialize(int stage)
         registerService(Protocol::manet, nullptr, gate("ipIn"));
         registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
         host->subscribe(linkBrokenSignal, this);
+        networkProtocol->registerHook(0, this);
     }
 }
 
@@ -211,8 +213,15 @@ void Rpl::processMessage(cMessage *message)
     std::string arrivalGateName = std::string(message->getArrivalGate()->getBaseName());
     if (arrivalGateName.compare("ttModule") == 0)
         processTrickleTimerMsg(message);
-    else if (Packet *fp = dynamic_cast<Packet *>(message))
-        processPacket(fp);
+    else if (Packet *fp = dynamic_cast<Packet *>(message)) {
+        try {
+            processPacket(fp);
+        }
+        catch (std::exception &e) {
+            EV_WARN << "Error occured during packet processing: " << e.what() << endl;
+        }
+    }
+
 //    else
 //        throw cRuntimeError("Unknown message");
 }
@@ -249,42 +258,38 @@ void Rpl::processPacket(Packet *packet)
         delete packet;
         return;
     }
-    try {
-        auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
-        auto dispatchProtocol = packet->findTag<DispatchProtocolReq>();
-        auto protocol = packetProtocolTag->getProtocol();
-        if (verbose) {
-            EV_DETAIL << "Received packet dispatch protocol - " << dispatchProtocol->str() << endl;
-            EV_DETAIL << "Received packet protocol - " << protocol->str() << endl;
-        }
-        auto rplHeader = packet->popAtFront<RplHeader>();
-        auto rplBody = packet->peekData<RplPacket>();
-        auto senderAddr = rplBody->getSrcAddress();
-        switch (rplHeader->getIcmpv6Code()) {
-            case DIO: {
-                processDio(dynamicPtrCast<const Dio>(rplBody));
-                break;
-            }
-            case DAO: {
-                if (daoEnabled)
-                    processDao(dynamicPtrCast<const Dao>(rplBody));
-                else
-                    EV_DETAIL << "DAO support not enabled, discarding packet" << endl;
-                break;
-            }
-            case DAO_ACK: {
-                processDaoAck(dynamicPtrCast<const Dao>(rplBody));
-                break;
-            }
-            case DIS: {
-                processDis(dynamicPtrCast<const Dis>(rplBody));
-                break;
-            }
-            default: EV_WARN << "Unknown Rpl packet" << endl;
-        }
+
+    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
+    auto dispatchProtocol = packet->findTag<DispatchProtocolReq>();
+    auto protocol = packetProtocolTag->getProtocol();
+    if (verbose) {
+        EV_DETAIL << "Received packet dispatch protocol - " << dispatchProtocol->str() << endl;
+        EV_DETAIL << "Received packet protocol - " << protocol->str() << endl;
     }
-    catch (std::exception &e) {
-        EV_WARN << "Error while processing packet - " << e.what() << endl;
+    auto rplHeader = packet->popAtFront<RplHeader>();
+    auto rplBody = packet->peekData<RplPacket>();
+    auto senderAddr = rplBody->getSrcAddress();
+    switch (rplHeader->getIcmpv6Code()) {
+        case DIO: {
+            processDio(dynamicPtrCast<const Dio>(rplBody));
+            break;
+        }
+        case DAO: {
+            if (daoEnabled)
+                processDao(dynamicPtrCast<const Dao>(rplBody));
+            else
+                EV_DETAIL << "DAO support not enabled, discarding packet" << endl;
+            break;
+        }
+        case DAO_ACK: {
+            processDaoAck(dynamicPtrCast<const Dao>(rplBody));
+            break;
+        }
+        case DIS: {
+            processDis(dynamicPtrCast<const Dis>(rplBody));
+            break;
+        }
+        default: EV_WARN << "Unknown Rpl packet" << endl;
     }
 
     delete packet;
@@ -548,7 +553,7 @@ void Rpl::updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest
      * (i.e. not downward route, learned from DAO), set it as default route
      */
     if (!routeData)
-        routingTable->addDefaultRoute(nextHop, interfaceEntryPtr->getInterfaceId(), 5000);
+        routingTable->addDefaultRoute(nextHop, interfaceEntryPtr->getInterfaceId(), DEFAULT_PARENT_LIFETIME);
     else
         route->setProtocolData(routeData);
     routingTable->addRoute(route);
@@ -567,11 +572,59 @@ void Rpl::updateRoutingTable(const Ipv6Address &nextHop) {
     updateRoutingTable(nextHop, dodagId, nullptr);
 }
 
+
+
+INetfilter::IHook::Result Rpl::appendRpiHeader(Packet *datagram) {
+    EV_INFO << "Checking RPL Packet Information for outgoing packet " << datagram << endl;
+    const auto& networkHeader = findNetworkProtocolHeader(datagram);
+    if (networkHeader != nullptr) {
+        const Ipv6Address& srcAddress = networkHeader->getSourceAddress().toIpv6();
+        EV_DETAIL << " originator: " << srcAddress << endl;
+    }
+
+    auto datagramName = std::string(datagram->getFullName());
+    if (datagramName.find(std::string("Udp")) != std::string::npos) {
+        try {
+            auto rpiHeader = datagram->peekAtBack<RplHeader>(B(4));
+        }
+        catch (std::exception &e) {
+           EV_WARN << "No RPI header detected for outgoing packet, appending" << endl;
+           auto rpiHeader = makeShared<RplPacketInfo>();
+           rpiHeader->setChunkLength(B(4));
+           datagram->insertAtBack(rpiHeader);
+        }
+    }
+
+    return ACCEPT;
+}
+
+INetfilter::IHook::Result Rpl::checkRpiHeader(Packet *datagram) {
+    EV_INFO << "Checking RPL Packet Information for incoming packet " << datagram << endl;
+    const auto& networkHeader = findNetworkProtocolHeader(datagram);
+    if (networkHeader != nullptr) {
+        const Ipv6Address& srcAddress = networkHeader->getSourceAddress().toIpv6();
+        EV_DETAIL << " originator: " << srcAddress << endl;
+    }
+    auto datagramName = std::string(datagram->getFullName());
+    try {
+        if (datagramName.find(std::string("Udp")) != std::string::npos) {
+            EV_DETAIL << "Received application packet with UDP header" << endl;
+        }
+        auto rpiHeader = datagram->peekAtBack<RplPacketInfo>(B(4));
+        EV_DETAIL << "Got RPI header: " << rpiHeader << endl;
+        // TODO: perform loop-detection test
+    }
+    catch (std::exception &e) {
+       EV_WARN << "Couldn't dissect packet due to error: " << e.what() << endl;
+    }
+
+    return ACCEPT;
+}
+
 void Rpl::printTags(Packet *packet) {
     EV_DETAIL << "Packet " << packet->str() << "\n Tags: " << endl;
     for (int i = 0; i < packet->getNumTags(); i++)
-        EV_DETAIL << packet->getTag(i)->str() << endl;
-
+        EV_DETAIL << "classname: " << packet->getTag(i)->getClassName() << endl;
 }
 
 
@@ -584,8 +637,8 @@ void Rpl::deletePrefParent(bool poisoned)
     }
 
     auto prefParentAddr = preferredParent->getSrcAddress();
-    EV_DETAIL << "Preferred parent " << prefParentAddr << " unreachability detected "
-            << boolStr(poisoned, "through poisoning", "") << endl;
+    EV_DETAIL << "Preferred parent " << prefParentAddr
+            << boolStr(poisoned, " detachment", " unreachability") << "detected" << endl;
     emit(parentUnreachableSignal, preferredParent);
     routingTable->deleteDefaultRoutes(interfaceEntryPtr->getInterfaceId());
     EV_DETAIL << "Deleted default route through unreachable preferred parent " << endl;
