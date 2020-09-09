@@ -50,6 +50,7 @@ precompiled_*.h.*
 *.pdf
 !doc/*presentation.pdf
 !doc/*.pdf
+!doc/**/*.html
 *.ilg
 *.ind
 *.synctex.gz
