@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['ocp_475',['Ocp',['../namespaceinet.html#af7057eca4ffe384b78820662618a7e00',1,'inet']]]
+  ['trickle_5fevents_304',['TRICKLE_EVENTS',['../namespaceinet.html#a47992335ddd76f127770f695519228da',1,'inet']]]
 ];

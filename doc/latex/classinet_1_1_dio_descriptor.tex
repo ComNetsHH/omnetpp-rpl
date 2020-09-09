@@ -55,10 +55,11 @@ enum \mbox{\hyperlink{classinet_1_1_dio_descriptor_a8268b03522f1335968fe05168e1b
 \mbox{\hyperlink{classinet_1_1_dio_descriptor_a8268b03522f1335968fe05168e1b0d06a5bbf09cc93ad7c64e17f7f140a68d379}{F\+I\+E\+L\+D\+\_\+grounded}}, 
 \newline
 \mbox{\hyperlink{classinet_1_1_dio_descriptor_a8268b03522f1335968fe05168e1b0d06adcc99d809a379fb68b234842eee3b0ba}{F\+I\+E\+L\+D\+\_\+dtsn}}, 
+\mbox{\hyperlink{classinet_1_1_dio_descriptor_a8268b03522f1335968fe05168e1b0d06adf2500cb4d11750ce5053f85f5c6b221}{F\+I\+E\+L\+D\+\_\+dio\+Id}}, 
 \mbox{\hyperlink{classinet_1_1_dio_descriptor_a8268b03522f1335968fe05168e1b0d06aff55a0babc6d73c131c3c29d69975b34}{F\+I\+E\+L\+D\+\_\+min\+Interval}}, 
 \mbox{\hyperlink{classinet_1_1_dio_descriptor_a8268b03522f1335968fe05168e1b0d06a3cf565418feb4feaa00253ba06dff546}{F\+I\+E\+L\+D\+\_\+dio\+Redundancy\+Const}}, 
-\mbox{\hyperlink{classinet_1_1_dio_descriptor_a8268b03522f1335968fe05168e1b0d06a79a624bbe46be41ded518fec2971ac0e}{F\+I\+E\+L\+D\+\_\+dio\+Num\+Doublings}}, 
 \newline
+\mbox{\hyperlink{classinet_1_1_dio_descriptor_a8268b03522f1335968fe05168e1b0d06a79a624bbe46be41ded518fec2971ac0e}{F\+I\+E\+L\+D\+\_\+dio\+Num\+Doublings}}, 
 \mbox{\hyperlink{classinet_1_1_dio_descriptor_a8268b03522f1335968fe05168e1b0d06a889772a326242cc019186ee37c51dd4f}{F\+I\+E\+L\+D\+\_\+ocp}}
  \}
 \end{DoxyCompactItemize}
@@ -67,6 +68,13 @@ enum \mbox{\hyperlink{classinet_1_1_dio_descriptor_a8268b03522f1335968fe05168e1b
 \item 
 const char $\ast$$\ast$ \mbox{\hyperlink{classinet_1_1_dio_descriptor_a48627d0e04116a238b46956a15c0f0c1}{propertynames}}
 \end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line 1076 of file Rpl\+\_\+m.\+cc.
+
 
 
 \doxysubsection{Member Enumeration Documentation}
@@ -97,6 +105,10 @@ F\+I\+E\+L\+D\+\_\+grounded&\\
 F\+I\+E\+L\+D\+\_\+dtsn&\\
 \hline
 
+\raisebox{\heightof{T}}[0pt][0pt]{\index{FIELD\_dioId@{FIELD\_dioId}!inet::DioDescriptor@{inet::DioDescriptor}}\index{inet::DioDescriptor@{inet::DioDescriptor}!FIELD\_dioId@{FIELD\_dioId}}}\mbox{\Hypertarget{classinet_1_1_dio_descriptor_a8268b03522f1335968fe05168e1b0d06adf2500cb4d11750ce5053f85f5c6b221}\label{classinet_1_1_dio_descriptor_a8268b03522f1335968fe05168e1b0d06adf2500cb4d11750ce5053f85f5c6b221}} 
+F\+I\+E\+L\+D\+\_\+dio\+Id&\\
+\hline
+
 \raisebox{\heightof{T}}[0pt][0pt]{\index{FIELD\_minInterval@{FIELD\_minInterval}!inet::DioDescriptor@{inet::DioDescriptor}}\index{inet::DioDescriptor@{inet::DioDescriptor}!FIELD\_minInterval@{FIELD\_minInterval}}}\mbox{\Hypertarget{classinet_1_1_dio_descriptor_a8268b03522f1335968fe05168e1b0d06aff55a0babc6d73c131c3c29d69975b34}\label{classinet_1_1_dio_descriptor_a8268b03522f1335968fe05168e1b0d06aff55a0babc6d73c131c3c29d69975b34}} 
 F\+I\+E\+L\+D\+\_\+min\+Interval&\\
 \hline
@@ -116,6 +128,10 @@ F\+I\+E\+L\+D\+\_\+ocp&\\
 \end{DoxyEnumFields}
 
 
+Definition at line 1080 of file Rpl\+\_\+m.\+cc.
+
+
+
 \doxysubsection{Constructor \& Destructor Documentation}
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_a5bc2bc628b660ef890d3b245cd5e5c37}\label{classinet_1_1_dio_descriptor_a5bc2bc628b660ef890d3b245cd5e5c37}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!DioDescriptor@{DioDescriptor}}
@@ -131,6 +147,10 @@ F\+I\+E\+L\+D\+\_\+ocp&\\
 
 
 
+Definition at line 1123 of file Rpl\+\_\+m.\+cc.
+
+
+
 \doxysubsection{Member Function Documentation}
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_a71db1edde61b515d1f276f0c48ead5c9}\label{classinet_1_1_dio_descriptor_a71db1edde61b515d1f276f0c48ead5c9}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!doesSupport@{doesSupport}}
@@ -138,11 +158,19 @@ F\+I\+E\+L\+D\+\_\+ocp&\\
 \doxysubsubsection{\texorpdfstring{doesSupport()}{doesSupport()}}
 {\footnotesize\ttfamily bool inet\+::\+Dio\+Descriptor\+::does\+Support (\begin{DoxyParamCaption}\item[{omnetpp\+::c\+Object $\ast$}]{obj }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
 
+
+
+Definition at line 1128 of file Rpl\+\_\+m.\+cc.
+
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_a1337aa31cab69e3f5a57c444fb85f867}\label{classinet_1_1_dio_descriptor_a1337aa31cab69e3f5a57c444fb85f867}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!findField@{findField}}
 \index{findField@{findField}!inet::DioDescriptor@{inet::DioDescriptor}}
 \doxysubsubsection{\texorpdfstring{findField()}{findField()}}
 {\footnotesize\ttfamily int inet\+::\+Dio\+Descriptor\+::find\+Field (\begin{DoxyParamCaption}\item[{const char $\ast$}]{field\+Name }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1202 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_a6db82e736427acf42557c82cfd4b5cd8}\label{classinet_1_1_dio_descriptor_a6db82e736427acf42557c82cfd4b5cd8}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!getFieldArraySize@{getFieldArraySize}}
@@ -150,11 +178,19 @@ F\+I\+E\+L\+D\+\_\+ocp&\\
 \doxysubsubsection{\texorpdfstring{getFieldArraySize()}{getFieldArraySize()}}
 {\footnotesize\ttfamily int inet\+::\+Dio\+Descriptor\+::get\+Field\+Array\+Size (\begin{DoxyParamCaption}\item[{void $\ast$}]{object,  }\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
 
+
+
+Definition at line 1275 of file Rpl\+\_\+m.\+cc.
+
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_ac37ddc56bbacbccd52407be9cf2d0421}\label{classinet_1_1_dio_descriptor_ac37ddc56bbacbccd52407be9cf2d0421}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!getFieldCount@{getFieldCount}}
 \index{getFieldCount@{getFieldCount}!inet::DioDescriptor@{inet::DioDescriptor}}
 \doxysubsubsection{\texorpdfstring{getFieldCount()}{getFieldCount()}}
 {\footnotesize\ttfamily int inet\+::\+Dio\+Descriptor\+::get\+Field\+Count (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1150 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_a4b71b70e3042c609c9f92b9fd299f553}\label{classinet_1_1_dio_descriptor_a4b71b70e3042c609c9f92b9fd299f553}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!getFieldDynamicTypeString@{getFieldDynamicTypeString}}
@@ -162,11 +198,19 @@ F\+I\+E\+L\+D\+\_\+ocp&\\
 \doxysubsubsection{\texorpdfstring{getFieldDynamicTypeString()}{getFieldDynamicTypeString()}}
 {\footnotesize\ttfamily const char $\ast$ inet\+::\+Dio\+Descriptor\+::get\+Field\+Dynamic\+Type\+String (\begin{DoxyParamCaption}\item[{void $\ast$}]{object,  }\item[{int}]{field,  }\item[{int}]{i }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
 
+
+
+Definition at line 1289 of file Rpl\+\_\+m.\+cc.
+
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_a6586b22215cdb9b86e022e7d8a47d22b}\label{classinet_1_1_dio_descriptor_a6586b22215cdb9b86e022e7d8a47d22b}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!getFieldName@{getFieldName}}
 \index{getFieldName@{getFieldName}!inet::DioDescriptor@{inet::DioDescriptor}}
 \doxysubsubsection{\texorpdfstring{getFieldName()}{getFieldName()}}
 {\footnotesize\ttfamily const char $\ast$ inet\+::\+Dio\+Descriptor\+::get\+Field\+Name (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1179 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_a11d40b2f3efadf08a7bd644183aa09fa}\label{classinet_1_1_dio_descriptor_a11d40b2f3efadf08a7bd644183aa09fa}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!getFieldProperty@{getFieldProperty}}
@@ -174,11 +218,19 @@ F\+I\+E\+L\+D\+\_\+ocp&\\
 \doxysubsubsection{\texorpdfstring{getFieldProperty()}{getFieldProperty()}}
 {\footnotesize\ttfamily const char $\ast$ inet\+::\+Dio\+Descriptor\+::get\+Field\+Property (\begin{DoxyParamCaption}\item[{int}]{field,  }\item[{const char $\ast$}]{propertyname }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
 
+
+
+Definition at line 1259 of file Rpl\+\_\+m.\+cc.
+
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_aa6fed74fa6ca9e6d5d7bc65068f64ab9}\label{classinet_1_1_dio_descriptor_aa6fed74fa6ca9e6d5d7bc65068f64ab9}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!getFieldPropertyNames@{getFieldPropertyNames}}
 \index{getFieldPropertyNames@{getFieldPropertyNames}!inet::DioDescriptor@{inet::DioDescriptor}}
 \doxysubsubsection{\texorpdfstring{getFieldPropertyNames()}{getFieldPropertyNames()}}
 {\footnotesize\ttfamily const char $\ast$$\ast$ inet\+::\+Dio\+Descriptor\+::get\+Field\+Property\+Names (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1242 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_ad007c4103ac01cdff42a1bcd56c08aa6}\label{classinet_1_1_dio_descriptor_ad007c4103ac01cdff42a1bcd56c08aa6}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!getFieldStructName@{getFieldStructName}}
@@ -186,11 +238,19 @@ F\+I\+E\+L\+D\+\_\+ocp&\\
 \doxysubsubsection{\texorpdfstring{getFieldStructName()}{getFieldStructName()}}
 {\footnotesize\ttfamily const char $\ast$ inet\+::\+Dio\+Descriptor\+::get\+Field\+Struct\+Name (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
 
+
+
+Definition at line 1351 of file Rpl\+\_\+m.\+cc.
+
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_a3df7c5d6a9ca3021924a484e08b01ede}\label{classinet_1_1_dio_descriptor_a3df7c5d6a9ca3021924a484e08b01ede}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!getFieldStructValuePointer@{getFieldStructValuePointer}}
 \index{getFieldStructValuePointer@{getFieldStructValuePointer}!inet::DioDescriptor@{inet::DioDescriptor}}
 \doxysubsubsection{\texorpdfstring{getFieldStructValuePointer()}{getFieldStructValuePointer()}}
 {\footnotesize\ttfamily void $\ast$ inet\+::\+Dio\+Descriptor\+::get\+Field\+Struct\+Value\+Pointer (\begin{DoxyParamCaption}\item[{void $\ast$}]{object,  }\item[{int}]{field,  }\item[{int}]{i }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1364 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_adbcf500c0f877eceb5f426aeef3e6e76}\label{classinet_1_1_dio_descriptor_adbcf500c0f877eceb5f426aeef3e6e76}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!getFieldTypeFlags@{getFieldTypeFlags}}
@@ -198,11 +258,19 @@ F\+I\+E\+L\+D\+\_\+ocp&\\
 \doxysubsubsection{\texorpdfstring{getFieldTypeFlags()}{getFieldTypeFlags()}}
 {\footnotesize\ttfamily unsigned int inet\+::\+Dio\+Descriptor\+::get\+Field\+Type\+Flags (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
 
+
+
+Definition at line 1156 of file Rpl\+\_\+m.\+cc.
+
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_a5245dae541103ca7461608bfe795c8ad}\label{classinet_1_1_dio_descriptor_a5245dae541103ca7461608bfe795c8ad}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!getFieldTypeString@{getFieldTypeString}}
 \index{getFieldTypeString@{getFieldTypeString}!inet::DioDescriptor@{inet::DioDescriptor}}
 \doxysubsubsection{\texorpdfstring{getFieldTypeString()}{getFieldTypeString()}}
 {\footnotesize\ttfamily const char $\ast$ inet\+::\+Dio\+Descriptor\+::get\+Field\+Type\+String (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1219 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_a405b0354b458b015e86a0923ca8b01cb}\label{classinet_1_1_dio_descriptor_a405b0354b458b015e86a0923ca8b01cb}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!getFieldValueAsString@{getFieldValueAsString}}
@@ -210,17 +278,29 @@ F\+I\+E\+L\+D\+\_\+ocp&\\
 \doxysubsubsection{\texorpdfstring{getFieldValueAsString()}{getFieldValueAsString()}}
 {\footnotesize\ttfamily std\+::string inet\+::\+Dio\+Descriptor\+::get\+Field\+Value\+As\+String (\begin{DoxyParamCaption}\item[{void $\ast$}]{object,  }\item[{int}]{field,  }\item[{int}]{i }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
 
+
+
+Definition at line 1303 of file Rpl\+\_\+m.\+cc.
+
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_aaa30cba825b3980f96ed9b3252a50228}\label{classinet_1_1_dio_descriptor_aaa30cba825b3980f96ed9b3252a50228}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!getProperty@{getProperty}}
 \index{getProperty@{getProperty}!inet::DioDescriptor@{inet::DioDescriptor}}
 \doxysubsubsection{\texorpdfstring{getProperty()}{getProperty()}}
 {\footnotesize\ttfamily const char $\ast$ inet\+::\+Dio\+Descriptor\+::get\+Property (\begin{DoxyParamCaption}\item[{const char $\ast$}]{propertyname }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
 
+
+
+Definition at line 1144 of file Rpl\+\_\+m.\+cc.
+
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_a45c11a66c16e379de153bc95b77181c7}\label{classinet_1_1_dio_descriptor_a45c11a66c16e379de153bc95b77181c7}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!getPropertyNames@{getPropertyNames}}
 \index{getPropertyNames@{getPropertyNames}!inet::DioDescriptor@{inet::DioDescriptor}}
 \doxysubsubsection{\texorpdfstring{getPropertyNames()}{getPropertyNames()}}
 {\footnotesize\ttfamily const char $\ast$$\ast$ inet\+::\+Dio\+Descriptor\+::get\+Property\+Names (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1133 of file Rpl\+\_\+m.\+cc.
 
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_a259e30ef4fd9817e282a5c620d0118cc}\label{classinet_1_1_dio_descriptor_a259e30ef4fd9817e282a5c620d0118cc}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!setFieldValueAsString@{setFieldValueAsString}}
@@ -230,12 +310,20 @@ F\+I\+E\+L\+D\+\_\+ocp&\\
 
 
 
+Definition at line 1327 of file Rpl\+\_\+m.\+cc.
+
+
+
 \doxysubsection{Member Data Documentation}
 \mbox{\Hypertarget{classinet_1_1_dio_descriptor_a48627d0e04116a238b46956a15c0f0c1}\label{classinet_1_1_dio_descriptor_a48627d0e04116a238b46956a15c0f0c1}} 
 \index{inet::DioDescriptor@{inet::DioDescriptor}!propertynames@{propertynames}}
 \index{propertynames@{propertynames}!inet::DioDescriptor@{inet::DioDescriptor}}
 \doxysubsubsection{\texorpdfstring{propertynames}{propertynames}}
 {\footnotesize\ttfamily const char$\ast$$\ast$ inet\+::\+Dio\+Descriptor\+::propertynames\hspace{0.3cm}{\ttfamily [mutable]}, {\ttfamily [private]}}
+
+
+
+Definition at line 1079 of file Rpl\+\_\+m.\+cc.
 
 
 

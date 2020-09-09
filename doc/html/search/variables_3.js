@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['grounded_441',['grounded',['../classinet_1_1_dio.html#a5679e6ff30527637b3e43d6b48a0df58',1,'inet::Dio']]]
+  ['expirationtime_274',['expirationTime',['../classinet_1_1_rpl_route_data.html#ae99ff0e09ae332898af2c66c718415ba',1,'inet::RplRouteData']]]
 ];

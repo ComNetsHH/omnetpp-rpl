@@ -62,19 +62,40 @@ class TrickleTimer : public cSimpleModule
     TrickleTimer();
     ~TrickleTimer();
 
-    // lifecycle
+    /** Lifecycle **/
     void start() { start(false); };
     void start(bool warmupDelay);
     virtual void reset();
     virtual void stop();
     virtual void suspend();
 
+    /**
+     * Increment counter of control messages heard during current interval [RFC 6550, 8.3]
+     * based on the external routing module events.
+     */
     void ctrlMsgReceived() { ctrlMsgReceivedCtn++; }
+
+    /**
+     * Check if number of control messages heard in current interval is not
+     * greater than the threshold 'redundancy constant' [RFC 6206]
+     *
+     * @return true if control messages heard less than the redundancy const
+     * false otherwise
+     */
     bool checkRedundancyConst();
+
+    /**
+     * Schedule next trickle trigger event, causing transmission/broadcast of control message
+     * from routing module
+     */
     void scheduleNext();
+
+    /**
+     * Double current interval if no inconsistencies detected
+     */
     void updateInterval();
 
-    // Messsage processing
+    /** Messsage processing */
     void handleMessage(cMessage *message);
     void processSelfMessage(cMessage *message);
     void handleMessageWhenUp(cMessage *message);

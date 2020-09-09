@@ -38,6 +38,7 @@ enum RplPacketCode {
     DIO = 1;
     DAO = 2;
     DAO_ACK = 3;
+    // for manual testing purposes, to be removed
     PING = 4;
     PING_ACK = 5;
 };
@@ -67,7 +68,7 @@ class RplPacket extends FieldsChunk {
     Ipv6Address dodagId;            // IPv6 address of the DODAG root
 }
 
-// DODAG Information Option
+// DODAG Information Option [RFC 6550, 6.3]
 class Dio extends RplPacket {
     // DODAG version number, may be incremented by the root to trigger topology refresh 
     uint8_t dodagVersion;       	
@@ -88,7 +89,7 @@ class Dio extends RplPacket {
 }
 
 
-// Destination Advertisement Object
+// Destination Advertisement Object [RFC 6550, 6.4] 
 class Dao extends RplPacket {
     uint8_t daoSeqNum;			// ID for each unique DAO sent by a node
     bool daoAckRequired;		// indicates whether DAO-ACK is expected by the sender 
@@ -101,7 +102,7 @@ class Dis extends RplPacket {
 
 }
 
-// RPL Information Packet header according to RFC 6550 11.2
+// RPL Information Packet header [RFC 6550 11.2]
 class RplPacketInfo extends RplPacket {
     bool down;
     bool rankError;

@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['objectivefunction_457',['objectiveFunction',['../classinet_1_1_rpl.html#aceb86be400cc2b6f0ac596f4e29e87f2',1,'inet::Rpl']]],
-  ['objectivefunctiontype_458',['objectiveFunctionType',['../classinet_1_1_rpl.html#a549831c064dfde3d78bc6b44da748d43',1,'inet::Rpl']]],
-  ['ocp_459',['ocp',['../classinet_1_1_dio.html#aaac60cf85674c07a8f3b76d0ca759190',1,'inet::Dio']]]
+  ['networkprotocol_285',['networkProtocol',['../classinet_1_1_rpl.html#a9a3a41f6bd53a8b92fccbc4d353ca47a',1,'inet::Rpl']]],
+  ['numdoublings_286',['numDoublings',['../classinet_1_1_trickle_timer.html#ae2ba8f9a6686cc57a81c17f89027bca0',1,'inet::TrickleTimer']]]
 ];

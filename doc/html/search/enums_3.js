@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['rplpacketcode_487',['RplPacketCode',['../namespaceinet.html#aeccc687bfd4a9c672ccab097bc03aa68',1,'inet']]]
+  ['trickle_5fevents_589',['TRICKLE_EVENTS',['../namespaceinet.html#a47992335ddd76f127770f695519228da',1,'inet']]]
 ];

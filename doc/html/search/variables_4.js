@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['hoplimit_442',['hopLimit',['../classinet_1_1_rpl_packet.html#a9255b0d39d023dbbceec1473dce3df31',1,'inet::RplPacket']]],
-  ['host_443',['host',['../classinet_1_1_rpl.html#a70ac33cc4623af823e9f5b42c3706ebf',1,'inet::Rpl']]]
+  ['floating_275',['floating',['../classinet_1_1_rpl.html#abdb7853efb13f9f4eb192a4035206182',1,'inet::Rpl']]]
 ];

@@ -19,6 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <queue>
 #include "inet/common/INETMath.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
@@ -42,15 +43,20 @@ Define_Module(Rpl);
 // TODO: Store DODAG-related info in a dedicated cObject entity to
 // be able to monitor it's fields in the simulation
 
-// TODO: Figure out 'false positives' link-break signals triggered
-// through lost NeighborAdvertisement Packets
+// TODO: Figure out 'false positives' root cause, triggering link-break signals
+// on lost NeighborAdvertisement (NA) packets
 
-// TODO: Replace plain pointers with shared pointers for proper garbage collection
+// TODO: Replace plain pointers with shared pointers where possible for
+// proper garbage collection
+
+// TODO: Replace preferredParent with it's address (initialized to UNSPECIFIED_ADDRESS by default)
+// to avoid nullptr dereferencing possibility in many places
+
+// TODO: Source-routing headers
 
 Rpl::Rpl() :
     isRoot(false),
-    detachedTimeout(2),
-    dioIdCtn(0),
+    detachedTimeout(2), // manual suppressing previous DODAG info [RFC 6550, 8.2.2.1]
     prefixLength(112),
     objectiveFunctionType("hopCount"),
     daoDelay(DEFAULT_DAO_DELAY),
@@ -132,10 +138,6 @@ void Rpl::stop()
     cancelAndDelete(detachedTimeoutEvent);
 }
 
-//
-// Handling messages
-//
-
 void Rpl::handleMessageWhenUp(cMessage *message)
 {
     if (message->isSelfMessage())
@@ -158,10 +160,9 @@ void Rpl::processSelfMessage(cMessage *message)
 
 void Rpl::detachFromDodag() {
     /**
-     * If node's parent set turns empty, node is no longer associated
-     * with the DODAG and suppresses former DODAG data by
-     * clearing dodagId, instanceId, parent sets, setting it's rank to INF etc.
-     * see RFC6560, 8.2.2.1.
+     * If node's parent set is emptied, node is no longer associated
+     * with a DODAG and suppresses previous RPL state by
+     * clearing dodagId, parent sets, setting it's rank to INFINITE_RANK [RFC6560, 8.2.2.1]
      */
     EV_DETAIL << "Candidate parent list empty, leaving DODAG" << endl;
     backupParents.erase(backupParents.begin(), backupParents.end());
@@ -230,14 +231,14 @@ void Rpl::processTrickleTimerMsg(cMessage *message)
 {
     /**
      * Process signal from trickle timer module,
-     * indicating DIO broadcast event, see RFC6560, 8.3
+     * indicating DIO broadcast event [RFC6560, 8.3]
      */
     EV_DETAIL << "Processing msg from trickle timer" << endl;
     switch (message->getKind()) {
         case TRICKLE_TRIGGER_EVENT: {
             /**
              * Broadcast DIO only if number of DIOs heard
-             * from other nodes <= redundancyConstant (k), see RFC6206, 4.2
+             * from other nodes <= redundancyConstant (k) [RFC6206, 4.2]
              */
             if (trickleTimer->checkRedundancyConst()) {
                 EV_DETAIL << "Redundancy OK, broadcasting DIO" << endl;
@@ -254,17 +255,10 @@ void Rpl::processTrickleTimerMsg(cMessage *message)
 void Rpl::processPacket(Packet *packet)
 {
     if (floating) {
-        EV_DETAIL << "Not processing packet " << packet << "\n due to floating state" << endl;
+        EV_DETAIL << "Not processing packet " << packet
+                << "\n due to floating (detached) state" << endl;
         delete packet;
         return;
-    }
-
-    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
-    auto dispatchProtocol = packet->findTag<DispatchProtocolReq>();
-    auto protocol = packetProtocolTag->getProtocol();
-    if (verbose) {
-        EV_DETAIL << "Received packet dispatch protocol - " << dispatchProtocol->str() << endl;
-        EV_DETAIL << "Received packet protocol - " << protocol->str() << endl;
     }
     auto rplHeader = packet->popAtFront<RplHeader>();
     auto rplBody = packet->peekData<RplPacket>();
@@ -333,13 +327,11 @@ const Ptr<Dio> Rpl::createDio()
     dio->setStoring(storing);
     dio->setRank(rank);
     dio->setDtsn(dtsn);
-    dio->setDioId(dioIdCtn++);
-    EV_DETAIL << "dioIdCtn = " << (int)dioIdCtn << endl;
     dio->setDodagVersion(dodagVersion);
     dio->setDodagId(isRoot ? getSelfAddress() : dodagId);
     dio->setSrcAddress(getSelfAddress());
     EV_DETAIL << "DIO created advertising DODAG - " << dio->getDodagId()
-            << " and rank " << dio->getRank() << "; id = " << (int)dio->getDioId() << endl;
+            << " and rank " << dio->getRank() << endl;
     return dio;
 }
 
@@ -375,8 +367,9 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
             trickleTimer->start();
     } else {
         /**
-         * Immediately check if INF_RANK is advertised, and the advertising node is a preferred parent,
-         * in case 'poisoning' detected, delete preferred parent and remove it from candidate neighbors
+         * Immediately check if INFINITE_RANK is advertised, and the advertising
+         * node is a preferred parent, in case 'poisoning' detected, delete
+         * preferred parent and remove it from candidate neighbors
          */
         if (checkPoisonedParent(dio)) {
             EV_DETAIL << "Received poisoned DIO from preferred parent - "
@@ -395,7 +388,7 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
     /**
      * If dodagVersion has been incremented by the root, join newer DODAG
      * by emptying neighbor sets (candidate and backup parents) and start
-     * forwarding updated DODAG information via DIOs, see RFC6560, 8.2.2.1.
+     * forwarding updated DODAG information via DIOs [RFC6560, 8.2.2.1].
      */
     if (dio->getDodagVersion() > dodagVersion) {
         EV_DETAIL << "Newer DODAG version discovered, joining and clearing former parent sets" << endl;
@@ -406,7 +399,7 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
         EV_DETAIL << "Outdated DODAG version advertised, discarding DIO" << endl;
     /**
      * If Destination Advertisement Trigger Sequence Number has been incremented by parent
-     * update node's own DTSN and unicast DAO to refresh downward routes
+     * update node's own DTSN and unicast DAO to refresh downward routes.
      */
     if (dio->getDtsn() > dtsn) {
         EV_DETAIL << "DTSN incremented, unicast DAO scheduled" << endl;
@@ -422,13 +415,6 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
 }
 
 bool Rpl::checkPoisonedParent(const Ptr<const Dio>& dio) {
-//    if (preferredParent) {
-//        EV_DETAIL << "Checking if poisoned DIO is received: (id = " << (int)dio->getDioId() << ")" << endl;
-//        EV_DETAIL << "Rank advertised - " << dio->getRank() << endl;
-//        EV_DETAIL << "Sender - " << dio->getSrcAddress()
-//                    << "; pref. parent - " << preferredParent->getSrcAddress() << endl;
-//    }
-
     return preferredParent && dio->getRank() == INF_RANK
             && matchesSuffix(preferredParent->getSrcAddress(), dio->getSrcAddress());
 }
@@ -444,8 +430,7 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
 
     /**
      * If a node is root or operates in storing mode
-     * update routing table with destinations from DAO
-     * see RFC6560, 3.3.
+     * update routing table with destinations from DAO [RFC6560, 3.3].
      */
     if (storing || isRoot) {
         if (!checkDestKnown(daoSender, advertisedDest)) {
@@ -455,8 +440,7 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
         }
     }
     /**
-     * Forward DAO 'upwards' via preferred parent to advertise destination to the root,
-     * see RFC6560, 6.4.
+     * Forward DAO 'upwards' via preferred parent advertising destination to the root [RFC6560, 6.4]
      */
     if (!isRoot && preferredParent && !matchesSuffix(daoSender, preferredParent->getSrcAddress())) {
         sendRplPacket(createDao(advertisedDest), DAO,
@@ -501,7 +485,7 @@ void Rpl::updatePreferredParent()
 
     auto newPrefParentAddr = newPrefParent->getSrcAddress();
     /**
-     * If a better preferred parent has been discovered (based on the objective function),
+     * If a better preferred parent has been discovered (based on objective function's metric),
      * update default route to DODAG sink with the new nextHop
      */
     if (checkPrefParentChanged(newPrefParentAddr)) {
@@ -510,7 +494,7 @@ void Rpl::updatePreferredParent()
         EV_DETAIL << "Updated preferred parent to - " << newPrefParentAddr << endl;
         /**
          * Reset trickle timer due to inconsistency (preferred parent changed) detected, thus
-         * maintaining higher topology reactivity and convergence rate, see RFC6560, 8.3.
+         * maintaining higher topology reactivity and convergence rate [RFC6560, 8.3]
          */
         trickleTimer->reset();
         if (daoEnabled) {
@@ -572,59 +556,156 @@ void Rpl::updateRoutingTable(const Ipv6Address &nextHop) {
     updateRoutingTable(nextHop, dodagId, nullptr);
 }
 
+void Rpl::appendRplPacketInfo(Packet *datagram) {
+    auto rpi = makeShared<RplPacketInfo>();
+    rpi->setChunkLength(B(4));
+    rpi->setDown(isRoot || packetTravelsDown(datagram));
+    rpi->setRankError(false);
+    rpi->setFwdError(false);
+    rpi->setInstanceId(instanceId);
+    rpi->setSenderRank(rank);
+    datagram->insertAtBack(rpi);
+    EV_INFO << "Appended RPL Packet Information: \n" << printHeader(rpi.get())
+            << "\n to UDP datagram: " << datagram << endl;
+}
 
-
-INetfilter::IHook::Result Rpl::appendRpiHeader(Packet *datagram) {
-    EV_INFO << "Checking RPL Packet Information for outgoing packet " << datagram << endl;
-    const auto& networkHeader = findNetworkProtocolHeader(datagram);
-    if (networkHeader != nullptr) {
-        const Ipv6Address& srcAddress = networkHeader->getSourceAddress().toIpv6();
-        EV_DETAIL << " originator: " << srcAddress << endl;
+bool Rpl::packetTravelsDown(Packet *datagram) {
+    auto dest = findNetworkProtocolHeader(datagram)->getDestinationAddress().toIpv6();
+    EV_DETAIL << "Determining packet forwarding direction:\n destination - " << dest << endl;
+    auto ri = routingTable->doLongestPrefixMatch(dest);
+    if (ri == nullptr) {
+        auto errorMsg = std::string("Error while determining packet forwarding direction"
+                + std::string(", couldn't find route to ") + dest.str());
+        throw cRuntimeError(errorMsg.c_str());
     }
 
+    EV_DETAIL << " next hop - " << ri->getNextHop() << endl;
+    bool res = srcRoutingHeaderPresent(datagram)
+                    || !(ri->getNextHop().matches(preferredParent->getSrcAddress(), prefixLength));
+    EV_DETAIL << " Packet travels " << boolStr(res, "downwards", "upwards");
+    return res;
+}
+
+bool Rpl::srcRoutingHeaderPresent(Packet *datagram) {
+    return srcRoutingHeaderPresent(findNetworkProtocolHeader(datagram)->getDestinationAddress().toIpv6());
+}
+
+bool Rpl::srcRoutingHeaderPresent(const Ipv6Address& dest) {
+    // actual checking for source-routing header mocked out for now,
+    // returning true for any packet traveling downwards in non-storing mode
+    return !storing && !dest.matches(dodagId, prefixLength);
+}
+
+
+INetfilter::IHook::Result Rpl::checkRplPacketInfo(Packet *datagram) {
+    const auto& networkHeader = findNetworkProtocolHeader(datagram);
+    EV_DETAIL << "Packet source address - " << networkHeader->getSourceAddress().toIpv6() << endl;
+    Ipv6Address *dest = new Ipv6Address();
+    if (networkHeader != nullptr)
+        *dest = networkHeader->getDestinationAddress().toIpv6();
     auto datagramName = std::string(datagram->getFullName());
     if (datagramName.find(std::string("Udp")) != std::string::npos) {
+        if (preferredParent == nullptr
+                || dodagId.matches(Ipv6Address::UNSPECIFIED_ADDRESS, prefixLength))
+        {
+            EV_DETAIL << "Not belonging to a dodag, skip RPI header check" << endl;
+            return ACCEPT;
+        }
+        EV_DETAIL << "Checking RPI header for packet " << datagram << endl;
+        RplPacketInfo *rpi;
         try {
-            auto rpiHeader = datagram->peekAtBack<RplHeader>(B(4));
+            rpi = const_cast<RplPacketInfo *> (datagram->popAtBack<RplPacketInfo>(B(4)).get());
         }
         catch (std::exception &e) {
-           EV_WARN << "No RPI header detected for outgoing packet, appending" << endl;
-           auto rpiHeader = makeShared<RplPacketInfo>();
-           rpiHeader->setChunkLength(B(4));
-           datagram->insertAtBack(rpiHeader);
+           EV_WARN << "No RPL Packet Information header found in UDP datagram, appending" << endl;
+           try {
+               appendRplPacketInfo(datagram);
+               return ACCEPT;
+           }
+           catch (...) {
+               return DROP;
+           }
         }
+        // check for rank inconsistencies
+        EV_DETAIL << "Rank error - " << rpi->getRankError() << endl;
+        bool rankInconsistency = checkRankError(rpi);
+        if (rpi->getRankError() && rankInconsistency) {
+            EV_WARN << "Repeated rank error detected for packet "
+                    << datagram << "\n dropping..." << endl;
+            return DROP;
+        }
+        if (rankInconsistency)
+            rpi->setRankError(rankInconsistency);
+        EV_DETAIL << "Rank error after check - " << rpi->getRankError() << endl;
+        /**
+         * If there's a forwarding error, packet should be returned to parent
+         * with 'F' flag set to clear outdated DAO routes if DAO inconsistency detection
+         * is enabled [RFC 6550, 11.2.2.3]
+         */
+        rpi->setFwdError(!isRoot && checkForwardingError(rpi, dest));
+        if (rpi->getFwdError()) {
+            EV_WARN << "Forwarding error detected for packet " << datagram
+                    << "\n destined to " << dest << ", dropping" << endl;
+            return DROP;
+        }
+        // update packet forwarding direction if storing mode is in use
+        // e.g. if unicast P2P packet reaches sub-dodag root with 'O' flag cleared,
+        // and this root can route packet downwards to destination, 'O' flag has to be set.
+        if (storing)
+            rpi->setDown(isRoot || packetTravelsDown(datagram));
+        // try make new shared ptr chunk RPI, to be refactored into reusing existing RPI object
+        auto rpiCopy = makeShared<RplPacketInfo>();
+        rpiCopy->setChunkLength(B(4));
+        rpiCopy->setDown(rpi->getDown());
+        rpiCopy->setRankError(rpi->getRankError());
+        rpiCopy->setFwdError(rpi->getFwdError());
+        rpiCopy->setInstanceId(instanceId);
+        rpiCopy->setSenderRank(rank);
+        datagram->insertAtBack(rpiCopy);
     }
 
     return ACCEPT;
 }
 
-INetfilter::IHook::Result Rpl::checkRpiHeader(Packet *datagram) {
-    EV_INFO << "Checking RPL Packet Information for incoming packet " << datagram << endl;
-    const auto& networkHeader = findNetworkProtocolHeader(datagram);
-    if (networkHeader != nullptr) {
-        const Ipv6Address& srcAddress = networkHeader->getSourceAddress().toIpv6();
-        EV_DETAIL << " originator: " << srcAddress << endl;
-    }
-    auto datagramName = std::string(datagram->getFullName());
-    try {
-        if (datagramName.find(std::string("Udp")) != std::string::npos) {
-            EV_DETAIL << "Received application packet with UDP header" << endl;
-        }
-        auto rpiHeader = datagram->peekAtBack<RplPacketInfo>(B(4));
-        EV_DETAIL << "Got RPI header: " << rpiHeader << endl;
-        // TODO: perform loop-detection test
-    }
-    catch (std::exception &e) {
-       EV_WARN << "Couldn't dissect packet due to error: " << e.what() << endl;
-    }
+bool Rpl::checkRankError(RplPacketInfo *rpi) {
+    auto senderRank = rpi->getSenderRank();
+    EV_DETAIL << "Checking rank consistency: "
+            << "\n direction - " << boolStr(rpi->getDown(), "down", "up")
+            << "\n senderRank - " << senderRank << "; own rank - " << rank << endl;
+    bool res = (!(rpi->getDown()) && (senderRank <= rank))
+                    || (rpi->getDown() && (senderRank >= rank));
+    EV_DETAIL << "Rank consistency check " << boolStr(res, "failed", "passed") << endl;
+    return res;
+}
 
-    return ACCEPT;
+bool Rpl::checkForwardingError(RplPacketInfo *rpi, Ipv6Address *dest) {
+    EV_DETAIL << "Checking forwarding error: \n MOP - "
+            << boolStr(storing, "storing", "non-storing")
+            << "\n dest - " << *dest
+            << "\n direction - " << boolStr(rpi->getDown(), "down", "up") << endl;
+    auto route = routingTable->doLongestPrefixMatch(*dest);
+    if (route == nullptr)
+        EV_DETAIL << "Route for dest - " << *dest << " is nullptr" << endl;
+    auto parentAddr = preferredParent != nullptr ? preferredParent->getSrcAddress() : Ipv6Address::UNSPECIFIED_ADDRESS;
+    bool res = storing && rpi->getDown()
+                    && (route == nullptr || route->getNextHop().matches(parentAddr, prefixLength));
+    EV_DETAIL << "Forwarding " << boolStr(res, "error detected", "OK") << endl;
+    return res;
 }
 
 void Rpl::printTags(Packet *packet) {
     EV_DETAIL << "Packet " << packet->str() << "\n Tags: " << endl;
     for (int i = 0; i < packet->getNumTags(); i++)
         EV_DETAIL << "classname: " << packet->getTag(i)->getClassName() << endl;
+}
+
+std::string Rpl::printHeader(RplPacketInfo *rpi) {
+    std::ostringstream out;
+    out << " direction: " << boolStr(rpi->getDown(), "down", "up")
+        << "\n senderRank:  " << rpi->getSenderRank()
+        << "\n rankError: " << boolStr(rpi->getRankError())
+        << "\n forwardingError: " << boolStr(rpi->getFwdError());
+    return out.str();
 }
 
 
@@ -656,11 +737,17 @@ void Rpl::deletePrefParent(bool poisoned)
     EV_DETAIL << "Erased preferred parent from candidate parent set" << endl;
 }
 
-
-
 //
 // Utility methods
 //
+
+Ipv6Address* Rpl::constructSrcRoutingHeader(const Ipv6Address &dest) {
+    Ipv6Address *addresses;
+    addresses[1] = (routingTable->doLongestPrefixMatch(dest)->getNextHop());
+
+
+    return addresses;
+}
 
 std::string Rpl::boolStr(bool cond, std::string positive, std::string negative) {
     return cond ? positive : negative;
@@ -680,7 +767,7 @@ bool Rpl::checkDestKnown(const Ipv6Address &nextHop, const Ipv6Address &dest) {
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         auto ri = routingTable->getRoute(i);
         if (ri->getDestPrefix() == dest) {
-            EV_DETAIL << "Destination " << ri->getDestPrefix() << " already known, " << endl;
+            EV_DETAIL << "Destination " << ri->getDestPrefix() << " already known, ";
             if (ri->getNextHop() == nextHop) {
                 EV_DETAIL << "reachable via " << ri->getNextHop() << endl;
                 return true;
@@ -718,7 +805,7 @@ void Rpl::addNeighbour(const Ptr<const Dio>& dio)
      * Maintain following sets of link-local nodes:
      *  - backup parents
      *  - candidate parents
-     * where preferred parent is chosen from the candidate parent set, see RFC6560, 8.2.1.
+     * where preferred parent is chosen from the candidate parent set [RFC6560, 8.2.1]
      *
      * In current implementation, neighbor data is represented by most recent
      * DIO packet received from it.

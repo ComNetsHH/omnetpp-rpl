@@ -73,7 +73,6 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     uint16_t rank;
     uint8_t dtsn;
     Dio *preferredParent;
-    Dio *backupParent;
     std::string objectiveFunctionType;
     std::map<Ipv6Address, Dio *> backupParents;
     std::map<Ipv6Address, Dio *> candidateParents;
@@ -90,7 +89,6 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     uint8_t detachedTimeout; // temporary variable to suppress msg processing after just leaving the DODAG
     cMessage *detachedTimeoutEvent; // temporary msg corresponding to triggering above functionality
     uint8_t prefixLength;
-    uint8_t dioIdCtn;
 
 
   public:
@@ -98,20 +96,19 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     ~Rpl();
 
     static std::string boolStr(bool cond, std::string positive, std::string negative);
-    static std::string boolStr(bool cond) { return boolStr(cond, "True", "False"); }
+    static std::string boolStr(bool cond) { return boolStr(cond, "true", "false"); }
 
   protected:
-    // module interface
+    /** module interface */
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     void initialize(int stage) override;
     void handleMessageWhenUp(cMessage *message) override;
 
   private:
-    // handling messages
     void processSelfMessage(cMessage *message);
     void processMessage(cMessage *message);
 
-    /* Handling generic packets */
+    /************ Handling generic packets *************/
 
     /**
      * Send packet via 'ipOut' gate with specified delay
@@ -129,7 +126,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      */
     void processTrickleTimerMsg(cMessage *message);
 
-    /* Handling RPL packets */
+    /************ Handling RPL packets *************/
 
     /**
      * Process DIO packet by inspecting it's source @see checkUnknownDio(),
@@ -161,7 +158,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * Send RPL packet (@see createDao(), createDio(), createDis()) via 'ipOut'
      *
      * @param packet packet object encapsulating control and payload data
-     * @param code icmpv6-based control code used for RPL packets, see Section 6
+     * @param code icmpv6-based control code used for RPL packets, [RFC 6550, 6]
      * @param nextHop next hop for the RPL packet to be sent out to (unicast DAO, broadcast DIO, DIS)
      * @param delay transmission delay before sending packet from outgoing gate
      */
@@ -184,8 +181,6 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      */
     const Ptr<Dao> createDao(const Ipv6Address &reachableDest);
     const Ptr<Dao> createDao() {return createDao(getSelfAddress()); };
-
-
 
     /**
      * Update routing table with new route to destination reachable via next hop
@@ -216,21 +211,22 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     void deletePrefParent(bool poisoned);
 
     /**
-     * Update preferred parent on each DIO reception by invoking
-     * objective function recalculation for candidate neighbors set.
-     * If necessary (@see checkPrefParentChanged()), update routing table @see updateRoutingTable()
-     * and reset trickle timer, see Section 8.3
+     * Update preferred parent based on the current best candidate
+     * determined by the objective function from candidate neighbors
+     * If change in preferred parent detected, restart Trickle timer [RFC 6550, 8.3]
      */
     void updatePreferredParent();
 
-    /* Lifecycle */
+    /************ Lifecycle ****************/
+
     virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
     virtual void handleStopOperation(LifecycleOperation *operation) override { stop(); }
     virtual void handleCrashOperation(LifecycleOperation *operation) override  { stop(); }
     void start();
     void stop();
 
-    /* Utility */
+    /************ Utility *****************/
+
     /**
      * Check whether DIO comes from an uknown DODAG or has different
      * RPL instance id
@@ -243,7 +239,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     /**
      * Get address of the default network interface
      *
-     * @return ipv6 address set by autoconfigurator
+     * @return Ipv6 address set by autoconfigurator
      */
     Ipv6Address getSelfAddress();
 
@@ -271,26 +267,30 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     bool checkDestKnown(const Ipv6Address &nextHop, const Ipv6Address &dest);
 
     /**
-     * Detach from DODAG in case preferred parent has been detected unreachable
-     * and candidate parent set is empty. Suppress (see Section 8.2.2.1) all former DODAG info:
+     * Detach from a DODAG in case preferred parent has been detected unreachable
+     * and candidate parent set is empty. Clear RPL-related state including:
      *  - rank
      *  - dodagId
-     *  - backup parents
-     *  - sub-dodag @see poisonSubDodag()
+     *  - RPL instance
+     *  - neighbor sets
+     * [RFC 6550, 8.2.2.1]
      */
     void detachFromDodag();
 
     /**
-     * Poison node's sub-dodag by advertising rank of INF_RANK to enable them
-     * joining a new DODAG (or updated DODAG version), see Section 8.2.2.5
+     * Poison node's sub-dodag by advertising rank of INF_RANK in case
+     * connection to the DODAG is lost. Child nodes upon hearing this message
+     * remove poisoning node from their parent set [RFC 6550, 8.2.2.5]
      */
     void poisonSubDodag();
+
     /**
      * Check if INF_RANK is advertised in DIO and whether it comes from preferred parent
      */
     bool checkPoisonedParent(const Ptr<const Dio>& dio);
 
     /**
+     * @deprecated
      * Check if IPv6 address suffixes match given the prefix length
      *
      * @param addr1 first address for comparison
@@ -303,19 +303,87 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
         return matchesSuffix(addr1, addr2, prefixLength);
     };
 
+    /**
+     * Print all packet tags' classnames
+     *
+     * @param packet packet to print tags from
+     */
     void printTags(Packet *packet);
 
-    // handlers to insert/check RPL Packet Information header
-    // as part of a loop detection mechanism from RFC6550, 11.2
-    Result appendRpiHeader(Packet *datagram);
-    Result checkRpiHeader(Packet *datagram);
-//
-    // netfilter
-    virtual Result datagramPreRoutingHook(Packet *datagram) override { Enter_Method("datagramPreRoutingHook"); return checkRpiHeader(datagram); }
+    /**
+     * Print detailed info about RPL Packet Information header
+     *
+     * @param rpi RPL Packet Information object
+     * @return string containing packet info
+     */
+    std::string printHeader(RplPacketInfo *rpi);
+
+    /** Loop detection */
+
+    /**
+     * Check if a rank inconsistency happens during packet forwarding
+     * for detailed procedure description [RFC 6550, 11.2.2.2]
+     *
+     * @param rpi RPL Route Infomration header to check for
+     * @return true if ther's mismatched rank relationship, false otherwise
+     */
+    bool checkRankError(RplPacketInfo *rpi);
+
+    /**
+     * Check RPL Packet Information header to spot a forwarding error in storing mode
+     * (packet expected to progress down, but no route found) [RFC 6550, 11.2.2.3]
+     *
+     * @param rpi RPL Route Infomration header to check for
+     * @param dest destination address retrieved from packet IP header
+     * @return true if forwarding error detected, false otherwise
+     */
+    bool checkForwardingError(RplPacketInfo *rpi, Ipv6Address *dest);
+
+    /**
+     * Check if a source-routed hop-by-hop header is present in the datagram
+     *
+     * @param datagram Udp packet to perform a check
+     * @return true if source-routing hop-by-hop header is present
+     */
+    bool srcRoutingHeaderPresent(Packet *datagram);
+    bool srcRoutingHeaderPresent(const Ipv6Address& dest);
+
+    /**
+     * Determine packet forwarding direction - 'up' or 'down'
+     *
+     * @param datagram UDP packet to check for
+     * @return true if packet travels down, false otherwise
+     */
+    bool packetTravelsDown(Packet *datagram);
+
+    /**
+     * Append RPL Packet Information header to outgoing packet,
+     * captured by Netfilter hook
+     *
+     * @param datagram outgoing UDP packet
+     */
+    void appendRplPacketInfo(Packet *datagram);
+
+    /**
+     * Check RPL Packet Information header on rank consistency,
+     * forwarding errors [RFC 6550, 11.2]
+     *
+     * @param datagram packet coming from upper or lower layers catched by Netfilter hook
+     * @return INetfilter interface result specifying further actions with a packet
+     */
+    Result checkRplPacketInfo(Packet *datagram);
+
+    /** Netfilter hooks */
+    // catching incoming packet
+    virtual Result datagramPreRoutingHook(Packet *datagram) override { Enter_Method("datagramPreRoutingHook"); return checkRplPacketInfo(datagram); }
     virtual Result datagramForwardHook(Packet *datagram) override { return ACCEPT; }
     virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
     virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }
-    virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return appendRpiHeader(datagram); }
+    // catching outgoing packet
+    virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return checkRplPacketInfo(datagram); }
+
+    /** Source-routing methods */
+    Ipv6Address* constructSrcRoutingHeader(const Ipv6Address& dest);
 
     /**
      * Handle signals by implementing @see cListener interface to

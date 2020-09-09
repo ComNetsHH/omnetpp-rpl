@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['energy_52',['ENERGY',['../namespaceinet.html#af7057eca4ffe384b78820662618a7e00a77409f1d59ded0a470bbf0336de1b2ca',1,'inet']]],
-  ['etx_53',['ETX',['../namespaceinet.html#af7057eca4ffe384b78820662618a7e00a2ef1c095278eb503cd6c828257292927',1,'inet']]]
+  ['expirationtime_45',['expirationTime',['../classinet_1_1_rpl_route_data.html#ae99ff0e09ae332898af2c66c718415ba',1,'inet::RplRouteData']]]
 ];

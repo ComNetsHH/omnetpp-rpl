@@ -24,14 +24,14 @@
 
 namespace inet {
 
-/** RPL default parameters, see RFC6550, 17 */
+/** RPL params [RFC6550, 17] */
 #define INF_RANK 0xFFFF
 #define ROOT_RANK 1
 #define RPL_DEFAULT_INSTANCE 1
 #define DEFAULT_INIT_DODAG_VERSION 0
 #define DEFAULT_DAO_DELAY 1
 
-/** Trickle timer default parameter values, see RFC6550, 8.3.1 */
+/** Trickle timer params [RFC6550, 8.3.1] */
 #define DEFAULT_DIO_INTERVAL_MIN 0x03
 #define DEFAULT_DIO_REDUNDANCY_CONST 0x03
 #define DEFAULT_DIO_INTERVAL_DOUBLINGS 0x14
@@ -41,11 +41,9 @@ namespace inet {
 
 /** Misc */
 #define DEFAULT_PARENT_LIFETIME 5000
-
 const Ipv6Address LL_RPL_MULTICAST("FF02:0:0:0:0:0:0:1A");
 
-// Trickle timer and internal event types
-enum {
+enum TRICKLE_EVENTS {
     TRICKLE_START,
     TRICKLE_INTERVAL_UPDATE_EVENT,
     TRICKLE_TRIGGER_EVENT,

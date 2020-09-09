@@ -45,15 +45,30 @@ namespace inet {
 class ObjectiveFunction : public cObject
 {
   private:
-    Ocp type;
-    int minHopRankIncrease;
+    Ocp type; /** Objective Function (OF) type as defined in RFC 6551. */
+    int minHopRankIncrease; /** base step of rank increment [RFC 6550, 6.7.6] */
 
   public:
     ObjectiveFunction();
     ObjectiveFunction(std::string type);
     virtual ~ObjectiveFunction();
 
+    /**
+     * Determine node's preferred parent from the candidate neighbor set using
+     * relevant metric (defined by OF type).
+     *
+     * @param candidateParents map of node's neighborhood in form of latest DIO packets
+     * from each neighbor
+     * @return best parent candidate based on the type of objective function in use
+     */
     virtual Dio* getPreferredParent(std::map<Ipv6Address, Dio *> candidateParents);
+    /**
+     * Calculate node's rank based on the chosen preferred parent [RFC 6550, 3.5].
+     *
+     * @param preferredParent node's preferred parent properties (rank, address, ...)
+     * represented by last DIO received from it
+     * @return updated rank based on the minHopRankIncrease and OF
+     */
     virtual uint16_t calcRank(Dio* preferredParent);
 
 };
