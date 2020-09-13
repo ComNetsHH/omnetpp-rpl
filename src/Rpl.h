@@ -62,7 +62,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     TrickleTimer *trickleTimer;
     cModule *host;
 
-    /** RPL configuration, some parameters are adjustable, see NED file */
+    /** RPL configuration parameters and state management */
     uint8_t dodagVersion;
     Ipv6Address dodagId;
     uint8_t instanceId;
@@ -76,6 +76,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     std::string objectiveFunctionType;
     std::map<Ipv6Address, Dio *> backupParents;
     std::map<Ipv6Address, Dio *> candidateParents;
+    std::map<Ipv6Address, Ipv6Address> sourceRoutingTable;
 
     /** Statistics collection */
     simsignal_t dioReceivedSignal;
@@ -254,7 +255,11 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * false otherwise
      */
     bool checkPrefParentChanged(const Ipv6Address &newPrefParentAddr);
-    void printmap(std::map<Ipv6Address, Dio *> neighbours);
+
+    template<typename Map>
+    std::string printMap(const Map& map);
+
+    bool selfGeneratedPkt(Packet *pkt);
 
     /**
      * Check if destination advertised in DAO is already stored in
@@ -337,16 +342,28 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param dest destination address retrieved from packet IP header
      * @return true if forwarding error detected, false otherwise
      */
-    bool checkForwardingError(RplPacketInfo *rpi, Ipv6Address *dest);
+    bool checkForwardingError(RplPacketInfo *rpi, Ipv6Address &dest);
 
     /**
-     * Check if a source-routed hop-by-hop header is present in the datagram
-     *
-     * @param datagram Udp packet to perform a check
-     * @return true if source-routing hop-by-hop header is present
+     * Get default length of Target/Transit option headers
+     * @return predefined default byte value
      */
-    bool srcRoutingHeaderPresent(Packet *datagram);
-    bool srcRoutingHeaderPresent(const Ipv6Address& dest);
+    B getTransitOptionsLength();
+
+    /**
+     * Get default length of Target/Transit option headers
+     *
+     * @return predefined default byte value
+     */
+    B getRpiHeaderLength();
+
+    /**
+     * Used by sink to collect Transit -> Target reachability information
+     * for source-routing purposes [RFC6550, 9.7]
+     *
+     * @param dao
+     */
+    void extractSourceRoutingData(Packet *dao);
 
     /**
      * Determine packet forwarding direction - 'up' or 'down'
@@ -371,19 +388,61 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param datagram packet coming from upper or lower layers catched by Netfilter hook
      * @return INetfilter interface result specifying further actions with a packet
      */
-    Result checkRplPacketInfo(Packet *datagram);
+    Result checkRplHeaders(Packet *datagram);
+
+    /**
+     * Append Target and Transit option headers representing
+     * child->parent relationship, required for source-routing
+     *
+     * @param pkt DAO packet to insert option headers [RFC6550, 6.7.7-6.7.8]
+     */
+    void appendDaoTransitOptions(Packet *pkt);
+
+    /**
+     * Check RPL Packet Information header for loop detection purposes [RFC6550, 11.2]
+     *
+     * @param datagram application data to check RPL headers for
+     * @return
+     */
+    bool checkRplRouteInfo(Packet *datagram);
+    bool isDao(Packet *datagram);
+    bool isUdp(Packet *datagram);
+
+    /**
+     * Check if packet has source-routing header (SRH) present
+     * @param pkt packet to check for
+     * @return true on SRH presence, false otherwise
+     */
+    bool sourceRouted(Packet *pkt);
+    B getDaoFrontOffset();
+    std::string rplIcmpCodeToStr(RplPacketCode code);
+
+    /**
+     * Manually forward application packet to next hop using the
+     * info provided in SRH
+     *
+     * @param datagram
+     */
+    void forwardSourceRoutedPacket(Packet *datagram);
+
+    /**
+     * At sink append SRH for packets going downwards
+     * @param datagram
+     */
+    void appendSrcRoutingHeader(Packet *datagram);
 
     /** Netfilter hooks */
     // catching incoming packet
-    virtual Result datagramPreRoutingHook(Packet *datagram) override { Enter_Method("datagramPreRoutingHook"); return checkRplPacketInfo(datagram); }
+    virtual Result datagramPreRoutingHook(Packet *datagram) override { Enter_Method("datagramPreRoutingHook"); return checkRplHeaders(datagram); }
     virtual Result datagramForwardHook(Packet *datagram) override { return ACCEPT; }
     virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
     virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }
     // catching outgoing packet
-    virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return checkRplPacketInfo(datagram); }
+    virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return checkRplHeaders(datagram); }
 
     /** Source-routing methods */
     Ipv6Address* constructSrcRoutingHeader(const Ipv6Address& dest);
+    B getDaoLength();
 
     /**
      * Handle signals by implementing @see cListener interface to

@@ -51,7 +51,6 @@ module Rpl like IManetRouting
         bool daoEnabled = default(true);
         bool storing = default(false);
         bool poisoning = default(true);
-        bool verbose = default(false);
         bool useBackupAsPreferred = default(false);
         bool unreachabilityDetectionEnabled = default(false);
         string objectiveFunctionType = default("hopCount");	 // hopCount, ETX, energy, ...

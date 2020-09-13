@@ -1,18 +1,14 @@
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-//import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
-import inet.node.xmipv6.WirelessHost6;
 import rpl.RplRouter;
-import rpl.AdhocHost6;
 
 network RplNetwork
 {
     parameters:
         int numNodes;
-        @display("bgb=650,650");
+        @display("bgb=450,650");
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             @display("p=550,50");
@@ -37,7 +33,7 @@ network RplNetwork
             @display("i=device/pocketpc_s;p=83.712,306.072");
         }
         host4: RplRouter {
-            @display("i=device/pocketpc_s;p=222.36,306.072");
+            @display("i=device/pocketpc_s;p=270.36,306.072");
         }
         host5: RplRouter {
             @display("i=device/pocketpc_s;p=222.36,430.332");

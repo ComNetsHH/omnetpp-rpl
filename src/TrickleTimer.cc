@@ -55,7 +55,7 @@ void TrickleTimer::start(bool warmupDelay) {
     EV_INFO << "Trickle timer started" << endl;
     started = true;
     minInterval = DEFAULT_DIO_INTERVAL_MIN;
-    currentInterval = warmupDelay ? minInterval * 4 : minInterval;
+    currentInterval = warmupDelay ? minInterval * 2 : minInterval;
     maxInterval = minInterval * (pow(2, numDoublings));
     ctrlMsgReceivedCtn = 0;
 

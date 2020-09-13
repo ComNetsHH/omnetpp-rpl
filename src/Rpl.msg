@@ -27,6 +27,7 @@ import inet.networklayer.icmpv6.Icmpv6Header;
 
 cplusplus {{
 	#include "RplDefs.h"
+	#include <deque>
 	#include <stdint.h>
 }}
 	
@@ -61,7 +62,6 @@ class RplHeader extends Icmpv6Header {
 }
 
 class RplPacket extends FieldsChunk {
-    int hopLimit;		  
     Ipv6Address destAddress;   		
     Ipv6Address srcAddress;
     uint8_t instanceId;        	  	// RPL instance ID
@@ -109,5 +109,29 @@ class RplPacketInfo extends RplPacket {
     bool fwdError;
     uint16_t senderRank;
 }
+
+
+class RplTargetInfo extends RplPacket {
+    Ipv6Address target;
+    // tbd fields according to 
+}
+
+class RplTransitInfo extends RplPacket {
+    Ipv6Address transit;
+    // tbd fields
+}
+
+
+
+class SourceRoutingHeader extends FieldsChunk {	
+}
+
+cplusplus (SourceRoutingHeader) {{
+    std::deque<Ipv6Address> addresses;
+    
+    std::deque<Ipv6Address> getAddresses() { return this->addresses; }
+    void setAddresses(std::deque<Ipv6Address> hopList) { handleChange(); this->addresses = hopList; }	
+}}
+
 
 
