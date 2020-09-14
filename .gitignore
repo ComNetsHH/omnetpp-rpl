@@ -1,6 +1,6 @@
 # local and generated files not to be committed
-Makefile
-src/Makefile
+**/makefrag
+**/Makefile
 src/Makefile.vc
 *_m.h
 *_m.cc
@@ -29,9 +29,12 @@ precompiled_*.h.*
 /tutorials/*/cache/
 /tutorials/*/data/
 /tutorials/wireless/html/
-/tests/*/work/
-/tests/*/*/work/
-/tests/*/results*/
+/simulations/results
+/test*/*/work/
+/test*/*/*/work/
+/test*/*/results*/
+/test/work
+*.html
 *.log
 *.sim
 *.pyc
@@ -45,12 +48,18 @@ precompiled_*.h.*
 *.idx
 *.toc
 *.pdf
+!doc/*presentation.pdf
+!doc/*.pdf
+!doc/**/*.html
 *.ilg
 *.ind
 *.synctex.gz
 .buildlog*
 
 # ignore binary files
+rpl
+rpl_dbg
+run
 out/
 *.so
 *.dylib

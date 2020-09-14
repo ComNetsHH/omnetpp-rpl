@@ -1,0 +1,294 @@
+\hypertarget{classinet_1_1_dao_descriptor}{}\doxysection{inet\+::Dao\+Descriptor Class Reference}
+\label{classinet_1_1_dao_descriptor}\index{inet::DaoDescriptor@{inet::DaoDescriptor}}
+Inheritance diagram for inet\+::Dao\+Descriptor\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classinet_1_1_dao_descriptor}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classinet_1_1_dao_descriptor_aa80c62b2fb9e0c4c9bd8053379dc3940}{Dao\+Descriptor}} ()
+\item 
+virtual \mbox{\hyperlink{classinet_1_1_dao_descriptor_a7b4ae3991d675b88acd61b0e30f65a5b}{$\sim$\+Dao\+Descriptor}} ()
+\item 
+virtual bool \mbox{\hyperlink{classinet_1_1_dao_descriptor_a01b8f81d5b35ce3d00160fc9ec1b045c}{does\+Support}} (omnetpp\+::c\+Object $\ast$obj) const override
+\item 
+virtual const char $\ast$$\ast$ \mbox{\hyperlink{classinet_1_1_dao_descriptor_ad38f89bff04f61e891efd97e32c3ba30}{get\+Property\+Names}} () const override
+\item 
+virtual const char $\ast$ \mbox{\hyperlink{classinet_1_1_dao_descriptor_ae6a923e7d1ad16e1ce87ed8929ae138f}{get\+Property}} (const char $\ast$propertyname) const override
+\item 
+virtual int \mbox{\hyperlink{classinet_1_1_dao_descriptor_a980c11e0d22aab39b4577026851b5ff9}{get\+Field\+Count}} () const override
+\item 
+virtual const char $\ast$ \mbox{\hyperlink{classinet_1_1_dao_descriptor_ad8558e4863b9eaa1e7cd5dbdc36e3f28}{get\+Field\+Name}} (int field) const override
+\item 
+virtual int \mbox{\hyperlink{classinet_1_1_dao_descriptor_a4df5ee8a9d430927b13b5a671c6a57a0}{find\+Field}} (const char $\ast$field\+Name) const override
+\item 
+virtual unsigned int \mbox{\hyperlink{classinet_1_1_dao_descriptor_a7a80f40a5d0255bf34070cc8baef5b83}{get\+Field\+Type\+Flags}} (int field) const override
+\item 
+virtual const char $\ast$ \mbox{\hyperlink{classinet_1_1_dao_descriptor_aa86f14b733faed8e25759e30e6270809}{get\+Field\+Type\+String}} (int field) const override
+\item 
+virtual const char $\ast$$\ast$ \mbox{\hyperlink{classinet_1_1_dao_descriptor_a15df233a0619a66c185c114343755f97}{get\+Field\+Property\+Names}} (int field) const override
+\item 
+virtual const char $\ast$ \mbox{\hyperlink{classinet_1_1_dao_descriptor_a343ca4dcd8742e39ec1de64a246a7b1c}{get\+Field\+Property}} (int field, const char $\ast$propertyname) const override
+\item 
+virtual int \mbox{\hyperlink{classinet_1_1_dao_descriptor_ae451bae91ff8d44b1c0502ee5611dd73}{get\+Field\+Array\+Size}} (void $\ast$object, int field) const override
+\item 
+virtual const char $\ast$ \mbox{\hyperlink{classinet_1_1_dao_descriptor_a64cc1fa5c7a727ac93b021b65e7bafde}{get\+Field\+Dynamic\+Type\+String}} (void $\ast$object, int field, int i) const override
+\item 
+virtual std\+::string \mbox{\hyperlink{classinet_1_1_dao_descriptor_adbb4ab9bf61928356241019abf8306f7}{get\+Field\+Value\+As\+String}} (void $\ast$object, int field, int i) const override
+\item 
+virtual bool \mbox{\hyperlink{classinet_1_1_dao_descriptor_a490dea8d468512e15ebed122a75d7509}{set\+Field\+Value\+As\+String}} (void $\ast$object, int field, int i, const char $\ast$value) const override
+\item 
+virtual const char $\ast$ \mbox{\hyperlink{classinet_1_1_dao_descriptor_ac7e29c6cea45285500aad09a1ac2ff28}{get\+Field\+Struct\+Name}} (int field) const override
+\item 
+virtual void $\ast$ \mbox{\hyperlink{classinet_1_1_dao_descriptor_a0dbe2fcdbf249a5f1299e62d395e6f8b}{get\+Field\+Struct\+Value\+Pointer}} (void $\ast$object, int field, int i) const override
+\end{DoxyCompactItemize}
+\doxysubsection*{Private Types}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{classinet_1_1_dao_descriptor_a89b187a59ecfeced00bd035d1d256c01}{Field\+Constants}} \{ \mbox{\hyperlink{classinet_1_1_dao_descriptor_a89b187a59ecfeced00bd035d1d256c01a189a5b71e4ee82d85f1c0404a09c4c8b}{F\+I\+E\+L\+D\+\_\+dao\+Seq\+Num}}, 
+\mbox{\hyperlink{classinet_1_1_dao_descriptor_a89b187a59ecfeced00bd035d1d256c01a951fbb9d128dc25a279f65e85d76b9a2}{F\+I\+E\+L\+D\+\_\+dao\+Ack\+Required}}, 
+\mbox{\hyperlink{classinet_1_1_dao_descriptor_a89b187a59ecfeced00bd035d1d256c01a6d7c9f6c4e330abf2e979527a2bccfb8}{F\+I\+E\+L\+D\+\_\+reachable\+Dest}}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+const char $\ast$$\ast$ \mbox{\hyperlink{classinet_1_1_dao_descriptor_a49e6e3721eb4802cad29e7cde0c7480a}{propertynames}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line 1457 of file Rpl\+\_\+m.\+cc.
+
+
+
+\doxysubsection{Member Enumeration Documentation}
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a89b187a59ecfeced00bd035d1d256c01}\label{classinet_1_1_dao_descriptor_a89b187a59ecfeced00bd035d1d256c01}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!FieldConstants@{FieldConstants}}
+\index{FieldConstants@{FieldConstants}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{FieldConstants}{FieldConstants}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{classinet_1_1_dao_descriptor_a89b187a59ecfeced00bd035d1d256c01}{inet\+::\+Dao\+Descriptor\+::\+Field\+Constants}}\hspace{0.3cm}{\ttfamily [private]}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{FIELD\_daoSeqNum@{FIELD\_daoSeqNum}!inet::DaoDescriptor@{inet::DaoDescriptor}}\index{inet::DaoDescriptor@{inet::DaoDescriptor}!FIELD\_daoSeqNum@{FIELD\_daoSeqNum}}}\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a89b187a59ecfeced00bd035d1d256c01a189a5b71e4ee82d85f1c0404a09c4c8b}\label{classinet_1_1_dao_descriptor_a89b187a59ecfeced00bd035d1d256c01a189a5b71e4ee82d85f1c0404a09c4c8b}} 
+F\+I\+E\+L\+D\+\_\+dao\+Seq\+Num&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{FIELD\_daoAckRequired@{FIELD\_daoAckRequired}!inet::DaoDescriptor@{inet::DaoDescriptor}}\index{inet::DaoDescriptor@{inet::DaoDescriptor}!FIELD\_daoAckRequired@{FIELD\_daoAckRequired}}}\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a89b187a59ecfeced00bd035d1d256c01a951fbb9d128dc25a279f65e85d76b9a2}\label{classinet_1_1_dao_descriptor_a89b187a59ecfeced00bd035d1d256c01a951fbb9d128dc25a279f65e85d76b9a2}} 
+F\+I\+E\+L\+D\+\_\+dao\+Ack\+Required&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{FIELD\_reachableDest@{FIELD\_reachableDest}!inet::DaoDescriptor@{inet::DaoDescriptor}}\index{inet::DaoDescriptor@{inet::DaoDescriptor}!FIELD\_reachableDest@{FIELD\_reachableDest}}}\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a89b187a59ecfeced00bd035d1d256c01a6d7c9f6c4e330abf2e979527a2bccfb8}\label{classinet_1_1_dao_descriptor_a89b187a59ecfeced00bd035d1d256c01a6d7c9f6c4e330abf2e979527a2bccfb8}} 
+F\+I\+E\+L\+D\+\_\+reachable\+Dest&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+Definition at line 1461 of file Rpl\+\_\+m.\+cc.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_aa80c62b2fb9e0c4c9bd8053379dc3940}\label{classinet_1_1_dao_descriptor_aa80c62b2fb9e0c4c9bd8053379dc3940}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!DaoDescriptor@{DaoDescriptor}}
+\index{DaoDescriptor@{DaoDescriptor}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{DaoDescriptor()}{DaoDescriptor()}}
+{\footnotesize\ttfamily inet\+::\+Dao\+Descriptor\+::\+Dao\+Descriptor (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a7b4ae3991d675b88acd61b0e30f65a5b}\label{classinet_1_1_dao_descriptor_a7b4ae3991d675b88acd61b0e30f65a5b}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!````~DaoDescriptor@{$\sim$DaoDescriptor}}
+\index{````~DaoDescriptor@{$\sim$DaoDescriptor}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{$\sim$DaoDescriptor()}{~DaoDescriptor()}}
+{\footnotesize\ttfamily inet\+::\+Dao\+Descriptor\+::$\sim$\+Dao\+Descriptor (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 1497 of file Rpl\+\_\+m.\+cc.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a01b8f81d5b35ce3d00160fc9ec1b045c}\label{classinet_1_1_dao_descriptor_a01b8f81d5b35ce3d00160fc9ec1b045c}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!doesSupport@{doesSupport}}
+\index{doesSupport@{doesSupport}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{doesSupport()}{doesSupport()}}
+{\footnotesize\ttfamily bool inet\+::\+Dao\+Descriptor\+::does\+Support (\begin{DoxyParamCaption}\item[{omnetpp\+::c\+Object $\ast$}]{obj }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1502 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a4df5ee8a9d430927b13b5a671c6a57a0}\label{classinet_1_1_dao_descriptor_a4df5ee8a9d430927b13b5a671c6a57a0}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!findField@{findField}}
+\index{findField@{findField}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{findField()}{findField()}}
+{\footnotesize\ttfamily int inet\+::\+Dao\+Descriptor\+::find\+Field (\begin{DoxyParamCaption}\item[{const char $\ast$}]{field\+Name }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1562 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_ae451bae91ff8d44b1c0502ee5611dd73}\label{classinet_1_1_dao_descriptor_ae451bae91ff8d44b1c0502ee5611dd73}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!getFieldArraySize@{getFieldArraySize}}
+\index{getFieldArraySize@{getFieldArraySize}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldArraySize()}{getFieldArraySize()}}
+{\footnotesize\ttfamily int inet\+::\+Dao\+Descriptor\+::get\+Field\+Array\+Size (\begin{DoxyParamCaption}\item[{void $\ast$}]{object,  }\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1614 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a980c11e0d22aab39b4577026851b5ff9}\label{classinet_1_1_dao_descriptor_a980c11e0d22aab39b4577026851b5ff9}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!getFieldCount@{getFieldCount}}
+\index{getFieldCount@{getFieldCount}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldCount()}{getFieldCount()}}
+{\footnotesize\ttfamily int inet\+::\+Dao\+Descriptor\+::get\+Field\+Count (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1524 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a64cc1fa5c7a727ac93b021b65e7bafde}\label{classinet_1_1_dao_descriptor_a64cc1fa5c7a727ac93b021b65e7bafde}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!getFieldDynamicTypeString@{getFieldDynamicTypeString}}
+\index{getFieldDynamicTypeString@{getFieldDynamicTypeString}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldDynamicTypeString()}{getFieldDynamicTypeString()}}
+{\footnotesize\ttfamily const char $\ast$ inet\+::\+Dao\+Descriptor\+::get\+Field\+Dynamic\+Type\+String (\begin{DoxyParamCaption}\item[{void $\ast$}]{object,  }\item[{int}]{field,  }\item[{int}]{i }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1628 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_ad8558e4863b9eaa1e7cd5dbdc36e3f28}\label{classinet_1_1_dao_descriptor_ad8558e4863b9eaa1e7cd5dbdc36e3f28}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!getFieldName@{getFieldName}}
+\index{getFieldName@{getFieldName}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldName()}{getFieldName()}}
+{\footnotesize\ttfamily const char $\ast$ inet\+::\+Dao\+Descriptor\+::get\+Field\+Name (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1546 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a343ca4dcd8742e39ec1de64a246a7b1c}\label{classinet_1_1_dao_descriptor_a343ca4dcd8742e39ec1de64a246a7b1c}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!getFieldProperty@{getFieldProperty}}
+\index{getFieldProperty@{getFieldProperty}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldProperty()}{getFieldProperty()}}
+{\footnotesize\ttfamily const char $\ast$ inet\+::\+Dao\+Descriptor\+::get\+Field\+Property (\begin{DoxyParamCaption}\item[{int}]{field,  }\item[{const char $\ast$}]{propertyname }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1601 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a15df233a0619a66c185c114343755f97}\label{classinet_1_1_dao_descriptor_a15df233a0619a66c185c114343755f97}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!getFieldPropertyNames@{getFieldPropertyNames}}
+\index{getFieldPropertyNames@{getFieldPropertyNames}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldPropertyNames()}{getFieldPropertyNames()}}
+{\footnotesize\ttfamily const char $\ast$$\ast$ inet\+::\+Dao\+Descriptor\+::get\+Field\+Property\+Names (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1588 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_ac7e29c6cea45285500aad09a1ac2ff28}\label{classinet_1_1_dao_descriptor_ac7e29c6cea45285500aad09a1ac2ff28}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!getFieldStructName@{getFieldStructName}}
+\index{getFieldStructName@{getFieldStructName}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldStructName()}{getFieldStructName()}}
+{\footnotesize\ttfamily const char $\ast$ inet\+::\+Dao\+Descriptor\+::get\+Field\+Struct\+Name (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1675 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a0dbe2fcdbf249a5f1299e62d395e6f8b}\label{classinet_1_1_dao_descriptor_a0dbe2fcdbf249a5f1299e62d395e6f8b}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!getFieldStructValuePointer@{getFieldStructValuePointer}}
+\index{getFieldStructValuePointer@{getFieldStructValuePointer}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldStructValuePointer()}{getFieldStructValuePointer()}}
+{\footnotesize\ttfamily void $\ast$ inet\+::\+Dao\+Descriptor\+::get\+Field\+Struct\+Value\+Pointer (\begin{DoxyParamCaption}\item[{void $\ast$}]{object,  }\item[{int}]{field,  }\item[{int}]{i }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1688 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a7a80f40a5d0255bf34070cc8baef5b83}\label{classinet_1_1_dao_descriptor_a7a80f40a5d0255bf34070cc8baef5b83}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!getFieldTypeFlags@{getFieldTypeFlags}}
+\index{getFieldTypeFlags@{getFieldTypeFlags}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldTypeFlags()}{getFieldTypeFlags()}}
+{\footnotesize\ttfamily unsigned int inet\+::\+Dao\+Descriptor\+::get\+Field\+Type\+Flags (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1530 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_aa86f14b733faed8e25759e30e6270809}\label{classinet_1_1_dao_descriptor_aa86f14b733faed8e25759e30e6270809}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!getFieldTypeString@{getFieldTypeString}}
+\index{getFieldTypeString@{getFieldTypeString}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldTypeString()}{getFieldTypeString()}}
+{\footnotesize\ttfamily const char $\ast$ inet\+::\+Dao\+Descriptor\+::get\+Field\+Type\+String (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1572 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_adbb4ab9bf61928356241019abf8306f7}\label{classinet_1_1_dao_descriptor_adbb4ab9bf61928356241019abf8306f7}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!getFieldValueAsString@{getFieldValueAsString}}
+\index{getFieldValueAsString@{getFieldValueAsString}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldValueAsString()}{getFieldValueAsString()}}
+{\footnotesize\ttfamily std\+::string inet\+::\+Dao\+Descriptor\+::get\+Field\+Value\+As\+String (\begin{DoxyParamCaption}\item[{void $\ast$}]{object,  }\item[{int}]{field,  }\item[{int}]{i }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1642 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_ae6a923e7d1ad16e1ce87ed8929ae138f}\label{classinet_1_1_dao_descriptor_ae6a923e7d1ad16e1ce87ed8929ae138f}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!getProperty@{getProperty}}
+\index{getProperty@{getProperty}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{getProperty()}{getProperty()}}
+{\footnotesize\ttfamily const char $\ast$ inet\+::\+Dao\+Descriptor\+::get\+Property (\begin{DoxyParamCaption}\item[{const char $\ast$}]{propertyname }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1518 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_ad38f89bff04f61e891efd97e32c3ba30}\label{classinet_1_1_dao_descriptor_ad38f89bff04f61e891efd97e32c3ba30}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!getPropertyNames@{getPropertyNames}}
+\index{getPropertyNames@{getPropertyNames}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{getPropertyNames()}{getPropertyNames()}}
+{\footnotesize\ttfamily const char $\ast$$\ast$ inet\+::\+Dao\+Descriptor\+::get\+Property\+Names (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1507 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a490dea8d468512e15ebed122a75d7509}\label{classinet_1_1_dao_descriptor_a490dea8d468512e15ebed122a75d7509}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!setFieldValueAsString@{setFieldValueAsString}}
+\index{setFieldValueAsString@{setFieldValueAsString}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{setFieldValueAsString()}{setFieldValueAsString()}}
+{\footnotesize\ttfamily bool inet\+::\+Dao\+Descriptor\+::set\+Field\+Value\+As\+String (\begin{DoxyParamCaption}\item[{void $\ast$}]{object,  }\item[{int}]{field,  }\item[{int}]{i,  }\item[{const char $\ast$}]{value }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 1659 of file Rpl\+\_\+m.\+cc.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classinet_1_1_dao_descriptor_a49e6e3721eb4802cad29e7cde0c7480a}\label{classinet_1_1_dao_descriptor_a49e6e3721eb4802cad29e7cde0c7480a}} 
+\index{inet::DaoDescriptor@{inet::DaoDescriptor}!propertynames@{propertynames}}
+\index{propertynames@{propertynames}!inet::DaoDescriptor@{inet::DaoDescriptor}}
+\doxysubsubsection{\texorpdfstring{propertynames}{propertynames}}
+{\footnotesize\ttfamily const char$\ast$$\ast$ inet\+::\+Dao\+Descriptor\+::propertynames\hspace{0.3cm}{\ttfamily [mutable]}, {\ttfamily [private]}}
+
+
+
+Definition at line 1460 of file Rpl\+\_\+m.\+cc.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/\mbox{\hyperlink{_rpl__m_8cc}{Rpl\+\_\+m.\+cc}}\end{DoxyCompactItemize}

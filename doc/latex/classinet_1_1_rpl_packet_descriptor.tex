@@ -1,0 +1,306 @@
+\hypertarget{classinet_1_1_rpl_packet_descriptor}{}\doxysection{inet\+::Rpl\+Packet\+Descriptor Class Reference}
+\label{classinet_1_1_rpl_packet_descriptor}\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+Inheritance diagram for inet\+::Rpl\+Packet\+Descriptor\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classinet_1_1_rpl_packet_descriptor}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_a191be854d15dec0a734a54b5d96b9d1b}{Rpl\+Packet\+Descriptor}} ()
+\item 
+virtual \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_a9fb2aa29fb233a855753ec4f408ae811}{$\sim$\+Rpl\+Packet\+Descriptor}} ()
+\item 
+virtual bool \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_af0a5941ba218db1f73126e5ebfc57494}{does\+Support}} (omnetpp\+::c\+Object $\ast$obj) const override
+\item 
+virtual const char $\ast$$\ast$ \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_a6238900db284e07b13f05eac84b506e1}{get\+Property\+Names}} () const override
+\item 
+virtual const char $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_aae67cfab94769396a6526f1b84d4f0b0}{get\+Property}} (const char $\ast$propertyname) const override
+\item 
+virtual int \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_a21d261690e247b8199876e0d4130b4fb}{get\+Field\+Count}} () const override
+\item 
+virtual const char $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_a442b1d7f611ecea82924d62d7d7b4bdf}{get\+Field\+Name}} (int field) const override
+\item 
+virtual int \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_a555264c69a7b189dd1395e98b8546c11}{find\+Field}} (const char $\ast$field\+Name) const override
+\item 
+virtual unsigned int \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_ae2afb8ee63e77053ad984688cdfd78c1}{get\+Field\+Type\+Flags}} (int field) const override
+\item 
+virtual const char $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_adfdd224bf4495f696df2dc0ecab378bb}{get\+Field\+Type\+String}} (int field) const override
+\item 
+virtual const char $\ast$$\ast$ \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_ae59fc0838789a88a5b9a7546f7945c3e}{get\+Field\+Property\+Names}} (int field) const override
+\item 
+virtual const char $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_a47b6d1cabe95c34c53a63f71f40159cc}{get\+Field\+Property}} (int field, const char $\ast$propertyname) const override
+\item 
+virtual int \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_a4e816a1ece79b1081c678a8f2def687a}{get\+Field\+Array\+Size}} (void $\ast$object, int field) const override
+\item 
+virtual const char $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_a54289da9502a9581a52d62f57ad229c7}{get\+Field\+Dynamic\+Type\+String}} (void $\ast$object, int field, int i) const override
+\item 
+virtual std\+::string \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_a62b9e04c02294e597b5cc5e2f094e9f9}{get\+Field\+Value\+As\+String}} (void $\ast$object, int field, int i) const override
+\item 
+virtual bool \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_a7d92088b9ba942b957b6ef92af652ba8}{set\+Field\+Value\+As\+String}} (void $\ast$object, int field, int i, const char $\ast$value) const override
+\item 
+virtual const char $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_a85eaaac29c54ac5e3cf5ea8a36306513}{get\+Field\+Struct\+Name}} (int field) const override
+\item 
+virtual void $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_a2ea7d061b7d59f68b9800cf642e97ff1}{get\+Field\+Struct\+Value\+Pointer}} (void $\ast$object, int field, int i) const override
+\end{DoxyCompactItemize}
+\doxysubsection*{Private Types}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020}{Field\+Constants}} \{ \newline
+\mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020ab321b93a64754226ca672c2fba93c881}{F\+I\+E\+L\+D\+\_\+hop\+Limit}}, 
+\mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020ab995cc97c677d95df33c13fa34372a39}{F\+I\+E\+L\+D\+\_\+dest\+Address}}, 
+\mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020a97fd6aad1f7ebe7cd2a9b11624c5696f}{F\+I\+E\+L\+D\+\_\+src\+Address}}, 
+\mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020a6aadd89dc1d397407514420c687bb9e8}{F\+I\+E\+L\+D\+\_\+instance\+Id}}, 
+\newline
+\mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020aa8157aef9c7265a420ecc1c1b85e7311}{F\+I\+E\+L\+D\+\_\+dodag\+Id}}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+const char $\ast$$\ast$ \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_a358f8c9074eefef1fda55c151fb2310f}{propertynames}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line 639 of file Rpl\+\_\+m.\+cc.
+
+
+
+\doxysubsection{Member Enumeration Documentation}
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020}\label{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!FieldConstants@{FieldConstants}}
+\index{FieldConstants@{FieldConstants}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{FieldConstants}{FieldConstants}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020}{inet\+::\+Rpl\+Packet\+Descriptor\+::\+Field\+Constants}}\hspace{0.3cm}{\ttfamily [private]}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{FIELD\_hopLimit@{FIELD\_hopLimit}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!FIELD\_hopLimit@{FIELD\_hopLimit}}}\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020ab321b93a64754226ca672c2fba93c881}\label{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020ab321b93a64754226ca672c2fba93c881}} 
+F\+I\+E\+L\+D\+\_\+hop\+Limit&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{FIELD\_destAddress@{FIELD\_destAddress}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!FIELD\_destAddress@{FIELD\_destAddress}}}\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020ab995cc97c677d95df33c13fa34372a39}\label{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020ab995cc97c677d95df33c13fa34372a39}} 
+F\+I\+E\+L\+D\+\_\+dest\+Address&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{FIELD\_srcAddress@{FIELD\_srcAddress}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!FIELD\_srcAddress@{FIELD\_srcAddress}}}\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020a97fd6aad1f7ebe7cd2a9b11624c5696f}\label{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020a97fd6aad1f7ebe7cd2a9b11624c5696f}} 
+F\+I\+E\+L\+D\+\_\+src\+Address&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{FIELD\_instanceId@{FIELD\_instanceId}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!FIELD\_instanceId@{FIELD\_instanceId}}}\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020a6aadd89dc1d397407514420c687bb9e8}\label{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020a6aadd89dc1d397407514420c687bb9e8}} 
+F\+I\+E\+L\+D\+\_\+instance\+Id&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{FIELD\_dodagId@{FIELD\_dodagId}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!FIELD\_dodagId@{FIELD\_dodagId}}}\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020aa8157aef9c7265a420ecc1c1b85e7311}\label{classinet_1_1_rpl_packet_descriptor_ac8629b94086a077128d33914f7f32020aa8157aef9c7265a420ecc1c1b85e7311}} 
+F\+I\+E\+L\+D\+\_\+dodag\+Id&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+Definition at line 643 of file Rpl\+\_\+m.\+cc.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_a191be854d15dec0a734a54b5d96b9d1b}\label{classinet_1_1_rpl_packet_descriptor_a191be854d15dec0a734a54b5d96b9d1b}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!RplPacketDescriptor@{RplPacketDescriptor}}
+\index{RplPacketDescriptor@{RplPacketDescriptor}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{RplPacketDescriptor()}{RplPacketDescriptor()}}
+{\footnotesize\ttfamily inet\+::\+Rpl\+Packet\+Descriptor\+::\+Rpl\+Packet\+Descriptor (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_a9fb2aa29fb233a855753ec4f408ae811}\label{classinet_1_1_rpl_packet_descriptor_a9fb2aa29fb233a855753ec4f408ae811}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!````~RplPacketDescriptor@{$\sim$RplPacketDescriptor}}
+\index{````~RplPacketDescriptor@{$\sim$RplPacketDescriptor}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{$\sim$RplPacketDescriptor()}{~RplPacketDescriptor()}}
+{\footnotesize\ttfamily inet\+::\+Rpl\+Packet\+Descriptor\+::$\sim$\+Rpl\+Packet\+Descriptor (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 681 of file Rpl\+\_\+m.\+cc.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_af0a5941ba218db1f73126e5ebfc57494}\label{classinet_1_1_rpl_packet_descriptor_af0a5941ba218db1f73126e5ebfc57494}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!doesSupport@{doesSupport}}
+\index{doesSupport@{doesSupport}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{doesSupport()}{doesSupport()}}
+{\footnotesize\ttfamily bool inet\+::\+Rpl\+Packet\+Descriptor\+::does\+Support (\begin{DoxyParamCaption}\item[{omnetpp\+::c\+Object $\ast$}]{obj }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 686 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_a555264c69a7b189dd1395e98b8546c11}\label{classinet_1_1_rpl_packet_descriptor_a555264c69a7b189dd1395e98b8546c11}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!findField@{findField}}
+\index{findField@{findField}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{findField()}{findField()}}
+{\footnotesize\ttfamily int inet\+::\+Rpl\+Packet\+Descriptor\+::find\+Field (\begin{DoxyParamCaption}\item[{const char $\ast$}]{field\+Name }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 750 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_a4e816a1ece79b1081c678a8f2def687a}\label{classinet_1_1_rpl_packet_descriptor_a4e816a1ece79b1081c678a8f2def687a}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!getFieldArraySize@{getFieldArraySize}}
+\index{getFieldArraySize@{getFieldArraySize}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldArraySize()}{getFieldArraySize()}}
+{\footnotesize\ttfamily int inet\+::\+Rpl\+Packet\+Descriptor\+::get\+Field\+Array\+Size (\begin{DoxyParamCaption}\item[{void $\ast$}]{object,  }\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 806 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_a21d261690e247b8199876e0d4130b4fb}\label{classinet_1_1_rpl_packet_descriptor_a21d261690e247b8199876e0d4130b4fb}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!getFieldCount@{getFieldCount}}
+\index{getFieldCount@{getFieldCount}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldCount()}{getFieldCount()}}
+{\footnotesize\ttfamily int inet\+::\+Rpl\+Packet\+Descriptor\+::get\+Field\+Count (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 708 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_a54289da9502a9581a52d62f57ad229c7}\label{classinet_1_1_rpl_packet_descriptor_a54289da9502a9581a52d62f57ad229c7}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!getFieldDynamicTypeString@{getFieldDynamicTypeString}}
+\index{getFieldDynamicTypeString@{getFieldDynamicTypeString}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldDynamicTypeString()}{getFieldDynamicTypeString()}}
+{\footnotesize\ttfamily const char $\ast$ inet\+::\+Rpl\+Packet\+Descriptor\+::get\+Field\+Dynamic\+Type\+String (\begin{DoxyParamCaption}\item[{void $\ast$}]{object,  }\item[{int}]{field,  }\item[{int}]{i }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 820 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_a442b1d7f611ecea82924d62d7d7b4bdf}\label{classinet_1_1_rpl_packet_descriptor_a442b1d7f611ecea82924d62d7d7b4bdf}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!getFieldName@{getFieldName}}
+\index{getFieldName@{getFieldName}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldName()}{getFieldName()}}
+{\footnotesize\ttfamily const char $\ast$ inet\+::\+Rpl\+Packet\+Descriptor\+::get\+Field\+Name (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 732 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_a47b6d1cabe95c34c53a63f71f40159cc}\label{classinet_1_1_rpl_packet_descriptor_a47b6d1cabe95c34c53a63f71f40159cc}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!getFieldProperty@{getFieldProperty}}
+\index{getFieldProperty@{getFieldProperty}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldProperty()}{getFieldProperty()}}
+{\footnotesize\ttfamily const char $\ast$ inet\+::\+Rpl\+Packet\+Descriptor\+::get\+Field\+Property (\begin{DoxyParamCaption}\item[{int}]{field,  }\item[{const char $\ast$}]{propertyname }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 793 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_ae59fc0838789a88a5b9a7546f7945c3e}\label{classinet_1_1_rpl_packet_descriptor_ae59fc0838789a88a5b9a7546f7945c3e}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!getFieldPropertyNames@{getFieldPropertyNames}}
+\index{getFieldPropertyNames@{getFieldPropertyNames}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldPropertyNames()}{getFieldPropertyNames()}}
+{\footnotesize\ttfamily const char $\ast$$\ast$ inet\+::\+Rpl\+Packet\+Descriptor\+::get\+Field\+Property\+Names (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 780 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_a85eaaac29c54ac5e3cf5ea8a36306513}\label{classinet_1_1_rpl_packet_descriptor_a85eaaac29c54ac5e3cf5ea8a36306513}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!getFieldStructName@{getFieldStructName}}
+\index{getFieldStructName@{getFieldStructName}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldStructName()}{getFieldStructName()}}
+{\footnotesize\ttfamily const char $\ast$ inet\+::\+Rpl\+Packet\+Descriptor\+::get\+Field\+Struct\+Name (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 869 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_a2ea7d061b7d59f68b9800cf642e97ff1}\label{classinet_1_1_rpl_packet_descriptor_a2ea7d061b7d59f68b9800cf642e97ff1}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!getFieldStructValuePointer@{getFieldStructValuePointer}}
+\index{getFieldStructValuePointer@{getFieldStructValuePointer}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldStructValuePointer()}{getFieldStructValuePointer()}}
+{\footnotesize\ttfamily void $\ast$ inet\+::\+Rpl\+Packet\+Descriptor\+::get\+Field\+Struct\+Value\+Pointer (\begin{DoxyParamCaption}\item[{void $\ast$}]{object,  }\item[{int}]{field,  }\item[{int}]{i }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 882 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_ae2afb8ee63e77053ad984688cdfd78c1}\label{classinet_1_1_rpl_packet_descriptor_ae2afb8ee63e77053ad984688cdfd78c1}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!getFieldTypeFlags@{getFieldTypeFlags}}
+\index{getFieldTypeFlags@{getFieldTypeFlags}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldTypeFlags()}{getFieldTypeFlags()}}
+{\footnotesize\ttfamily unsigned int inet\+::\+Rpl\+Packet\+Descriptor\+::get\+Field\+Type\+Flags (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 714 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_adfdd224bf4495f696df2dc0ecab378bb}\label{classinet_1_1_rpl_packet_descriptor_adfdd224bf4495f696df2dc0ecab378bb}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!getFieldTypeString@{getFieldTypeString}}
+\index{getFieldTypeString@{getFieldTypeString}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldTypeString()}{getFieldTypeString()}}
+{\footnotesize\ttfamily const char $\ast$ inet\+::\+Rpl\+Packet\+Descriptor\+::get\+Field\+Type\+String (\begin{DoxyParamCaption}\item[{int}]{field }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 762 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_a62b9e04c02294e597b5cc5e2f094e9f9}\label{classinet_1_1_rpl_packet_descriptor_a62b9e04c02294e597b5cc5e2f094e9f9}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!getFieldValueAsString@{getFieldValueAsString}}
+\index{getFieldValueAsString@{getFieldValueAsString}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{getFieldValueAsString()}{getFieldValueAsString()}}
+{\footnotesize\ttfamily std\+::string inet\+::\+Rpl\+Packet\+Descriptor\+::get\+Field\+Value\+As\+String (\begin{DoxyParamCaption}\item[{void $\ast$}]{object,  }\item[{int}]{field,  }\item[{int}]{i }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 834 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_aae67cfab94769396a6526f1b84d4f0b0}\label{classinet_1_1_rpl_packet_descriptor_aae67cfab94769396a6526f1b84d4f0b0}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!getProperty@{getProperty}}
+\index{getProperty@{getProperty}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{getProperty()}{getProperty()}}
+{\footnotesize\ttfamily const char $\ast$ inet\+::\+Rpl\+Packet\+Descriptor\+::get\+Property (\begin{DoxyParamCaption}\item[{const char $\ast$}]{propertyname }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 702 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_a6238900db284e07b13f05eac84b506e1}\label{classinet_1_1_rpl_packet_descriptor_a6238900db284e07b13f05eac84b506e1}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!getPropertyNames@{getPropertyNames}}
+\index{getPropertyNames@{getPropertyNames}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{getPropertyNames()}{getPropertyNames()}}
+{\footnotesize\ttfamily const char $\ast$$\ast$ inet\+::\+Rpl\+Packet\+Descriptor\+::get\+Property\+Names (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 691 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_a7d92088b9ba942b957b6ef92af652ba8}\label{classinet_1_1_rpl_packet_descriptor_a7d92088b9ba942b957b6ef92af652ba8}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!setFieldValueAsString@{setFieldValueAsString}}
+\index{setFieldValueAsString@{setFieldValueAsString}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{setFieldValueAsString()}{setFieldValueAsString()}}
+{\footnotesize\ttfamily bool inet\+::\+Rpl\+Packet\+Descriptor\+::set\+Field\+Value\+As\+String (\begin{DoxyParamCaption}\item[{void $\ast$}]{object,  }\item[{int}]{field,  }\item[{int}]{i,  }\item[{const char $\ast$}]{value }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 853 of file Rpl\+\_\+m.\+cc.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_descriptor_a358f8c9074eefef1fda55c151fb2310f}\label{classinet_1_1_rpl_packet_descriptor_a358f8c9074eefef1fda55c151fb2310f}} 
+\index{inet::RplPacketDescriptor@{inet::RplPacketDescriptor}!propertynames@{propertynames}}
+\index{propertynames@{propertynames}!inet::RplPacketDescriptor@{inet::RplPacketDescriptor}}
+\doxysubsubsection{\texorpdfstring{propertynames}{propertynames}}
+{\footnotesize\ttfamily const char$\ast$$\ast$ inet\+::\+Rpl\+Packet\+Descriptor\+::propertynames\hspace{0.3cm}{\ttfamily [mutable]}, {\ttfamily [private]}}
+
+
+
+Definition at line 642 of file Rpl\+\_\+m.\+cc.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/\mbox{\hyperlink{_rpl__m_8cc}{Rpl\+\_\+m.\+cc}}\end{DoxyCompactItemize}

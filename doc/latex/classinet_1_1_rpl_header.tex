@@ -1,0 +1,221 @@
+\hypertarget{classinet_1_1_rpl_header}{}\doxysection{inet\+::Rpl\+Header Class Reference}
+\label{classinet_1_1_rpl_header}\index{inet::RplHeader@{inet::RplHeader}}
+
+
+Class generated from {\ttfamily Rpl.\+msg\+:58} by nedtool.  
+
+
+
+
+{\ttfamily \#include $<$Rpl\+\_\+m.\+h$>$}
+
+Inheritance diagram for inet\+::Rpl\+Header\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classinet_1_1_rpl_header}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classinet_1_1_rpl_header_ab8be167705d24f7a20881587278655dd}{Rpl\+Header}} ()
+\item 
+\mbox{\hyperlink{classinet_1_1_rpl_header_a3cfa4cb17d771981e2a09c9f92f02466}{Rpl\+Header}} (const \mbox{\hyperlink{classinet_1_1_rpl_header}{Rpl\+Header}} \&other)
+\item 
+virtual \mbox{\hyperlink{classinet_1_1_rpl_header_a3946ba6f938ce70c9d84ffb76d475eaa}{$\sim$\+Rpl\+Header}} ()
+\item 
+\mbox{\hyperlink{classinet_1_1_rpl_header}{Rpl\+Header}} \& \mbox{\hyperlink{classinet_1_1_rpl_header_aed7d71d984dc52be571fa0af2b6bf5cf}{operator=}} (const \mbox{\hyperlink{classinet_1_1_rpl_header}{Rpl\+Header}} \&other)
+\item 
+virtual \mbox{\hyperlink{classinet_1_1_rpl_header}{Rpl\+Header}} $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_header_aecb0c7df60053930fefa36add300ff84}{dup}} () const override
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_header_ac4016809b04d3380742ed7ab35c615d1}{parsim\+Pack}} (omnetpp\+::c\+Comm\+Buffer $\ast$b) const override
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_header_af585d708fca81777501024821714e35e}{parsim\+Unpack}} (omnetpp\+::c\+Comm\+Buffer $\ast$b) override
+\item 
+virtual \mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68}{inet\+::\+Rpl\+Packet\+Code}} \mbox{\hyperlink{classinet_1_1_rpl_header_ad181ba6ab654e110afcbb35deb573b4d}{get\+Icmpv6\+Code}} () const
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_header_a51a5579016d37b97bc147dbcfb2b4448}{set\+Icmpv6\+Code}} (\mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68}{inet\+::\+Rpl\+Packet\+Code}} \mbox{\hyperlink{classinet_1_1_rpl_header_ac8614c6b4dd214db60c045f36078c08c}{icmpv6\+Code}})
+\item 
+virtual uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_header_a802055c8e712267c41a9948afb44f974}{get\+Icmpv6\+Type}} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \mbox{\hyperlink{classinet_1_1_rpl_header_a78c8cc7670bcc28efa5aca50f35c3770}{operator==}} (const \mbox{\hyperlink{classinet_1_1_rpl_header}{Rpl\+Header}} \&)
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68}{inet\+::\+Rpl\+Packet\+Code}} \mbox{\hyperlink{classinet_1_1_rpl_header_ac8614c6b4dd214db60c045f36078c08c}{icmpv6\+Code}} = static\+\_\+cast$<$\mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68}{inet\+::\+Rpl\+Packet\+Code}}$>$(-\/1)
+\item 
+const uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_header_aa6aa355eb7c7293916af29ab788cdb2c}{icmpv6\+Type}} = 155
+\end{DoxyCompactItemize}
+\doxysubsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classinet_1_1_rpl_header_a06be681da012fbc40f884ba0cd64f346}{copy}} (const \mbox{\hyperlink{classinet_1_1_rpl_header}{Rpl\+Header}} \&other)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Class generated from {\ttfamily Rpl.\+msg\+:58} by nedtool. 
+
+
+\begin{DoxyPre}
+class \mbox{\hyperlink{classinet_1_1_rpl_header}{RplHeader}} extends Icmpv6Header
+\{
+    RplPacketCode icmpv6Code;
+    const uint8\_t icmpv6Type = 155;
+\}
+\end{DoxyPre}
+ 
+
+Definition at line 105 of file Rpl\+\_\+m.\+h.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classinet_1_1_rpl_header_ab8be167705d24f7a20881587278655dd}\label{classinet_1_1_rpl_header_ab8be167705d24f7a20881587278655dd}} 
+\index{inet::RplHeader@{inet::RplHeader}!RplHeader@{RplHeader}}
+\index{RplHeader@{RplHeader}!inet::RplHeader@{inet::RplHeader}}
+\doxysubsubsection{\texorpdfstring{RplHeader()}{RplHeader()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily inet\+::\+Rpl\+Header\+::\+Rpl\+Header (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classinet_1_1_rpl_header_a3cfa4cb17d771981e2a09c9f92f02466}\label{classinet_1_1_rpl_header_a3cfa4cb17d771981e2a09c9f92f02466}} 
+\index{inet::RplHeader@{inet::RplHeader}!RplHeader@{RplHeader}}
+\index{RplHeader@{RplHeader}!inet::RplHeader@{inet::RplHeader}}
+\doxysubsubsection{\texorpdfstring{RplHeader()}{RplHeader()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily inet\+::\+Rpl\+Header\+::\+Rpl\+Header (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_rpl_header}{Rpl\+Header}} \&}]{other }\end{DoxyParamCaption})}
+
+
+
+Definition at line 235 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_header_a3946ba6f938ce70c9d84ffb76d475eaa}\label{classinet_1_1_rpl_header_a3946ba6f938ce70c9d84ffb76d475eaa}} 
+\index{inet::RplHeader@{inet::RplHeader}!````~RplHeader@{$\sim$RplHeader}}
+\index{````~RplHeader@{$\sim$RplHeader}!inet::RplHeader@{inet::RplHeader}}
+\doxysubsubsection{\texorpdfstring{$\sim$RplHeader()}{~RplHeader()}}
+{\footnotesize\ttfamily inet\+::\+Rpl\+Header\+::$\sim$\+Rpl\+Header (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 240 of file Rpl\+\_\+m.\+cc.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classinet_1_1_rpl_header_a06be681da012fbc40f884ba0cd64f346}\label{classinet_1_1_rpl_header_a06be681da012fbc40f884ba0cd64f346}} 
+\index{inet::RplHeader@{inet::RplHeader}!copy@{copy}}
+\index{copy@{copy}!inet::RplHeader@{inet::RplHeader}}
+\doxysubsubsection{\texorpdfstring{copy()}{copy()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Header\+::copy (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_rpl_header}{Rpl\+Header}} \&}]{other }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 252 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_header_aecb0c7df60053930fefa36add300ff84}\label{classinet_1_1_rpl_header_aecb0c7df60053930fefa36add300ff84}} 
+\index{inet::RplHeader@{inet::RplHeader}!dup@{dup}}
+\index{dup@{dup}!inet::RplHeader@{inet::RplHeader}}
+\doxysubsubsection{\texorpdfstring{dup()}{dup()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{classinet_1_1_rpl_header}{Rpl\+Header}}$\ast$ inet\+::\+Rpl\+Header\+::dup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 123 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_header_ad181ba6ab654e110afcbb35deb573b4d}\label{classinet_1_1_rpl_header_ad181ba6ab654e110afcbb35deb573b4d}} 
+\index{inet::RplHeader@{inet::RplHeader}!getIcmpv6Code@{getIcmpv6Code}}
+\index{getIcmpv6Code@{getIcmpv6Code}!inet::RplHeader@{inet::RplHeader}}
+\doxysubsubsection{\texorpdfstring{getIcmpv6Code()}{getIcmpv6Code()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68}{inet\+::\+Rpl\+Packet\+Code}} inet\+::\+Rpl\+Header\+::get\+Icmpv6\+Code (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 271 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_header_a802055c8e712267c41a9948afb44f974}\label{classinet_1_1_rpl_header_a802055c8e712267c41a9948afb44f974}} 
+\index{inet::RplHeader@{inet::RplHeader}!getIcmpv6Type@{getIcmpv6Type}}
+\index{getIcmpv6Type@{getIcmpv6Type}!inet::RplHeader@{inet::RplHeader}}
+\doxysubsubsection{\texorpdfstring{getIcmpv6Type()}{getIcmpv6Type()}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Rpl\+Header\+::get\+Icmpv6\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 282 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_header_aed7d71d984dc52be571fa0af2b6bf5cf}\label{classinet_1_1_rpl_header_aed7d71d984dc52be571fa0af2b6bf5cf}} 
+\index{inet::RplHeader@{inet::RplHeader}!operator=@{operator=}}
+\index{operator=@{operator=}!inet::RplHeader@{inet::RplHeader}}
+\doxysubsubsection{\texorpdfstring{operator=()}{operator=()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classinet_1_1_rpl_header}{Rpl\+Header}} \& inet\+::\+Rpl\+Header\+::operator= (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_rpl_header}{Rpl\+Header}} \&}]{other }\end{DoxyParamCaption})}
+
+
+
+Definition at line 244 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_header_a78c8cc7670bcc28efa5aca50f35c3770}\label{classinet_1_1_rpl_header_a78c8cc7670bcc28efa5aca50f35c3770}} 
+\index{inet::RplHeader@{inet::RplHeader}!operator==@{operator==}}
+\index{operator==@{operator==}!inet::RplHeader@{inet::RplHeader}}
+\doxysubsubsection{\texorpdfstring{operator==()}{operator==()}}
+{\footnotesize\ttfamily bool inet\+::\+Rpl\+Header\+::operator== (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_rpl_header}{Rpl\+Header}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classinet_1_1_rpl_header_ac4016809b04d3380742ed7ab35c615d1}\label{classinet_1_1_rpl_header_ac4016809b04d3380742ed7ab35c615d1}} 
+\index{inet::RplHeader@{inet::RplHeader}!parsimPack@{parsimPack}}
+\index{parsimPack@{parsimPack}!inet::RplHeader@{inet::RplHeader}}
+\doxysubsubsection{\texorpdfstring{parsimPack()}{parsimPack()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Header\+::parsim\+Pack (\begin{DoxyParamCaption}\item[{omnetpp\+::c\+Comm\+Buffer $\ast$}]{b }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 257 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_header_af585d708fca81777501024821714e35e}\label{classinet_1_1_rpl_header_af585d708fca81777501024821714e35e}} 
+\index{inet::RplHeader@{inet::RplHeader}!parsimUnpack@{parsimUnpack}}
+\index{parsimUnpack@{parsimUnpack}!inet::RplHeader@{inet::RplHeader}}
+\doxysubsubsection{\texorpdfstring{parsimUnpack()}{parsimUnpack()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Header\+::parsim\+Unpack (\begin{DoxyParamCaption}\item[{omnetpp\+::c\+Comm\+Buffer $\ast$}]{b }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 264 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_header_a51a5579016d37b97bc147dbcfb2b4448}\label{classinet_1_1_rpl_header_a51a5579016d37b97bc147dbcfb2b4448}} 
+\index{inet::RplHeader@{inet::RplHeader}!setIcmpv6Code@{setIcmpv6Code}}
+\index{setIcmpv6Code@{setIcmpv6Code}!inet::RplHeader@{inet::RplHeader}}
+\doxysubsubsection{\texorpdfstring{setIcmpv6Code()}{setIcmpv6Code()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Header\+::set\+Icmpv6\+Code (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68}{inet\+::\+Rpl\+Packet\+Code}}}]{icmpv6\+Code }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 276 of file Rpl\+\_\+m.\+cc.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classinet_1_1_rpl_header_ac8614c6b4dd214db60c045f36078c08c}\label{classinet_1_1_rpl_header_ac8614c6b4dd214db60c045f36078c08c}} 
+\index{inet::RplHeader@{inet::RplHeader}!icmpv6Code@{icmpv6Code}}
+\index{icmpv6Code@{icmpv6Code}!inet::RplHeader@{inet::RplHeader}}
+\doxysubsubsection{\texorpdfstring{icmpv6Code}{icmpv6Code}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68}{inet\+::\+Rpl\+Packet\+Code}} inet\+::\+Rpl\+Header\+::icmpv6\+Code = static\+\_\+cast$<$\mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68}{inet\+::\+Rpl\+Packet\+Code}}$>$(-\/1)\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line 108 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_header_aa6aa355eb7c7293916af29ab788cdb2c}\label{classinet_1_1_rpl_header_aa6aa355eb7c7293916af29ab788cdb2c}} 
+\index{inet::RplHeader@{inet::RplHeader}!icmpv6Type@{icmpv6Type}}
+\index{icmpv6Type@{icmpv6Type}!inet::RplHeader@{inet::RplHeader}}
+\doxysubsubsection{\texorpdfstring{icmpv6Type}{icmpv6Type}}
+{\footnotesize\ttfamily const uint8\+\_\+t inet\+::\+Rpl\+Header\+::icmpv6\+Type = 155\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line 109 of file Rpl\+\_\+m.\+h.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/\mbox{\hyperlink{_rpl__m_8h}{Rpl\+\_\+m.\+h}}\item 
+src/\mbox{\hyperlink{_rpl__m_8cc}{Rpl\+\_\+m.\+cc}}\end{DoxyCompactItemize}

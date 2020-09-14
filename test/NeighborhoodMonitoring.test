@@ -1,0 +1,57 @@
+%description:
+Dio processing test
+
+%includes:
+#include "Rpl.h"
+#include "Rpl_m.h"
+
+%global:
+using namespace inet;
+
+auto dio = std::make_shared<Dio>();
+// Node's RPL instance data (global) 
+uint16_t rank = 3;
+std::map<Ipv6Address, Dio*> candidateParents;
+std::map<Ipv6Address, Dio*> backupParents;
+uint8_t prefixLength = 112;
+
+static void addNeighbour(std::shared_ptr<Dio> &dio) {
+	auto dioCopy = dio->dup();
+    auto dioSender = dio->getSrcAddress().getSuffix(prefixLength);
+    /** If DIO sender has equal rank, consider this node as a backup parent */
+    if (dio->getRank() == rank) {
+        if (backupParents.find(dioSender) != backupParents.end())
+            EV_DETAIL << "Backup parent entry updated, address suffix - " << dioSender << endl;
+        else
+            EV_DETAIL << "New backup parent added, address suffix - " << dioSender << endl;
+        backupParents[dioSender] = dioCopy;
+    }
+    /** If DIO sender has lower rank, consider this node as a candidate parent */
+    if (dio->getRank() < rank) {
+        if (candidateParents.find(dioSender) != candidateParents.end())
+            EV_DETAIL << "Candidate parent entry updated, address suffix - " << dioSender << endl;
+        else
+            EV_DETAIL << "New candidate parent added, address suffix - " << dioSender << endl;
+        candidateParents[dioSender] = dioCopy;
+    }
+}
+
+
+%activity:
+dio->setSrcAddress(Ipv6Address("::5"));
+dio->setRank(rank - 1);
+addNeighbour(dio);
+dio->setRank(rank);
+addNeighbour(dio);
+addNeighbour(dio);
+dio->setRank(rank + 1);
+addNeighbour(dio);	
+EV << "\n.";
+
+%contains: stdout
+New candidate parent added, address suffix - ::5
+New backup parent added, address suffix - ::5
+Backup parent entry updated, address suffix - ::5 
+
+.
+

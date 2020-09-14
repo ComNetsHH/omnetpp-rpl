@@ -1,0 +1,507 @@
+\hypertarget{classinet_1_1_trickle_timer}{}\doxysection{inet\+::Trickle\+Timer Class Reference}
+\label{classinet_1_1_trickle_timer}\index{inet::TrickleTimer@{inet::TrickleTimer}}
+
+
+{\ttfamily \#include $<$Trickle\+Timer.\+h$>$}
+
+Inheritance diagram for inet\+::Trickle\+Timer\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classinet_1_1_trickle_timer}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classinet_1_1_trickle_timer_a38a19fdb90189eb52a086da1616efd8f}{Trickle\+Timer}} ()
+\item 
+\mbox{\hyperlink{classinet_1_1_trickle_timer_a4eadde9aaafdfbf6f928609a2958fb41}{$\sim$\+Trickle\+Timer}} ()
+\item 
+void \mbox{\hyperlink{classinet_1_1_trickle_timer_a4c02410daef0e1e30be9f1a03f4b797e}{start}} ()
+\begin{DoxyCompactList}\small\item\em Lifecycle. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classinet_1_1_trickle_timer_a512a9a91eb8dade03cfa8ae71740fc7f}{start}} (bool warmup\+Delay)
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_trickle_timer_a8cf9c483b4f418e003e709b6d70bcb69}{reset}} ()
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_trickle_timer_a63c27d0c2bc47691cc988493ebf78cdb}{stop}} ()
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_trickle_timer_a431c374ceab3945928a297e15df605d9}{suspend}} ()
+\item 
+void \mbox{\hyperlink{classinet_1_1_trickle_timer_aa6a6df9539f0208dd62e566aab0faf1e}{ctrl\+Msg\+Received}} ()
+\begin{DoxyCompactList}\small\item\em Increment counter of control messages heard during current interval \mbox{[}R\+FC 6550, 8.\+3\mbox{]} based on the external routing module events. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classinet_1_1_trickle_timer_ac0d01f2c13d8eb6bbe05417d2b09ff6b}{check\+Redundancy\+Const}} ()
+\begin{DoxyCompactList}\small\item\em Check if number of control messages heard in current interval is not greater than the threshold \textquotesingle{}redundancy constant\textquotesingle{} \mbox{[}R\+FC 6206\mbox{]}. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classinet_1_1_trickle_timer_ae766175372e4ff3795ee1cd2a7277582}{schedule\+Next}} ()
+\begin{DoxyCompactList}\small\item\em Schedule next trickle trigger event, causing transmission/broadcast of control message from routing module. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classinet_1_1_trickle_timer_a2fad708bf96923e7864e3de4b9d7e53d}{update\+Interval}} ()
+\begin{DoxyCompactList}\small\item\em Double current interval if no inconsistencies detected. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classinet_1_1_trickle_timer_a0d39318fbf68bf49fc34e8e27aa96ae6}{handle\+Message}} (c\+Message $\ast$message)
+\begin{DoxyCompactList}\small\item\em Messsage processing. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classinet_1_1_trickle_timer_aa870911b5469dfadb17817c3073d27d5}{process\+Self\+Message}} (c\+Message $\ast$message)
+\item 
+void \mbox{\hyperlink{classinet_1_1_trickle_timer_a0723156fc9caa7f68245ef162fb1be25}{handle\+Message\+When\+Up}} (c\+Message $\ast$message)
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_trickle_timer_a4d4adac48bb3d080d42534b40ddb97eb}{get\+Ctrl\+Msg\+Received}} () const
+\item 
+void \mbox{\hyperlink{classinet_1_1_trickle_timer_aaa0d3357d03a2a444a647b5059007f67}{set\+Ctrl\+Msg\+Received}} (uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_trickle_timer_a1adab02dc60400db10a38270d63b8639}{ctrl\+Msg\+Received\+Ctn}})
+\item 
+int \mbox{\hyperlink{classinet_1_1_trickle_timer_a440f7b53b859ec5b7999524384c3eb09}{get\+Current\+Interval}} () const
+\item 
+void \mbox{\hyperlink{classinet_1_1_trickle_timer_a44c4df38c4b0a242ba5c3fc8980e4710}{set\+Current\+Interval}} (int \mbox{\hyperlink{classinet_1_1_trickle_timer_a9db997bcdf24c588ed48caa3b671f0af}{current\+Interval}})
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_trickle_timer_a48eaa0bb777a263de7460e54c0ca0bc4}{get\+Num\+Doublings}} () const
+\item 
+void \mbox{\hyperlink{classinet_1_1_trickle_timer_a88be378f6bf668e90ee93a8abe009dfc}{set\+Num\+Doublings}} (uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_trickle_timer_ae2ba8f9a6686cc57a81c17f89027bca0}{num\+Doublings}})
+\item 
+bool \mbox{\hyperlink{classinet_1_1_trickle_timer_aad059dab8a5ed8748e9e1902b5119cdd}{has\+Started}} ()
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_trickle_timer_a2ad819c7e90da14fae84a1d003d80943}{get\+Redundancy\+Const}} () const
+\item 
+void \mbox{\hyperlink{classinet_1_1_trickle_timer_a444fa54bd3651a885ab731dcb4d8f383}{set\+Redundancy\+Const}} (uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_trickle_timer_aeadb368810e80f5aa012f108cf5e8e27}{redundancy\+Const}})
+\item 
+int \mbox{\hyperlink{classinet_1_1_trickle_timer_a703b706c9ee8fefe7423b267b75348f0}{get\+Max\+Interval}} () const
+\item 
+void \mbox{\hyperlink{classinet_1_1_trickle_timer_a62e8d7019843657486b288ce72281b12}{set\+Max\+Interval}} (int \mbox{\hyperlink{classinet_1_1_trickle_timer_af4ed2983a63eac204181ae317e6869e0}{max\+Interval}})
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_trickle_timer_a605098633d39ee37a111dddd3c38852f}{get\+Min\+Interval}} () const
+\item 
+void \mbox{\hyperlink{classinet_1_1_trickle_timer_a57e6b205f5b4f5f0b87834e8bc273946}{set\+Min\+Interval}} (uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_trickle_timer_afe0f399e4250408b5254b2f86414234a}{min\+Interval}})
+\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_trickle_timer_afe0f399e4250408b5254b2f86414234a}{min\+Interval}}
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_trickle_timer_ae2ba8f9a6686cc57a81c17f89027bca0}{num\+Doublings}}
+\item 
+int \mbox{\hyperlink{classinet_1_1_trickle_timer_a9db997bcdf24c588ed48caa3b671f0af}{current\+Interval}}
+\item 
+int \mbox{\hyperlink{classinet_1_1_trickle_timer_af4ed2983a63eac204181ae317e6869e0}{max\+Interval}}
+\item 
+bool \mbox{\hyperlink{classinet_1_1_trickle_timer_a1d3618bc9dac52a6f6a82a2720ee0729}{started}}
+\item 
+c\+Message $\ast$ \mbox{\hyperlink{classinet_1_1_trickle_timer_a35a38b9e78573851616f5c0a5176ad0e}{trickle\+Trigger\+Event}}
+\item 
+c\+Message $\ast$ \mbox{\hyperlink{classinet_1_1_trickle_timer_ac1e1d6e77d9d830cb3769f7a70d14b52}{trickle\+Trigger\+Msg}}
+\item 
+c\+Message $\ast$ \mbox{\hyperlink{classinet_1_1_trickle_timer_aff546345d7c00da9cd05c0941fc2f52a}{interval\+Trigger\+Event}}
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_trickle_timer_aeadb368810e80f5aa012f108cf5e8e27}{redundancy\+Const}}
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_trickle_timer_a1adab02dc60400db10a38270d63b8639}{ctrl\+Msg\+Received\+Ctn}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line 46 of file Trickle\+Timer.\+h.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a38a19fdb90189eb52a086da1616efd8f}\label{classinet_1_1_trickle_timer_a38a19fdb90189eb52a086da1616efd8f}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!TrickleTimer@{TrickleTimer}}
+\index{TrickleTimer@{TrickleTimer}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{TrickleTimer()}{TrickleTimer()}}
+{\footnotesize\ttfamily inet\+::\+Trickle\+Timer\+::\+Trickle\+Timer (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Definition at line 28 of file Trickle\+Timer.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a4eadde9aaafdfbf6f928609a2958fb41}\label{classinet_1_1_trickle_timer_a4eadde9aaafdfbf6f928609a2958fb41}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!````~TrickleTimer@{$\sim$TrickleTimer}}
+\index{````~TrickleTimer@{$\sim$TrickleTimer}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{$\sim$TrickleTimer()}{~TrickleTimer()}}
+{\footnotesize\ttfamily inet\+::\+Trickle\+Timer\+::$\sim$\+Trickle\+Timer (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Definition at line 38 of file Trickle\+Timer.\+cc.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_ac0d01f2c13d8eb6bbe05417d2b09ff6b}\label{classinet_1_1_trickle_timer_ac0d01f2c13d8eb6bbe05417d2b09ff6b}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!checkRedundancyConst@{checkRedundancyConst}}
+\index{checkRedundancyConst@{checkRedundancyConst}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{checkRedundancyConst()}{checkRedundancyConst()}}
+{\footnotesize\ttfamily bool inet\+::\+Trickle\+Timer\+::check\+Redundancy\+Const (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Check if number of control messages heard in current interval is not greater than the threshold \textquotesingle{}redundancy constant\textquotesingle{} \mbox{[}R\+FC 6206\mbox{]}. 
+
+\begin{DoxyReturn}{Returns}
+true if control messages heard less than the redundancy const false otherwise 
+\end{DoxyReturn}
+
+
+Definition at line 125 of file Trickle\+Timer.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_aa6a6df9539f0208dd62e566aab0faf1e}\label{classinet_1_1_trickle_timer_aa6a6df9539f0208dd62e566aab0faf1e}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!ctrlMsgReceived@{ctrlMsgReceived}}
+\index{ctrlMsgReceived@{ctrlMsgReceived}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{ctrlMsgReceived()}{ctrlMsgReceived()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::ctrl\+Msg\+Received (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Increment counter of control messages heard during current interval \mbox{[}R\+FC 6550, 8.\+3\mbox{]} based on the external routing module events. 
+
+
+
+Definition at line 76 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a4d4adac48bb3d080d42534b40ddb97eb}\label{classinet_1_1_trickle_timer_a4d4adac48bb3d080d42534b40ddb97eb}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!getCtrlMsgReceived@{getCtrlMsgReceived}}
+\index{getCtrlMsgReceived@{getCtrlMsgReceived}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{getCtrlMsgReceived()}{getCtrlMsgReceived()}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Trickle\+Timer\+::get\+Ctrl\+Msg\+Received (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line 103 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a440f7b53b859ec5b7999524384c3eb09}\label{classinet_1_1_trickle_timer_a440f7b53b859ec5b7999524384c3eb09}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!getCurrentInterval@{getCurrentInterval}}
+\index{getCurrentInterval@{getCurrentInterval}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{getCurrentInterval()}{getCurrentInterval()}}
+{\footnotesize\ttfamily int inet\+::\+Trickle\+Timer\+::get\+Current\+Interval (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line 108 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a703b706c9ee8fefe7423b267b75348f0}\label{classinet_1_1_trickle_timer_a703b706c9ee8fefe7423b267b75348f0}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!getMaxInterval@{getMaxInterval}}
+\index{getMaxInterval@{getMaxInterval}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{getMaxInterval()}{getMaxInterval()}}
+{\footnotesize\ttfamily int inet\+::\+Trickle\+Timer\+::get\+Max\+Interval (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line 119 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a605098633d39ee37a111dddd3c38852f}\label{classinet_1_1_trickle_timer_a605098633d39ee37a111dddd3c38852f}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!getMinInterval@{getMinInterval}}
+\index{getMinInterval@{getMinInterval}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{getMinInterval()}{getMinInterval()}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Trickle\+Timer\+::get\+Min\+Interval (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line 122 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a48eaa0bb777a263de7460e54c0ca0bc4}\label{classinet_1_1_trickle_timer_a48eaa0bb777a263de7460e54c0ca0bc4}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!getNumDoublings@{getNumDoublings}}
+\index{getNumDoublings@{getNumDoublings}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{getNumDoublings()}{getNumDoublings()}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Trickle\+Timer\+::get\+Num\+Doublings (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line 111 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a2ad819c7e90da14fae84a1d003d80943}\label{classinet_1_1_trickle_timer_a2ad819c7e90da14fae84a1d003d80943}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!getRedundancyConst@{getRedundancyConst}}
+\index{getRedundancyConst@{getRedundancyConst}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{getRedundancyConst()}{getRedundancyConst()}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Trickle\+Timer\+::get\+Redundancy\+Const (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line 116 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a0d39318fbf68bf49fc34e8e27aa96ae6}\label{classinet_1_1_trickle_timer_a0d39318fbf68bf49fc34e8e27aa96ae6}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!handleMessage@{handleMessage}}
+\index{handleMessage@{handleMessage}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{handleMessage()}{handleMessage()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::handle\+Message (\begin{DoxyParamCaption}\item[{c\+Message $\ast$}]{message }\end{DoxyParamCaption})}
+
+
+
+Messsage processing. 
+
+
+
+Definition at line 79 of file Trickle\+Timer.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a0723156fc9caa7f68245ef162fb1be25}\label{classinet_1_1_trickle_timer_a0723156fc9caa7f68245ef162fb1be25}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!handleMessageWhenUp@{handleMessageWhenUp}}
+\index{handleMessageWhenUp@{handleMessageWhenUp}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{handleMessageWhenUp()}{handleMessageWhenUp()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::handle\+Message\+When\+Up (\begin{DoxyParamCaption}\item[{c\+Message $\ast$}]{message }\end{DoxyParamCaption})}
+
+
+
+Definition at line 71 of file Trickle\+Timer.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_aad059dab8a5ed8748e9e1902b5119cdd}\label{classinet_1_1_trickle_timer_aad059dab8a5ed8748e9e1902b5119cdd}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!hasStarted@{hasStarted}}
+\index{hasStarted@{hasStarted}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{hasStarted()}{hasStarted()}}
+{\footnotesize\ttfamily bool inet\+::\+Trickle\+Timer\+::has\+Started (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Definition at line 120 of file Trickle\+Timer.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_aa870911b5469dfadb17817c3073d27d5}\label{classinet_1_1_trickle_timer_aa870911b5469dfadb17817c3073d27d5}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!processSelfMessage@{processSelfMessage}}
+\index{processSelfMessage@{processSelfMessage}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{processSelfMessage()}{processSelfMessage()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::process\+Self\+Message (\begin{DoxyParamCaption}\item[{c\+Message $\ast$}]{message }\end{DoxyParamCaption})}
+
+
+
+Definition at line 85 of file Trickle\+Timer.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a8cf9c483b4f418e003e709b6d70bcb69}\label{classinet_1_1_trickle_timer_a8cf9c483b4f418e003e709b6d70bcb69}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!reset@{reset}}
+\index{reset@{reset}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{reset()}{reset()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::reset (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 130 of file Trickle\+Timer.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_ae766175372e4ff3795ee1cd2a7277582}\label{classinet_1_1_trickle_timer_ae766175372e4ff3795ee1cd2a7277582}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!scheduleNext@{scheduleNext}}
+\index{scheduleNext@{scheduleNext}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{scheduleNext()}{scheduleNext()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::schedule\+Next (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Schedule next trickle trigger event, causing transmission/broadcast of control message from routing module. 
+
+
+
+Definition at line 109 of file Trickle\+Timer.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_aaa0d3357d03a2a444a647b5059007f67}\label{classinet_1_1_trickle_timer_aaa0d3357d03a2a444a647b5059007f67}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!setCtrlMsgReceived@{setCtrlMsgReceived}}
+\index{setCtrlMsgReceived@{setCtrlMsgReceived}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{setCtrlMsgReceived()}{setCtrlMsgReceived()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::set\+Ctrl\+Msg\+Received (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{ctrl\+Msg\+Received\+Ctn }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line 104 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a44c4df38c4b0a242ba5c3fc8980e4710}\label{classinet_1_1_trickle_timer_a44c4df38c4b0a242ba5c3fc8980e4710}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!setCurrentInterval@{setCurrentInterval}}
+\index{setCurrentInterval@{setCurrentInterval}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{setCurrentInterval()}{setCurrentInterval()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::set\+Current\+Interval (\begin{DoxyParamCaption}\item[{int}]{current\+Interval }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line 109 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a62e8d7019843657486b288ce72281b12}\label{classinet_1_1_trickle_timer_a62e8d7019843657486b288ce72281b12}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!setMaxInterval@{setMaxInterval}}
+\index{setMaxInterval@{setMaxInterval}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{setMaxInterval()}{setMaxInterval()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::set\+Max\+Interval (\begin{DoxyParamCaption}\item[{int}]{max\+Interval }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line 120 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a57e6b205f5b4f5f0b87834e8bc273946}\label{classinet_1_1_trickle_timer_a57e6b205f5b4f5f0b87834e8bc273946}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!setMinInterval@{setMinInterval}}
+\index{setMinInterval@{setMinInterval}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{setMinInterval()}{setMinInterval()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::set\+Min\+Interval (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{min\+Interval }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line 123 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a88be378f6bf668e90ee93a8abe009dfc}\label{classinet_1_1_trickle_timer_a88be378f6bf668e90ee93a8abe009dfc}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!setNumDoublings@{setNumDoublings}}
+\index{setNumDoublings@{setNumDoublings}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{setNumDoublings()}{setNumDoublings()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::set\+Num\+Doublings (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{num\+Doublings }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line 112 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a444fa54bd3651a885ab731dcb4d8f383}\label{classinet_1_1_trickle_timer_a444fa54bd3651a885ab731dcb4d8f383}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!setRedundancyConst@{setRedundancyConst}}
+\index{setRedundancyConst@{setRedundancyConst}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{setRedundancyConst()}{setRedundancyConst()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::set\+Redundancy\+Const (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{redundancy\+Const }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line 117 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a4c02410daef0e1e30be9f1a03f4b797e}\label{classinet_1_1_trickle_timer_a4c02410daef0e1e30be9f1a03f4b797e}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!start@{start}}
+\index{start@{start}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{start()}{start()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::start (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Lifecycle. 
+
+
+
+Definition at line 66 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a512a9a91eb8dade03cfa8ae71740fc7f}\label{classinet_1_1_trickle_timer_a512a9a91eb8dade03cfa8ae71740fc7f}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!start@{start}}
+\index{start@{start}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{start()}{start()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::start (\begin{DoxyParamCaption}\item[{bool}]{warmup\+Delay }\end{DoxyParamCaption})}
+
+
+
+Definition at line 53 of file Trickle\+Timer.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a63c27d0c2bc47691cc988493ebf78cdb}\label{classinet_1_1_trickle_timer_a63c27d0c2bc47691cc988493ebf78cdb}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!stop@{stop}}
+\index{stop@{stop}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{stop()}{stop()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 42 of file Trickle\+Timer.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a431c374ceab3945928a297e15df605d9}\label{classinet_1_1_trickle_timer_a431c374ceab3945928a297e15df605d9}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!suspend@{suspend}}
+\index{suspend@{suspend}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{suspend()}{suspend()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::suspend (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 148 of file Trickle\+Timer.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a2fad708bf96923e7864e3de4b9d7e53d}\label{classinet_1_1_trickle_timer_a2fad708bf96923e7864e3de4b9d7e53d}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!updateInterval@{updateInterval}}
+\index{updateInterval@{updateInterval}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{updateInterval()}{updateInterval()}}
+{\footnotesize\ttfamily void inet\+::\+Trickle\+Timer\+::update\+Interval (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Double current interval if no inconsistencies detected. 
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a1adab02dc60400db10a38270d63b8639}\label{classinet_1_1_trickle_timer_a1adab02dc60400db10a38270d63b8639}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!ctrlMsgReceivedCtn@{ctrlMsgReceivedCtn}}
+\index{ctrlMsgReceivedCtn@{ctrlMsgReceivedCtn}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{ctrlMsgReceivedCtn}{ctrlMsgReceivedCtn}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Trickle\+Timer\+::ctrl\+Msg\+Received\+Ctn\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 59 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a9db997bcdf24c588ed48caa3b671f0af}\label{classinet_1_1_trickle_timer_a9db997bcdf24c588ed48caa3b671f0af}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!currentInterval@{currentInterval}}
+\index{currentInterval@{currentInterval}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{currentInterval}{currentInterval}}
+{\footnotesize\ttfamily int inet\+::\+Trickle\+Timer\+::current\+Interval\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 51 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_aff546345d7c00da9cd05c0941fc2f52a}\label{classinet_1_1_trickle_timer_aff546345d7c00da9cd05c0941fc2f52a}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!intervalTriggerEvent@{intervalTriggerEvent}}
+\index{intervalTriggerEvent@{intervalTriggerEvent}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{intervalTriggerEvent}{intervalTriggerEvent}}
+{\footnotesize\ttfamily c\+Message$\ast$ inet\+::\+Trickle\+Timer\+::interval\+Trigger\+Event\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 56 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_af4ed2983a63eac204181ae317e6869e0}\label{classinet_1_1_trickle_timer_af4ed2983a63eac204181ae317e6869e0}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!maxInterval@{maxInterval}}
+\index{maxInterval@{maxInterval}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{maxInterval}{maxInterval}}
+{\footnotesize\ttfamily int inet\+::\+Trickle\+Timer\+::max\+Interval\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 52 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_afe0f399e4250408b5254b2f86414234a}\label{classinet_1_1_trickle_timer_afe0f399e4250408b5254b2f86414234a}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!minInterval@{minInterval}}
+\index{minInterval@{minInterval}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{minInterval}{minInterval}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Trickle\+Timer\+::min\+Interval\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 49 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_ae2ba8f9a6686cc57a81c17f89027bca0}\label{classinet_1_1_trickle_timer_ae2ba8f9a6686cc57a81c17f89027bca0}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!numDoublings@{numDoublings}}
+\index{numDoublings@{numDoublings}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{numDoublings}{numDoublings}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Trickle\+Timer\+::num\+Doublings\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 50 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_aeadb368810e80f5aa012f108cf5e8e27}\label{classinet_1_1_trickle_timer_aeadb368810e80f5aa012f108cf5e8e27}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!redundancyConst@{redundancyConst}}
+\index{redundancyConst@{redundancyConst}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{redundancyConst}{redundancyConst}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Trickle\+Timer\+::redundancy\+Const\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 58 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a1d3618bc9dac52a6f6a82a2720ee0729}\label{classinet_1_1_trickle_timer_a1d3618bc9dac52a6f6a82a2720ee0729}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!started@{started}}
+\index{started@{started}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{started}{started}}
+{\footnotesize\ttfamily bool inet\+::\+Trickle\+Timer\+::started\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 53 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_a35a38b9e78573851616f5c0a5176ad0e}\label{classinet_1_1_trickle_timer_a35a38b9e78573851616f5c0a5176ad0e}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!trickleTriggerEvent@{trickleTriggerEvent}}
+\index{trickleTriggerEvent@{trickleTriggerEvent}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{trickleTriggerEvent}{trickleTriggerEvent}}
+{\footnotesize\ttfamily c\+Message$\ast$ inet\+::\+Trickle\+Timer\+::trickle\+Trigger\+Event\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 54 of file Trickle\+Timer.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_trickle_timer_ac1e1d6e77d9d830cb3769f7a70d14b52}\label{classinet_1_1_trickle_timer_ac1e1d6e77d9d830cb3769f7a70d14b52}} 
+\index{inet::TrickleTimer@{inet::TrickleTimer}!trickleTriggerMsg@{trickleTriggerMsg}}
+\index{trickleTriggerMsg@{trickleTriggerMsg}!inet::TrickleTimer@{inet::TrickleTimer}}
+\doxysubsubsection{\texorpdfstring{trickleTriggerMsg}{trickleTriggerMsg}}
+{\footnotesize\ttfamily c\+Message$\ast$ inet\+::\+Trickle\+Timer\+::trickle\+Trigger\+Msg\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 55 of file Trickle\+Timer.\+h.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/\mbox{\hyperlink{_trickle_timer_8h}{Trickle\+Timer.\+h}}\item 
+src/\mbox{\hyperlink{_trickle_timer_8cc}{Trickle\+Timer.\+cc}}\end{DoxyCompactItemize}

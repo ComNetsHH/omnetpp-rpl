@@ -1,0 +1,67 @@
+%description:
+Dio processing test
+
+%includes:
+#include "Rpl.h"
+#include "Rpl_m.h"
+
+%global:
+using namespace inet;
+
+auto dio = std::make_shared<Dio>();
+// Node's RPL instance data (global)
+Ipv6Address dodagId = Ipv6Address("::1");
+Ipv6Address addr2 = Ipv6Address("::2");
+Ipv6Address preferredParentAddr = Ipv6Address("::3"); 
+uint16_t rank = 3;
+
+static void processDio(std::shared_ptr <Dio> &dio)
+{
+	// Checking DIO origin 
+	if (dio->getDodagId() == dodagId) {
+		EV << "DIO should be processed" << "\n";
+ 	} else {
+ 		EV << "Unknown DODAG, DIO should NOT be processed" << "\n";
+ 		return;
+ 	}
+    
+    // Poisoning test
+	if (dio->getRank() == INF_RANK 
+		&& dio->getSrcAddress().getSuffix(112) == preferredParentAddr.getSuffix(112))
+	{
+		EV_DETAIL << "Poisoning detected" << endl;
+		return;
+	}
+    
+    // Simplified advertised rank test  
+    if (dio->getRank() <= rank) {
+    	EV_DETAIL << "Lower or equal rank advertised, parent sets to be updated";
+    }
+	else {
+		EV_DETAIL << "Higher rank advertised, discarding DIO" << endl;     
+	}
+	
+	
+}
+
+
+%activity:
+dio->setDodagId(addr2);
+dio->setRank(3);
+processDio(dio);
+dio->setDodagId(dodagId);
+processDio(dio);
+dio->setRank(INF_RANK);
+dio->setSrcAddress(preferredParentAddr);
+processDio(dio);
+EV << "\n.";
+
+%contains: stdout
+Unknown DODAG, DIO should NOT be processed
+DIO should be processed
+Lower or equal rank advertised, parent sets to be updated
+DIO should be processed
+Poisoning detected
+
+.
+

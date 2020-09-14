@@ -1,0 +1,522 @@
+\hypertarget{classinet_1_1_dao}{}\doxysection{inet\+::Dao Class Reference}
+\label{classinet_1_1_dao}\index{inet::Dao@{inet::Dao}}
+
+
+Class generated from {\ttfamily Rpl.\+msg\+:93} by nedtool.  
+
+
+
+
+{\ttfamily \#include $<$Rpl\+\_\+m.\+h$>$}
+
+Inheritance diagram for inet\+::Dao\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classinet_1_1_dao}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classinet_1_1_dao_aeef37022f02999027e252d7337842ed1}{Dao}} ()
+\item 
+\mbox{\hyperlink{classinet_1_1_dao_a8744136a7233564f12fa0de19f55d0d6}{Dao}} (const \mbox{\hyperlink{classinet_1_1_dao}{Dao}} \&other)
+\item 
+virtual \mbox{\hyperlink{classinet_1_1_dao_aaa52993f1103afaf306684d53a2fc405}{$\sim$\+Dao}} ()
+\item 
+\mbox{\hyperlink{classinet_1_1_dao}{Dao}} \& \mbox{\hyperlink{classinet_1_1_dao_ac2df3f0fadd6c22bece294471bbe5307}{operator=}} (const \mbox{\hyperlink{classinet_1_1_dao}{Dao}} \&other)
+\item 
+virtual \mbox{\hyperlink{classinet_1_1_dao}{Dao}} $\ast$ \mbox{\hyperlink{classinet_1_1_dao_aa1cbe8b905cead5fa5bb7c044d5c6bc9}{dup}} () const override
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_dao_a2c115fddde887be1eff766a30976cfe0}{parsim\+Pack}} (omnetpp\+::c\+Comm\+Buffer $\ast$b) const override
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_dao_a333eb8b68b5cd88c448895a675f78b21}{parsim\+Unpack}} (omnetpp\+::c\+Comm\+Buffer $\ast$b) override
+\item 
+virtual uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_dao_a8baf242a46b7385e8069222a772135f6}{get\+Dao\+Seq\+Num}} () const
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_dao_ae400213bb0232b93554a2d526e0fd94d}{set\+Dao\+Seq\+Num}} (uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_dao_a03332f119952d2f31d1b83c47a5c7e01}{dao\+Seq\+Num}})
+\item 
+virtual bool \mbox{\hyperlink{classinet_1_1_dao_ac580ecd8152769ff5cb8f62e3c49ae39}{get\+Dao\+Ack\+Required}} () const
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_dao_ac10404dcd3cee0e7cad1022ced266834}{set\+Dao\+Ack\+Required}} (bool \mbox{\hyperlink{classinet_1_1_dao_a03441b5fc721841aa3f00a0354846315}{dao\+Ack\+Required}})
+\item 
+virtual const Ipv6\+Address \& \mbox{\hyperlink{classinet_1_1_dao_ac09f848043d13739466f5db471f43342}{get\+Reachable\+Dest}} () const
+\item 
+virtual Ipv6\+Address \& \mbox{\hyperlink{classinet_1_1_dao_a835d4877e95bdf0a267b83dd4a77cc62}{get\+Reachable\+Dest\+For\+Update}} ()
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_dao_abb13d5da8d2676b5aed63f9bd532b294}{set\+Reachable\+Dest}} (const Ipv6\+Address \&\mbox{\hyperlink{classinet_1_1_dao_a22dc34951a89a99671fbf184ee12edd7}{reachable\+Dest}})
+\item 
+virtual int \mbox{\hyperlink{classinet_1_1_rpl_packet_a0342c2cf4d60a8fa81dba36c1450a4b9}{get\+Hop\+Limit}} () const
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_packet_a183c0d10b94982784f2e307767b411e4}{set\+Hop\+Limit}} (int \mbox{\hyperlink{classinet_1_1_rpl_packet_a9255b0d39d023dbbceec1473dce3df31}{hop\+Limit}})
+\item 
+virtual const Ipv6\+Address \& \mbox{\hyperlink{classinet_1_1_rpl_packet_a99d0c2c82ddf4d74195f9da23953212c}{get\+Dest\+Address}} () const
+\item 
+virtual Ipv6\+Address \& \mbox{\hyperlink{classinet_1_1_rpl_packet_a4a3d9cfe845d617949bce4ef26c23c47}{get\+Dest\+Address\+For\+Update}} ()
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_packet_a5e5dde13b7bb2102dd5670a493dde667}{set\+Dest\+Address}} (const Ipv6\+Address \&\mbox{\hyperlink{classinet_1_1_rpl_packet_aeb8f2b212e24bad61efb30ca962613fc}{dest\+Address}})
+\item 
+virtual const Ipv6\+Address \& \mbox{\hyperlink{classinet_1_1_rpl_packet_adc270d0a525a54dfb99d641afdf9ca38}{get\+Src\+Address}} () const
+\item 
+virtual Ipv6\+Address \& \mbox{\hyperlink{classinet_1_1_rpl_packet_a1f3f4fe99a393c27920cc6da22fe24f1}{get\+Src\+Address\+For\+Update}} ()
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_packet_ac6c8f2aa030599fd3dd042f48f7219cc}{set\+Src\+Address}} (const Ipv6\+Address \&\mbox{\hyperlink{classinet_1_1_rpl_packet_aff1db3575112464bd3cf611556365c60}{src\+Address}})
+\item 
+virtual uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_packet_a41454b233fc3e9df254c606b2d09911a}{get\+Instance\+Id}} () const
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_packet_a57be261158f06d160956b39a2a929d0e}{set\+Instance\+Id}} (uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_packet_afd5f63509e364caa5be162add25790f7}{instance\+Id}})
+\item 
+virtual const Ipv6\+Address \& \mbox{\hyperlink{classinet_1_1_rpl_packet_ace19adfe14fde1f2bb68c3fcb80406fe}{get\+Dodag\+Id}} () const
+\item 
+virtual Ipv6\+Address \& \mbox{\hyperlink{classinet_1_1_rpl_packet_a229b0f07c3a6cfd46484f50b6896aad6}{get\+Dodag\+Id\+For\+Update}} ()
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_packet_aef8d8a347337550f593f9b6802f3173d}{set\+Dodag\+Id}} (const Ipv6\+Address \&\mbox{\hyperlink{classinet_1_1_rpl_packet_ab048fa6d3bf114451e8638e793203f28}{dodag\+Id}})
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \mbox{\hyperlink{classinet_1_1_dao_adf0f0038fea9e6d088b2ad4fbac3e8d3}{operator==}} (const \mbox{\hyperlink{classinet_1_1_dao}{Dao}} \&)
+\item 
+bool \mbox{\hyperlink{classinet_1_1_rpl_packet_a3e5ff2309e6981a19ecf6a6282418651}{operator==}} (const \mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}} \&)
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_dao_a03332f119952d2f31d1b83c47a5c7e01}{dao\+Seq\+Num}} = 0
+\item 
+bool \mbox{\hyperlink{classinet_1_1_dao_a03441b5fc721841aa3f00a0354846315}{dao\+Ack\+Required}} = false
+\item 
+Ipv6\+Address \mbox{\hyperlink{classinet_1_1_dao_a22dc34951a89a99671fbf184ee12edd7}{reachable\+Dest}}
+\item 
+int \mbox{\hyperlink{classinet_1_1_rpl_packet_a9255b0d39d023dbbceec1473dce3df31}{hop\+Limit}} = 0
+\item 
+Ipv6\+Address \mbox{\hyperlink{classinet_1_1_rpl_packet_aeb8f2b212e24bad61efb30ca962613fc}{dest\+Address}}
+\item 
+Ipv6\+Address \mbox{\hyperlink{classinet_1_1_rpl_packet_aff1db3575112464bd3cf611556365c60}{src\+Address}}
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_packet_afd5f63509e364caa5be162add25790f7}{instance\+Id}} = 0
+\item 
+Ipv6\+Address \mbox{\hyperlink{classinet_1_1_rpl_packet_ab048fa6d3bf114451e8638e793203f28}{dodag\+Id}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classinet_1_1_dao_ad8df72ccd6d7d55dbd632fc95143e335}{copy}} (const \mbox{\hyperlink{classinet_1_1_dao}{Dao}} \&other)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Class generated from {\ttfamily Rpl.\+msg\+:93} by nedtool. 
+
+
+\begin{DoxyPre}
+// Destination Advertisement Object [RFC 6550, 6.4] 
+class \mbox{\hyperlink{classinet_1_1_dao}{Dao}} extends \mbox{\hyperlink{classinet_1_1_rpl_packet}{RplPacket}}
+\{
+    uint8\_t daoSeqNum;          // ID for each unique DAO sent by a node
+    bool daoAckRequired;        // indicates whether DAO-\/ACK is expected by the sender 
+    Ipv6Address reachableDest;  // advertised reachable destination\end{DoxyPre}
+
+
+
+\begin{DoxyPre}\}
+\end{DoxyPre}
+ 
+
+Definition at line 287 of file Rpl\+\_\+m.\+h.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classinet_1_1_dao_aeef37022f02999027e252d7337842ed1}\label{classinet_1_1_dao_aeef37022f02999027e252d7337842ed1}} 
+\index{inet::Dao@{inet::Dao}!Dao@{Dao}}
+\index{Dao@{Dao}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{Dao()}{Dao()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily inet\+::\+Dao\+::\+Dao (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classinet_1_1_dao_a8744136a7233564f12fa0de19f55d0d6}\label{classinet_1_1_dao_a8744136a7233564f12fa0de19f55d0d6}} 
+\index{inet::Dao@{inet::Dao}!Dao@{Dao}}
+\index{Dao@{Dao}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{Dao()}{Dao()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily inet\+::\+Dao\+::\+Dao (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_dao}{Dao}} \&}]{other }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1384 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_aaa52993f1103afaf306684d53a2fc405}\label{classinet_1_1_dao_aaa52993f1103afaf306684d53a2fc405}} 
+\index{inet::Dao@{inet::Dao}!````~Dao@{$\sim$Dao}}
+\index{````~Dao@{$\sim$Dao}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{$\sim$Dao()}{~Dao()}}
+{\footnotesize\ttfamily inet\+::\+Dao\+::$\sim$\+Dao (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 1389 of file Rpl\+\_\+m.\+cc.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classinet_1_1_dao_ad8df72ccd6d7d55dbd632fc95143e335}\label{classinet_1_1_dao_ad8df72ccd6d7d55dbd632fc95143e335}} 
+\index{inet::Dao@{inet::Dao}!copy@{copy}}
+\index{copy@{copy}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{copy()}{copy()}}
+{\footnotesize\ttfamily void inet\+::\+Dao\+::copy (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_dao}{Dao}} \&}]{other }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 1401 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_aa1cbe8b905cead5fa5bb7c044d5c6bc9}\label{classinet_1_1_dao_aa1cbe8b905cead5fa5bb7c044d5c6bc9}} 
+\index{inet::Dao@{inet::Dao}!dup@{dup}}
+\index{dup@{dup}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{dup()}{dup()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{classinet_1_1_dao}{Dao}}$\ast$ inet\+::\+Dao\+::dup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classinet_1_1_rpl_packet_af4e5f00325d40ebd9c4eb1bf7505a056}{inet\+::\+Rpl\+Packet}}.
+
+
+
+Definition at line 306 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_dao_ac580ecd8152769ff5cb8f62e3c49ae39}\label{classinet_1_1_dao_ac580ecd8152769ff5cb8f62e3c49ae39}} 
+\index{inet::Dao@{inet::Dao}!getDaoAckRequired@{getDaoAckRequired}}
+\index{getDaoAckRequired@{getDaoAckRequired}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{getDaoAckRequired()}{getDaoAckRequired()}}
+{\footnotesize\ttfamily bool inet\+::\+Dao\+::get\+Dao\+Ack\+Required (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 1435 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_a8baf242a46b7385e8069222a772135f6}\label{classinet_1_1_dao_a8baf242a46b7385e8069222a772135f6}} 
+\index{inet::Dao@{inet::Dao}!getDaoSeqNum@{getDaoSeqNum}}
+\index{getDaoSeqNum@{getDaoSeqNum}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{getDaoSeqNum()}{getDaoSeqNum()}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Dao\+::get\+Dao\+Seq\+Num (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 1424 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a99d0c2c82ddf4d74195f9da23953212c}\label{classinet_1_1_rpl_packet_a99d0c2c82ddf4d74195f9da23953212c}} 
+\index{inet::Dao@{inet::Dao}!getDestAddress@{getDestAddress}}
+\index{getDestAddress@{getDestAddress}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{getDestAddress()}{getDestAddress()}}
+{\footnotesize\ttfamily const Ipv6\+Address \& inet\+::\+Rpl\+Packet\+::get\+Dest\+Address (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 595 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a4a3d9cfe845d617949bce4ef26c23c47}\label{classinet_1_1_rpl_packet_a4a3d9cfe845d617949bce4ef26c23c47}} 
+\index{inet::Dao@{inet::Dao}!getDestAddressForUpdate@{getDestAddressForUpdate}}
+\index{getDestAddressForUpdate@{getDestAddressForUpdate}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{getDestAddressForUpdate()}{getDestAddressForUpdate()}}
+{\footnotesize\ttfamily virtual Ipv6\+Address\& inet\+::\+Rpl\+Packet\+::get\+Dest\+Address\+For\+Update (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 178 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_ace19adfe14fde1f2bb68c3fcb80406fe}\label{classinet_1_1_rpl_packet_ace19adfe14fde1f2bb68c3fcb80406fe}} 
+\index{inet::Dao@{inet::Dao}!getDodagId@{getDodagId}}
+\index{getDodagId@{getDodagId}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{getDodagId()}{getDodagId()}}
+{\footnotesize\ttfamily const Ipv6\+Address \& inet\+::\+Rpl\+Packet\+::get\+Dodag\+Id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 628 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a229b0f07c3a6cfd46484f50b6896aad6}\label{classinet_1_1_rpl_packet_a229b0f07c3a6cfd46484f50b6896aad6}} 
+\index{inet::Dao@{inet::Dao}!getDodagIdForUpdate@{getDodagIdForUpdate}}
+\index{getDodagIdForUpdate@{getDodagIdForUpdate}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{getDodagIdForUpdate()}{getDodagIdForUpdate()}}
+{\footnotesize\ttfamily virtual Ipv6\+Address\& inet\+::\+Rpl\+Packet\+::get\+Dodag\+Id\+For\+Update (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 186 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a0342c2cf4d60a8fa81dba36c1450a4b9}\label{classinet_1_1_rpl_packet_a0342c2cf4d60a8fa81dba36c1450a4b9}} 
+\index{inet::Dao@{inet::Dao}!getHopLimit@{getHopLimit}}
+\index{getHopLimit@{getHopLimit}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{getHopLimit()}{getHopLimit()}}
+{\footnotesize\ttfamily int inet\+::\+Rpl\+Packet\+::get\+Hop\+Limit (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 584 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a41454b233fc3e9df254c606b2d09911a}\label{classinet_1_1_rpl_packet_a41454b233fc3e9df254c606b2d09911a}} 
+\index{inet::Dao@{inet::Dao}!getInstanceId@{getInstanceId}}
+\index{getInstanceId@{getInstanceId}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{getInstanceId()}{getInstanceId()}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Rpl\+Packet\+::get\+Instance\+Id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 617 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_ac09f848043d13739466f5db471f43342}\label{classinet_1_1_dao_ac09f848043d13739466f5db471f43342}} 
+\index{inet::Dao@{inet::Dao}!getReachableDest@{getReachableDest}}
+\index{getReachableDest@{getReachableDest}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{getReachableDest()}{getReachableDest()}}
+{\footnotesize\ttfamily const Ipv6\+Address \& inet\+::\+Dao\+::get\+Reachable\+Dest (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 1446 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_a835d4877e95bdf0a267b83dd4a77cc62}\label{classinet_1_1_dao_a835d4877e95bdf0a267b83dd4a77cc62}} 
+\index{inet::Dao@{inet::Dao}!getReachableDestForUpdate@{getReachableDestForUpdate}}
+\index{getReachableDestForUpdate@{getReachableDestForUpdate}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{getReachableDestForUpdate()}{getReachableDestForUpdate()}}
+{\footnotesize\ttfamily virtual Ipv6\+Address\& inet\+::\+Dao\+::get\+Reachable\+Dest\+For\+Update (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 316 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_adc270d0a525a54dfb99d641afdf9ca38}\label{classinet_1_1_rpl_packet_adc270d0a525a54dfb99d641afdf9ca38}} 
+\index{inet::Dao@{inet::Dao}!getSrcAddress@{getSrcAddress}}
+\index{getSrcAddress@{getSrcAddress}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{getSrcAddress()}{getSrcAddress()}}
+{\footnotesize\ttfamily const Ipv6\+Address \& inet\+::\+Rpl\+Packet\+::get\+Src\+Address (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 606 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a1f3f4fe99a393c27920cc6da22fe24f1}\label{classinet_1_1_rpl_packet_a1f3f4fe99a393c27920cc6da22fe24f1}} 
+\index{inet::Dao@{inet::Dao}!getSrcAddressForUpdate@{getSrcAddressForUpdate}}
+\index{getSrcAddressForUpdate@{getSrcAddressForUpdate}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{getSrcAddressForUpdate()}{getSrcAddressForUpdate()}}
+{\footnotesize\ttfamily virtual Ipv6\+Address\& inet\+::\+Rpl\+Packet\+::get\+Src\+Address\+For\+Update (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 181 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_dao_ac2df3f0fadd6c22bece294471bbe5307}\label{classinet_1_1_dao_ac2df3f0fadd6c22bece294471bbe5307}} 
+\index{inet::Dao@{inet::Dao}!operator=@{operator=}}
+\index{operator=@{operator=}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{operator=()}{operator=()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classinet_1_1_dao}{Dao}} \& inet\+::\+Dao\+::operator= (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_dao}{Dao}} \&}]{other }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1393 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_adf0f0038fea9e6d088b2ad4fbac3e8d3}\label{classinet_1_1_dao_adf0f0038fea9e6d088b2ad4fbac3e8d3}} 
+\index{inet::Dao@{inet::Dao}!operator==@{operator==}}
+\index{operator==@{operator==}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{operator==()}{operator==()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily bool inet\+::\+Dao\+::operator== (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_dao}{Dao}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a3e5ff2309e6981a19ecf6a6282418651}\label{classinet_1_1_rpl_packet_a3e5ff2309e6981a19ecf6a6282418651}} 
+\index{inet::Dao@{inet::Dao}!operator==@{operator==}}
+\index{operator==@{operator==}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{operator==()}{operator==()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily bool inet\+::\+Rpl\+Packet\+::operator== (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [inherited]}}
+
+\mbox{\Hypertarget{classinet_1_1_dao_a2c115fddde887be1eff766a30976cfe0}\label{classinet_1_1_dao_a2c115fddde887be1eff766a30976cfe0}} 
+\index{inet::Dao@{inet::Dao}!parsimPack@{parsimPack}}
+\index{parsimPack@{parsimPack}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{parsimPack()}{parsimPack()}}
+{\footnotesize\ttfamily void inet\+::\+Dao\+::parsim\+Pack (\begin{DoxyParamCaption}\item[{omnetpp\+::c\+Comm\+Buffer $\ast$}]{b }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classinet_1_1_rpl_packet_af4b0907e2cb8b2cbc34e46197d8cc90f}{inet\+::\+Rpl\+Packet}}.
+
+
+
+Definition at line 1408 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_a333eb8b68b5cd88c448895a675f78b21}\label{classinet_1_1_dao_a333eb8b68b5cd88c448895a675f78b21}} 
+\index{inet::Dao@{inet::Dao}!parsimUnpack@{parsimUnpack}}
+\index{parsimUnpack@{parsimUnpack}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{parsimUnpack()}{parsimUnpack()}}
+{\footnotesize\ttfamily void inet\+::\+Dao\+::parsim\+Unpack (\begin{DoxyParamCaption}\item[{omnetpp\+::c\+Comm\+Buffer $\ast$}]{b }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classinet_1_1_rpl_packet_abd805006838257db74c8803b3696984a}{inet\+::\+Rpl\+Packet}}.
+
+
+
+Definition at line 1416 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_ac10404dcd3cee0e7cad1022ced266834}\label{classinet_1_1_dao_ac10404dcd3cee0e7cad1022ced266834}} 
+\index{inet::Dao@{inet::Dao}!setDaoAckRequired@{setDaoAckRequired}}
+\index{setDaoAckRequired@{setDaoAckRequired}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{setDaoAckRequired()}{setDaoAckRequired()}}
+{\footnotesize\ttfamily void inet\+::\+Dao\+::set\+Dao\+Ack\+Required (\begin{DoxyParamCaption}\item[{bool}]{dao\+Ack\+Required }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 1440 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_ae400213bb0232b93554a2d526e0fd94d}\label{classinet_1_1_dao_ae400213bb0232b93554a2d526e0fd94d}} 
+\index{inet::Dao@{inet::Dao}!setDaoSeqNum@{setDaoSeqNum}}
+\index{setDaoSeqNum@{setDaoSeqNum}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{setDaoSeqNum()}{setDaoSeqNum()}}
+{\footnotesize\ttfamily void inet\+::\+Dao\+::set\+Dao\+Seq\+Num (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{dao\+Seq\+Num }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 1429 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a5e5dde13b7bb2102dd5670a493dde667}\label{classinet_1_1_rpl_packet_a5e5dde13b7bb2102dd5670a493dde667}} 
+\index{inet::Dao@{inet::Dao}!setDestAddress@{setDestAddress}}
+\index{setDestAddress@{setDestAddress}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{setDestAddress()}{setDestAddress()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Packet\+::set\+Dest\+Address (\begin{DoxyParamCaption}\item[{const Ipv6\+Address \&}]{dest\+Address }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 600 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_aef8d8a347337550f593f9b6802f3173d}\label{classinet_1_1_rpl_packet_aef8d8a347337550f593f9b6802f3173d}} 
+\index{inet::Dao@{inet::Dao}!setDodagId@{setDodagId}}
+\index{setDodagId@{setDodagId}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{setDodagId()}{setDodagId()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Packet\+::set\+Dodag\+Id (\begin{DoxyParamCaption}\item[{const Ipv6\+Address \&}]{dodag\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 633 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a183c0d10b94982784f2e307767b411e4}\label{classinet_1_1_rpl_packet_a183c0d10b94982784f2e307767b411e4}} 
+\index{inet::Dao@{inet::Dao}!setHopLimit@{setHopLimit}}
+\index{setHopLimit@{setHopLimit}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{setHopLimit()}{setHopLimit()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Packet\+::set\+Hop\+Limit (\begin{DoxyParamCaption}\item[{int}]{hop\+Limit }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 589 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a57be261158f06d160956b39a2a929d0e}\label{classinet_1_1_rpl_packet_a57be261158f06d160956b39a2a929d0e}} 
+\index{inet::Dao@{inet::Dao}!setInstanceId@{setInstanceId}}
+\index{setInstanceId@{setInstanceId}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{setInstanceId()}{setInstanceId()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Packet\+::set\+Instance\+Id (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{instance\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 622 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_dao_abb13d5da8d2676b5aed63f9bd532b294}\label{classinet_1_1_dao_abb13d5da8d2676b5aed63f9bd532b294}} 
+\index{inet::Dao@{inet::Dao}!setReachableDest@{setReachableDest}}
+\index{setReachableDest@{setReachableDest}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{setReachableDest()}{setReachableDest()}}
+{\footnotesize\ttfamily void inet\+::\+Dao\+::set\+Reachable\+Dest (\begin{DoxyParamCaption}\item[{const Ipv6\+Address \&}]{reachable\+Dest }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 1451 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_ac6c8f2aa030599fd3dd042f48f7219cc}\label{classinet_1_1_rpl_packet_ac6c8f2aa030599fd3dd042f48f7219cc}} 
+\index{inet::Dao@{inet::Dao}!setSrcAddress@{setSrcAddress}}
+\index{setSrcAddress@{setSrcAddress}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{setSrcAddress()}{setSrcAddress()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Packet\+::set\+Src\+Address (\begin{DoxyParamCaption}\item[{const Ipv6\+Address \&}]{src\+Address }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 611 of file Rpl\+\_\+m.\+cc.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classinet_1_1_dao_a03441b5fc721841aa3f00a0354846315}\label{classinet_1_1_dao_a03441b5fc721841aa3f00a0354846315}} 
+\index{inet::Dao@{inet::Dao}!daoAckRequired@{daoAckRequired}}
+\index{daoAckRequired@{daoAckRequired}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{daoAckRequired}{daoAckRequired}}
+{\footnotesize\ttfamily bool inet\+::\+Dao\+::dao\+Ack\+Required = false\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line 291 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_dao_a03332f119952d2f31d1b83c47a5c7e01}\label{classinet_1_1_dao_a03332f119952d2f31d1b83c47a5c7e01}} 
+\index{inet::Dao@{inet::Dao}!daoSeqNum@{daoSeqNum}}
+\index{daoSeqNum@{daoSeqNum}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{daoSeqNum}{daoSeqNum}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Dao\+::dao\+Seq\+Num = 0\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line 290 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_aeb8f2b212e24bad61efb30ca962613fc}\label{classinet_1_1_rpl_packet_aeb8f2b212e24bad61efb30ca962613fc}} 
+\index{inet::Dao@{inet::Dao}!destAddress@{destAddress}}
+\index{destAddress@{destAddress}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{destAddress}{destAddress}}
+{\footnotesize\ttfamily Ipv6\+Address inet\+::\+Rpl\+Packet\+::dest\+Address\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 153 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_ab048fa6d3bf114451e8638e793203f28}\label{classinet_1_1_rpl_packet_ab048fa6d3bf114451e8638e793203f28}} 
+\index{inet::Dao@{inet::Dao}!dodagId@{dodagId}}
+\index{dodagId@{dodagId}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{dodagId}{dodagId}}
+{\footnotesize\ttfamily Ipv6\+Address inet\+::\+Rpl\+Packet\+::dodag\+Id\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 156 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a9255b0d39d023dbbceec1473dce3df31}\label{classinet_1_1_rpl_packet_a9255b0d39d023dbbceec1473dce3df31}} 
+\index{inet::Dao@{inet::Dao}!hopLimit@{hopLimit}}
+\index{hopLimit@{hopLimit}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{hopLimit}{hopLimit}}
+{\footnotesize\ttfamily int inet\+::\+Rpl\+Packet\+::hop\+Limit = 0\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 152 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_afd5f63509e364caa5be162add25790f7}\label{classinet_1_1_rpl_packet_afd5f63509e364caa5be162add25790f7}} 
+\index{inet::Dao@{inet::Dao}!instanceId@{instanceId}}
+\index{instanceId@{instanceId}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{instanceId}{instanceId}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Rpl\+Packet\+::instance\+Id = 0\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 155 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_dao_a22dc34951a89a99671fbf184ee12edd7}\label{classinet_1_1_dao_a22dc34951a89a99671fbf184ee12edd7}} 
+\index{inet::Dao@{inet::Dao}!reachableDest@{reachableDest}}
+\index{reachableDest@{reachableDest}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{reachableDest}{reachableDest}}
+{\footnotesize\ttfamily Ipv6\+Address inet\+::\+Dao\+::reachable\+Dest\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line 292 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_aff1db3575112464bd3cf611556365c60}\label{classinet_1_1_rpl_packet_aff1db3575112464bd3cf611556365c60}} 
+\index{inet::Dao@{inet::Dao}!srcAddress@{srcAddress}}
+\index{srcAddress@{srcAddress}!inet::Dao@{inet::Dao}}
+\doxysubsubsection{\texorpdfstring{srcAddress}{srcAddress}}
+{\footnotesize\ttfamily Ipv6\+Address inet\+::\+Rpl\+Packet\+::src\+Address\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [inherited]}}
+
+
+
+Definition at line 154 of file Rpl\+\_\+m.\+h.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/\mbox{\hyperlink{_rpl__m_8h}{Rpl\+\_\+m.\+h}}\item 
+src/\mbox{\hyperlink{_rpl__m_8cc}{Rpl\+\_\+m.\+cc}}\end{DoxyCompactItemize}
