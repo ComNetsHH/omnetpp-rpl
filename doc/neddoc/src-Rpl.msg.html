@@ -1,0 +1,202 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+      <link rel="stylesheet" type="text/css" href="style.css" />
+   </head>
+   <body onload="if (top.frames['componentsframe'] == undefined) { s = window.location.toString(); window.location = 'index.html?p=' + s.substring(s.lastIndexOf('/')+1); }">
+<h2 class="comptitle">Msg File <i>src/Rpl.msg</i></h2>
+<table class="typestable">
+   <tr>
+      <th class="name">Name</th>
+      <th class="type">Type</th>
+      <th class="description">Description</th>
+   </tr>
+<tr>
+   <td>
+<a href="src-Mop.html">Mop</a>
+   </td>
+   <td>
+<i>enum</i>
+   </td>
+   <td>
+<i>(no description)</i>
+   </td>
+</tr>
+<tr>
+   <td>
+<a href="src-RplPacketCode.html">RplPacketCode</a>
+   </td>
+   <td>
+<i>enum</i>
+   </td>
+   <td>
+<i>(no description)</i>
+   </td>
+</tr>
+<tr>
+   <td>
+<a href="src-RplHeader.html">RplHeader</a>
+   </td>
+   <td>
+<i>class</i>
+   </td>
+   <td>
+<i>(no description)</i>
+   </td>
+</tr>
+<tr>
+   <td>
+<a href="src-RplPacket.html">RplPacket</a>
+   </td>
+   <td>
+<i>class</i>
+   </td>
+   <td>
+<i>(no description)</i>
+   </td>
+</tr>
+<tr>
+   <td>
+<a href="src-Dio.html">Dio</a>
+   </td>
+   <td>
+<i>class</i>
+   </td>
+   <td>
+
+<p>DODAG Information Option</p>
+
+   </td>
+</tr>
+<tr>
+   <td>
+<a href="src-Dao.html">Dao</a>
+   </td>
+   <td>
+<i>class</i>
+   </td>
+   <td>
+
+<p>Destination Advertisement Object</p>
+
+   </td>
+</tr>
+<tr>
+   <td>
+<a href="src-Dis.html">Dis</a>
+   </td>
+   <td>
+<i>class</i>
+   </td>
+   <td>
+
+<p>DODAG Information Solicitation</p>
+
+   </td>
+</tr>
+</table>
+<h3 class="subtitle">Source code:</h3>
+<pre class="src"><span style="color: #808080; font-style: italic; ">//
+//  Simulation model for RPL (Routing Protocol for Low-Power and Lossy Networks)
+// 
+//  Copyright (C) 2020  Institute of Communication Networks (ComNets),
+//                      Hamburg University of Technology (TUHH)
+//            (C) 2020  Yevhenii Shudrenko
+// 
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+// 
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see &lt;https://www.gnu.org/licenses/&gt;.
+//
+</span><span style="color: #000000; ">
+</span><span style="color: #000000; ">import</span><span style="color: #000000; "> </span><span style="color: #000000; ">inet</span><span style="color: #000000; ">.</span><span style="color: #000000; ">common</span><span style="color: #000000; ">.</span><span style="color: #000000; ">INETDefs</span><span style="color: #000000; ">;
+</span><span style="color: #000000; ">import</span><span style="color: #000000; "> </span><span style="color: #000000; ">inet</span><span style="color: #000000; ">.</span><span style="color: #000000; ">common</span><span style="color: #000000; ">.</span><span style="color: #800000; font-weight: bold; ">packet</span><span style="color: #000000; ">.</span><span style="color: #000000; ">chunk</span><span style="color: #000000; ">.</span><span style="color: #000000; ">Chunk</span><span style="color: #000000; ">;
+</span><span style="color: #000000; ">import</span><span style="color: #000000; "> </span><span style="color: #000000; ">inet</span><span style="color: #000000; ">.</span><span style="color: #000000; ">networklayer</span><span style="color: #000000; ">.</span><span style="color: #000000; ">common</span><span style="color: #000000; ">.</span><span style="color: #000000; ">L3Address</span><span style="color: #000000; ">;
+</span><span style="color: #000000; ">import</span><span style="color: #000000; "> </span><span style="color: #000000; ">inet</span><span style="color: #000000; ">.</span><span style="color: #000000; ">networklayer</span><span style="color: #000000; ">.</span><span style="color: #000000; ">contract</span><span style="color: #000000; ">.</span><span style="color: #000000; ">ipv6</span><span style="color: #000000; ">.</span><span style="color: #000000; ">Ipv6Address</span><span style="color: #000000; ">;
+</span><span style="color: #000000; ">import</span><span style="color: #000000; "> </span><span style="color: #000000; ">inet</span><span style="color: #000000; ">.</span><span style="color: #000000; ">networklayer</span><span style="color: #000000; ">.</span><span style="color: #000000; ">icmpv6</span><span style="color: #000000; ">.</span><span style="color: #000000; ">Icmpv6Header</span><span style="color: #000000; ">;
+
+</span><span style="color: #800000; font-weight: bold; ">cplusplus</span><span style="color: #000000; "> {{
+	#</span><span style="color: #000000; ">include</span><span style="color: #000000; "> </span><span style="color: #008000; ">&quot;RplDefs.h&quot;</span><span style="color: #000000; ">
+	#</span><span style="color: #000000; ">include</span><span style="color: #000000; "> &lt;</span><span style="color: #000000; ">stdint</span><span style="color: #000000; ">.</span><span style="color: #000000; ">h</span><span style="color: #000000; ">&gt;
+}}
+	
+</span><span style="color: #800000; font-weight: bold; ">namespace</span><span style="color: #000000; "> </span><span style="color: #000000; ">inet</span><span style="color: #000000; ">;
+
+
+</span><span style="color: #800000; font-weight: bold; ">enum</span><span style="color: #000000; "> </span><span style="color: #000000; ">Mop</span><span style="color: #000000; "> {
+    </span><span style="color: #000000; ">NON_STORING</span><span style="color: #000000; "> = </span><span style="color: #008000; ">0</span><span style="color: #000000; ">;
+    </span><span style="color: #000000; ">STORING</span><span style="color: #000000; "> = </span><span style="color: #008000; ">1</span><span style="color: #000000; ">;
+};
+
+</span><span style="color: #800000; font-weight: bold; ">enum</span><span style="color: #000000; "> </span><span style="color: #000000; ">RplPacketCode</span><span style="color: #000000; "> {
+    </span><span style="color: #000000; ">DIS</span><span style="color: #000000; "> = </span><span style="color: #008000; ">0</span><span style="color: #000000; ">;
+    </span><span style="color: #000000; ">DIO</span><span style="color: #000000; "> = </span><span style="color: #008000; ">1</span><span style="color: #000000; ">;
+    </span><span style="color: #000000; ">DAO</span><span style="color: #000000; "> = </span><span style="color: #008000; ">2</span><span style="color: #000000; ">;
+    </span><span style="color: #000000; ">DAO_ACK</span><span style="color: #000000; "> = </span><span style="color: #008000; ">3</span><span style="color: #000000; ">;
+};
+
+
+</span><span style="color: #808080; font-style: italic; ">//
+// RPL packets
+//
+</span><span style="color: #000000; ">
+</span><span style="color: #800000; font-weight: bold; ">class</span><span style="color: #000000; "> </span><span style="color: #000000; ">RplHeader</span><span style="color: #000000; "> </span><span style="color: #800000; font-weight: bold; ">extends</span><span style="color: #000000; "> </span><span style="color: #000000; ">Icmpv6Header</span><span style="color: #000000; "> {
+	</span><span style="color: #000000; ">RplPacketCode</span><span style="color: #000000; "> </span><span style="color: #000000; ">icmpv6Code</span><span style="color: #000000; ">;
+	</span><span style="color: #000000; ">const</span><span style="color: #000000; "> </span><span style="color: #000000; ">uint8_t</span><span style="color: #000000; "> </span><span style="color: #000000; ">icmpv6Type</span><span style="color: #000000; "> = </span><span style="color: #008000; ">155</span><span style="color: #000000; ">;
+}
+
+</span><span style="color: #800000; font-weight: bold; ">class</span><span style="color: #000000; "> </span><span style="color: #000000; ">RplPacket</span><span style="color: #000000; "> </span><span style="color: #800000; font-weight: bold; ">extends</span><span style="color: #000000; "> </span><span style="color: #000000; ">FieldsChunk</span><span style="color: #000000; "> {
+    </span><span style="color: #000080; font-weight: bold; ">int</span><span style="color: #000000; "> </span><span style="color: #000000; ">hopLimit</span><span style="color: #000000; ">;
+    
+}
+
+</span><span style="color: #808080; font-style: italic; ">// DODAG Information Option
+</span><span style="color: #800000; font-weight: bold; ">class</span><span style="color: #000000; "> </span><span style="color: #000000; ">Dio</span><span style="color: #000000; "> </span><span style="color: #800000; font-weight: bold; ">extends</span><span style="color: #000000; "> </span><span style="color: #000000; ">RplPacket</span><span style="color: #000000; "> {
+    </span><span style="color: #000000; ">uint8_t</span><span style="color: #000000; "> </span><span style="color: #000000; ">instanceId</span><span style="color: #000000; ">;        	  	</span><span style="color: #808080; font-style: italic; ">// RPL instance ID
+</span><span style="color: #000000; ">    </span><span style="color: #000000; ">uint8_t</span><span style="color: #000000; "> </span><span style="color: #000000; ">dodagVersion</span><span style="color: #000000; ">;        	
+	</span><span style="color: #000000; ">uint16_t</span><span style="color: #000000; "> </span><span style="color: #000000; ">rank</span><span style="color: #000000; ">;            	 	</span><span style="color: #808080; font-style: italic; ">// Node's rank
+</span><span style="color: #000000; ">    </span><span style="color: #000000; ">Mop</span><span style="color: #000000; "> </span><span style="color: #000000; ">mop</span><span style="color: #000000; ">;					    </span><span style="color: #808080; font-style: italic; ">// Mode of operation               
+</span><span style="color: #000000; ">    </span><span style="color: #000080; font-weight: bold; ">bool</span><span style="color: #000000; "> </span><span style="color: #000000; ">grounded</span><span style="color: #000000; ">;              		   
+    </span><span style="color: #000000; ">uint8_t</span><span style="color: #000000; "> </span><span style="color: #000000; ">dtsn</span><span style="color: #000000; ">;                 	</span><span style="color: #808080; font-style: italic; ">// Destination Advertisement Trigger Sequence Number       
+</span><span style="color: #000000; ">   
+	</span><span style="color: #808080; font-style: italic; ">// Trickle timer parameters
+</span><span style="color: #000000; ">    </span><span style="color: #000080; font-weight: bold; ">double</span><span style="color: #000000; "> </span><span style="color: #000000; ">minInterval</span><span style="color: #000000; ">;           
+    </span><span style="color: #000080; font-weight: bold; ">int</span><span style="color: #000000; "> </span><span style="color: #000000; ">maxExponent</span><span style="color: #000000; ">;              
+    </span><span style="color: #000080; font-weight: bold; ">int</span><span style="color: #000000; "> </span><span style="color: #000000; ">redunConst</span><span style="color: #000000; ">;                
+    
+    </span><span style="color: #000080; font-weight: bold; ">double</span><span style="color: #000000; "> </span><span style="color: #000000; ">lifetime</span><span style="color: #000000; ">;                  </span><span style="color: #808080; font-style: italic; ">// Path lifetime
+</span><span style="color: #000000; ">    </span><span style="color: #000080; font-weight: bold; ">double</span><span style="color: #000000; "> </span><span style="color: #000000; ">metric</span><span style="color: #000000; ">;
+    </span><span style="color: #000000; ">Ipv6Address</span><span style="color: #000000; "> </span><span style="color: #000000; ">dodagId</span><span style="color: #000000; ">;              </span><span style="color: #808080; font-style: italic; ">// IPv6 address set by DODAG root
+</span><span style="color: #000000; ">    </span><span style="color: #000000; ">Ipv6Address</span><span style="color: #000000; "> </span><span style="color: #000000; ">destAddress</span><span style="color: #000000; ">;   		
+    </span><span style="color: #000000; ">Ipv6Address</span><span style="color: #000000; "> </span><span style="color: #000000; ">srcAddress</span><span style="color: #000000; ">;			  </span><span style="color: #808080; font-style: italic; ">// IPv6 sender address
+</span><span style="color: #000000; ">   	
+}
+
+
+</span><span style="color: #808080; font-style: italic; ">// Destination Advertisement Object
+</span><span style="color: #800000; font-weight: bold; ">class</span><span style="color: #000000; "> </span><span style="color: #000000; ">Dao</span><span style="color: #000000; "> </span><span style="color: #800000; font-weight: bold; ">extends</span><span style="color: #000000; "> </span><span style="color: #000000; ">RplPacket</span><span style="color: #000000; "> {
+    </span><span style="color: #000000; ">uint8_t</span><span style="color: #000000; "> </span><span style="color: #000000; ">instanceId</span><span style="color: #000000; ">;        	  	
+    </span><span style="color: #000000; ">uint8_t</span><span style="color: #000000; "> </span><span style="color: #000000; ">dodagVersion</span><span style="color: #000000; ">;        	  			
+    </span><span style="color: #000000; ">uint8_t</span><span style="color: #000000; "> </span><span style="color: #000000; ">daoSeqNum</span><span style="color: #000000; ">;				  </span><span style="color: #808080; font-style: italic; ">// DAOSequence number
+</span><span style="color: #000000; ">
+}
+
+
+</span><span style="color: #808080; font-style: italic; ">// DODAG Information Solicitation
+</span><span style="color: #800000; font-weight: bold; ">class</span><span style="color: #000000; "> </span><span style="color: #000000; ">Dis</span><span style="color: #000000; "> </span><span style="color: #800000; font-weight: bold; ">extends</span><span style="color: #000000; "> </span><span style="color: #000000; ">RplPacket</span><span style="color: #000000; "> {
+
+}
+
+
+</span></pre>
+   <hr><p class="footer"><a href="http://creativecommons.org/licenses/by-sa/3.0" target="_top"><img src="by-sa.png"></a> This documentation is released under the <a href="http://creativecommons.org/licenses/by-sa/3.0" target="_top">Creative Commons license</a></p>
+   </body>
+</html>

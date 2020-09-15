@@ -1,0 +1,156 @@
+\hypertarget{classinet_1_1_objective_function}{}\doxysection{inet\+::Objective\+Function Class Reference}
+\label{classinet_1_1_objective_function}\index{inet::ObjectiveFunction@{inet::ObjectiveFunction}}
+
+
+{\ttfamily \#include $<$Objective\+Function.\+h$>$}
+
+Inheritance diagram for inet\+::Objective\+Function\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classinet_1_1_objective_function}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classinet_1_1_objective_function_ac2fc8b23014130dcc20924384d1b340c}{Objective\+Function}} ()
+\begin{DoxyCompactList}\small\item\em base step of rank increment \mbox{[}R\+FC 6550, 6.\+7.\+6\mbox{]} \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classinet_1_1_objective_function_ac33f90245b4cb438129b9987832d95af}{Objective\+Function}} (std\+::string \mbox{\hyperlink{classinet_1_1_objective_function_aba490a6c6a8dbc0c62d8313a1fc80f1f}{type}})
+\item 
+virtual \mbox{\hyperlink{classinet_1_1_objective_function_a1345510ade2a3f6a2fffb011ef54edfe}{$\sim$\+Objective\+Function}} ()
+\item 
+virtual Dio $\ast$ \mbox{\hyperlink{classinet_1_1_objective_function_a005a1dd752d5997919aaad1248d4bf2d}{get\+Preferred\+Parent}} (std\+::map$<$ Ipv6\+Address, Dio $\ast$ $>$ candidate\+Parents)
+\begin{DoxyCompactList}\small\item\em Determine node\textquotesingle{}s preferred parent from the candidate neighbor set using relevant metric (defined by OF type). \end{DoxyCompactList}\item 
+virtual uint16\+\_\+t \mbox{\hyperlink{classinet_1_1_objective_function_ac6bdada891d22386507be623acf281f7}{calc\+Rank}} (Dio $\ast$preferred\+Parent)
+\begin{DoxyCompactList}\small\item\em Calculate node\textquotesingle{}s rank based on the chosen preferred parent \mbox{[}R\+FC 6550, 3.\+5\mbox{]}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ocp \mbox{\hyperlink{classinet_1_1_objective_function_aba490a6c6a8dbc0c62d8313a1fc80f1f}{type}}
+\item 
+int \mbox{\hyperlink{classinet_1_1_objective_function_a879197fc88807b6052c7fe45b87b8351}{min\+Hop\+Rank\+Increase}}
+\begin{DoxyCompactList}\small\item\em Objective Function (OF) type as defined in R\+FC 6551. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line 45 of file Objective\+Function.\+h.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classinet_1_1_objective_function_ac2fc8b23014130dcc20924384d1b340c}\label{classinet_1_1_objective_function_ac2fc8b23014130dcc20924384d1b340c}} 
+\index{inet::ObjectiveFunction@{inet::ObjectiveFunction}!ObjectiveFunction@{ObjectiveFunction}}
+\index{ObjectiveFunction@{ObjectiveFunction}!inet::ObjectiveFunction@{inet::ObjectiveFunction}}
+\doxysubsubsection{\texorpdfstring{ObjectiveFunction()}{ObjectiveFunction()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily inet\+::\+Objective\+Function\+::\+Objective\+Function (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+base step of rank increment \mbox{[}R\+FC 6550, 6.\+7.\+6\mbox{]} 
+
+
+
+Definition at line 26 of file Objective\+Function.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_objective_function_ac33f90245b4cb438129b9987832d95af}\label{classinet_1_1_objective_function_ac33f90245b4cb438129b9987832d95af}} 
+\index{inet::ObjectiveFunction@{inet::ObjectiveFunction}!ObjectiveFunction@{ObjectiveFunction}}
+\index{ObjectiveFunction@{ObjectiveFunction}!inet::ObjectiveFunction@{inet::ObjectiveFunction}}
+\doxysubsubsection{\texorpdfstring{ObjectiveFunction()}{ObjectiveFunction()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily inet\+::\+Objective\+Function\+::\+Objective\+Function (\begin{DoxyParamCaption}\item[{std\+::string}]{type }\end{DoxyParamCaption})}
+
+
+
+Definition at line 31 of file Objective\+Function.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_objective_function_a1345510ade2a3f6a2fffb011ef54edfe}\label{classinet_1_1_objective_function_a1345510ade2a3f6a2fffb011ef54edfe}} 
+\index{inet::ObjectiveFunction@{inet::ObjectiveFunction}!````~ObjectiveFunction@{$\sim$ObjectiveFunction}}
+\index{````~ObjectiveFunction@{$\sim$ObjectiveFunction}!inet::ObjectiveFunction@{inet::ObjectiveFunction}}
+\doxysubsubsection{\texorpdfstring{$\sim$ObjectiveFunction()}{~ObjectiveFunction()}}
+{\footnotesize\ttfamily inet\+::\+Objective\+Function\+::$\sim$\+Objective\+Function (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 41 of file Objective\+Function.\+cc.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classinet_1_1_objective_function_ac6bdada891d22386507be623acf281f7}\label{classinet_1_1_objective_function_ac6bdada891d22386507be623acf281f7}} 
+\index{inet::ObjectiveFunction@{inet::ObjectiveFunction}!calcRank@{calcRank}}
+\index{calcRank@{calcRank}!inet::ObjectiveFunction@{inet::ObjectiveFunction}}
+\doxysubsubsection{\texorpdfstring{calcRank()}{calcRank()}}
+{\footnotesize\ttfamily uint16\+\_\+t inet\+::\+Objective\+Function\+::calc\+Rank (\begin{DoxyParamCaption}\item[{Dio $\ast$}]{preferred\+Parent }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Calculate node\textquotesingle{}s rank based on the chosen preferred parent \mbox{[}R\+FC 6550, 3.\+5\mbox{]}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em preferred\+Parent} & node\textquotesingle{}s preferred parent properties (rank, address, ...) represented by last D\+IO received from it \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+updated rank based on the min\+Hop\+Rank\+Increase and OF 
+\end{DoxyReturn}
+Calculate node\textquotesingle{}s rank based on the objective function policy
+
+Definition at line 68 of file Objective\+Function.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_objective_function_a005a1dd752d5997919aaad1248d4bf2d}\label{classinet_1_1_objective_function_a005a1dd752d5997919aaad1248d4bf2d}} 
+\index{inet::ObjectiveFunction@{inet::ObjectiveFunction}!getPreferredParent@{getPreferredParent}}
+\index{getPreferredParent@{getPreferredParent}!inet::ObjectiveFunction@{inet::ObjectiveFunction}}
+\doxysubsubsection{\texorpdfstring{getPreferredParent()}{getPreferredParent()}}
+{\footnotesize\ttfamily Dio $\ast$ inet\+::\+Objective\+Function\+::get\+Preferred\+Parent (\begin{DoxyParamCaption}\item[{std\+::map$<$ Ipv6\+Address, Dio $\ast$ $>$}]{candidate\+Parents }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Determine node\textquotesingle{}s preferred parent from the candidate neighbor set using relevant metric (defined by OF type). 
+
+
+\begin{DoxyParams}{Parameters}
+{\em candidate\+Parents} & map of node\textquotesingle{}s neighborhood in form of latest D\+IO packets from each neighbor \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+best parent candidate based on the type of objective function in use 
+\end{DoxyReturn}
+
+
+Definition at line 45 of file Objective\+Function.\+cc.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classinet_1_1_objective_function_a879197fc88807b6052c7fe45b87b8351}\label{classinet_1_1_objective_function_a879197fc88807b6052c7fe45b87b8351}} 
+\index{inet::ObjectiveFunction@{inet::ObjectiveFunction}!minHopRankIncrease@{minHopRankIncrease}}
+\index{minHopRankIncrease@{minHopRankIncrease}!inet::ObjectiveFunction@{inet::ObjectiveFunction}}
+\doxysubsubsection{\texorpdfstring{minHopRankIncrease}{minHopRankIncrease}}
+{\footnotesize\ttfamily int inet\+::\+Objective\+Function\+::min\+Hop\+Rank\+Increase\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Objective Function (OF) type as defined in R\+FC 6551. 
+
+
+
+Definition at line 49 of file Objective\+Function.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_objective_function_aba490a6c6a8dbc0c62d8313a1fc80f1f}\label{classinet_1_1_objective_function_aba490a6c6a8dbc0c62d8313a1fc80f1f}} 
+\index{inet::ObjectiveFunction@{inet::ObjectiveFunction}!type@{type}}
+\index{type@{type}!inet::ObjectiveFunction@{inet::ObjectiveFunction}}
+\doxysubsubsection{\texorpdfstring{type}{type}}
+{\footnotesize\ttfamily Ocp inet\+::\+Objective\+Function\+::type\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 48 of file Objective\+Function.\+h.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/\mbox{\hyperlink{_objective_function_8h}{Objective\+Function.\+h}}\item 
+src/\mbox{\hyperlink{_objective_function_8cc}{Objective\+Function.\+cc}}\end{DoxyCompactItemize}

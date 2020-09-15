@@ -1,0 +1,487 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+      <link rel="stylesheet" type="text/css" href="style.css" />
+   </head>
+   <body onload="if (top.frames['componentsframe'] == undefined) { s = window.location.toString(); window.location = 'index.html?p=' + s.substring(s.lastIndexOf('/')+1); }">
+<h2 class="comptitle">Compound Module <i>RplRouter</i></h2>
+<b>Package:</b> rpl<br/><b>File: <a href="src-RplRouter.ned.html">src/RplRouter.ned</a></b><br/><p>(no description)</p><img src="rpl.RplRouter-type.png" ismap="yes" usemap="#type-diagram"/><map name="type-diagram">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.common.lifecycle.NodeStatus.html" title="NodeStatus" alt="NodeStatus" coords="62,78,100,122">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.power.contract.IEnergyStorage.html" title="IEnergyStorage" alt="IEnergyStorage" coords="36,231,126,275">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.power.contract.IEnergyManagement.html" title="IEnergyManagement" alt="IEnergyManagement" coords="21,281,142,325">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.power.contract.IEnergyGenerator.html" title="IEnergyGenerator" alt="IEnergyGenerator" coords="30,332,133,376">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.mobility.contract.IMobility.html" title="IMobility" alt="IMobility" coords="57,129,105,173">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html" title="PcapRecorder" alt="PcapRecorder" coords="-26,383,188,427">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.networklayer.common.InterfaceTable.html" title="InterfaceTable" alt="InterfaceTable" coords="39,180,124,224">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.linklayer.contract.ILoopbackInterface.html" title="ILoopbackInterface" alt="ILoopbackInterface" coords="417,353,540,413">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.linklayer.contract.IWirelessInterface.html" title="IWirelessInterface" alt="IWirelessInterface" coords="163,411,318,471">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.linklayer.contract.IPppInterface.html" title="IPppInterface" alt="IPppInterface" coords="137,353,248,413">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.linklayer.contract.IEthernetInterface.html" title="IEthernetInterface" alt="IEthernetInterface" coords="522,353,625,413">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.linklayer.contract.ITunnelInterface.html" title="ITunnelInterface" alt="ITunnelInterface" coords="552,411,690,471">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.linklayer.contract.IVlanInterface.html" title="IVlanInterface" alt="IVlanInterface" coords="547,411,695,471">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.networklayer.contract.INetworkLayer.html" title="INetworkLayer" alt="INetworkLayer" coords="220,258,269,318">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.networklayer.contract.INetworkLayer.html" title="INetworkLayer" alt="INetworkLayer" coords="315,258,364,318">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.networklayer.contract.INetworkLayer.html" title="INetworkLayer" alt="INetworkLayer" coords="407,258,459,318">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.common.MessageDispatcher.html" title="MessageDispatcher" alt="MessageDispatcher" coords="161,322,799,345">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.transportlayer.contract.IUdp.html" title="IUdp" alt="IUdp" coords="220,163,264,223">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.transportlayer.contract.ITcp.html" title="ITcp" alt="ITcp" coords="315,163,359,223">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.transportlayer.contract.ISctp.html" title="ISctp" alt="ISctp" coords="410,163,454,223">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.common.MessageDispatcher.html" title="MessageDispatcher" alt="MessageDispatcher" coords="161,226,799,249">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.applications.contract.IApp.html" title="IApp" alt="IApp" coords="195,68,285,128">
+<area shape="rect" href="../../../inet/doc/neddoc/inet.common.MessageDispatcher.html" title="MessageDispatcher" alt="MessageDispatcher" coords="161,131,799,154">
+<area shape="rect" href="rpl.Rpl.html" title="Rpl" alt="Rpl" coords="505,163,549,223">
+<area shape="rect" href="rpl.TrickleTimer.html" title="TrickleTimer" alt="TrickleTimer" coords="517,150,588,206">
+</map>
+<h3 class="subtitle">Extends:</h3>
+<table class="typestable">
+   <tr>
+      <th class="name">Name</th>
+      <th class="type">Type</th>
+      <th class="description">Description</th>
+   </tr>
+<tr>
+   <td>
+<a href="../../../inet/doc/neddoc/inet.node.inet.AdhocHost.html">AdhocHost</a>
+   </td>
+   <td>
+<i>compound&nbsp;module</i>
+   </td>
+   <td>
+
+<p>A wireless host containing routing, mobility and energy components. Supports
+IPv4 network protocol, TCP, UDP, and SCTP as transport protocol.
+This is a typical mobile node which can participate in adhoc routing
+and may have TCP/UDP applications installed. Supports ICMP (ping) too.</p>
+
+   </td>
+</tr>
+</table>
+<h3 class="subtitle">Networks:</h3>
+<table class="typestable">
+   <tr>
+      <th class="name">Name</th>
+      <th class="type">Type</th>
+      <th class="description">Description</th>
+   </tr>
+<tr>
+   <td>
+<a href="RplNetwork.html">RplNetwork</a>
+   </td>
+   <td>
+<i>network</i>
+   </td>
+   <td>
+<i>(no description)</i>
+   </td>
+</tr>
+</table>
+<h3 class="subtitle">Parameters:</h3>
+<table class="paramstable">
+   <tr>
+      <th class="name">Name</th>
+      <th class="type">Type</th>
+      <th class="defaultvalue">Default value</th>
+      <th class="description">Description</th>
+   </tr>
+<tr class="inherited">
+   <td>hasStatus</td>
+   <td>
+      <i>bool</i>
+   </td>
+   <td>false</td>
+   <td>   </td>
+</tr>
+<tr class="inherited">
+   <td>osgModel</td>
+   <td>
+      <i>string</i>
+   </td>
+   <td>""</td>
+   <td>
+<p>3D model for OSG visualization, no 3D model by default</p>
+   </td>
+</tr>
+<tr class="inherited">
+   <td>osgModelColor</td>
+   <td>
+      <i>string</i>
+   </td>
+   <td>""</td>
+   <td>
+<p>tint color, no colorization by default</p>
+   </td>
+</tr>
+<tr class="inherited">
+   <td>canvasImage</td>
+   <td>
+      <i>string</i>
+   </td>
+   <td>""</td>
+   <td>
+<p>image for canvas visualization, no image by default</p>
+   </td>
+</tr>
+<tr class="inherited">
+   <td>canvasImageColor</td>
+   <td>
+      <i>string</i>
+   </td>
+   <td>""</td>
+   <td>
+<p>tint color, no colorization by default</p>
+   </td>
+</tr>
+<tr class="inherited">
+   <td>numPcapRecorders</td>
+   <td>
+      <i>int</i>
+   </td>
+   <td>0</td>
+   <td>   </td>
+</tr>
+<tr class="inherited">
+   <td>numLoInterfaces</td>
+   <td>
+      <i>int</i>
+   </td>
+   <td>1</td>
+   <td>   </td>
+</tr>
+<tr class="inherited">
+   <td>numWlanInterfaces</td>
+   <td>
+      <i>int</i>
+   </td>
+   <td>1</td>
+   <td>   </td>
+</tr>
+<tr class="inherited">
+   <td>numEthInterfaces</td>
+   <td>
+      <i>int</i>
+   </td>
+   <td>0</td>
+   <td>
+<p>minimum number of ethernet interfaces</p>
+   </td>
+</tr>
+<tr class="inherited">
+   <td>numPppInterfaces</td>
+   <td>
+      <i>int</i>
+   </td>
+   <td>0</td>
+   <td>
+<p>minimum number of PPP interfaces</p>
+   </td>
+</tr>
+<tr class="inherited">
+   <td>numTunInterfaces</td>
+   <td>
+      <i>int</i>
+   </td>
+   <td>0</td>
+   <td>   </td>
+</tr>
+<tr class="inherited">
+   <td>numVlanInterfaces</td>
+   <td>
+      <i>int</i>
+   </td>
+   <td>0</td>
+   <td>   </td>
+</tr>
+<tr class="inherited">
+   <td>hasIpv4</td>
+   <td>
+      <i>bool</i>
+   </td>
+   <td>true</td>
+   <td>   </td>
+</tr>
+<tr class="inherited">
+   <td>hasIpv6</td>
+   <td>
+      <i>bool</i>
+   </td>
+   <td>false</td>
+   <td>   </td>
+</tr>
+<tr class="inherited">
+   <td>hasGn</td>
+   <td>
+      <i>bool</i>
+   </td>
+   <td>false</td>
+   <td>
+   </td>
+</tr>
+<tr class="inherited">
+   <td>forwarding</td>
+   <td>
+      <i>bool</i>
+   </td>
+   <td>true</td>
+   <td>   </td>
+</tr>
+<tr class="inherited">
+   <td>multicastForwarding</td>
+   <td>
+      <i>bool</i>
+   </td>
+   <td>false</td>
+   <td>   </td>
+</tr>
+<tr class="inherited">
+   <td>hasUdp</td>
+   <td>
+      <i>bool</i>
+   </td>
+   <td>firstAvailableOrEmpty("Udp") != ""</td>
+   <td>   </td>
+</tr>
+<tr class="inherited">
+   <td>hasTcp</td>
+   <td>
+      <i>bool</i>
+   </td>
+   <td>firstAvailableOrEmpty("Tcp", "TcpLwip", "TcpNsc") != ""</td>
+   <td>   </td>
+</tr>
+<tr class="inherited">
+   <td>hasSctp</td>
+   <td>
+      <i>bool</i>
+   </td>
+   <td>false</td>
+   <td>   </td>
+</tr>
+<tr class="inherited">
+   <td>numApps</td>
+   <td>
+      <i>int</i>
+   </td>
+   <td>0</td>
+   <td>   </td>
+</tr>
+</table>
+<h3 class="subtitle">Properties:</h3>
+<table class="propertiestable">
+   <tr>
+      <th class="name">Name</th>
+      <th class="value">Value</th>
+      <th class="description">Description</th>
+   </tr>
+<tr>
+   <td>networkNode</td>
+   <td><i></i></td>
+   <td></td>
+</tr>
+<tr>
+   <td>labels</td>
+   <td><i>node</i></td>
+   <td></td>
+</tr>
+<tr>
+   <td>display</td>
+   <td><i>i=device/cellphone</i></td>
+   <td></td>
+</tr>
+</table>
+<h3 class="subtitle">Gates:</h3>
+<table class="gatestable">
+   <tr>
+      <th class="name">Name</th>
+      <th class="type">Direction</th>
+      <th class="gatesize">Size</th>
+      <th class="description">Description</th>
+   </tr>
+<tr class="inherited">
+   <td>radioIn [ ]</xsl:if></td>
+   <td><i>input</i></td>
+   <td>numWlanInterfaces</td>   <td></td>
+</tr>
+<tr class="inherited">
+   <td>pppg [ ]</xsl:if></td>
+   <td><i>inout</i></td>
+   <td>numPppInterfaces</td>   <td></td>
+</tr>
+<tr class="inherited">
+   <td>ethg [ ]</xsl:if></td>
+   <td><i>inout</i></td>
+   <td>numEthInterfaces</td>   <td>
+</td>
+</tr>
+</table>
+<h3 class="subtitle">Unassigned submodule parameters:</h3>
+<table class="deepparamstable">
+   <tr>
+      <th class="name">Name</th>
+      <th class="type">Type</th>
+      <th class="defaultvalue">Default value</th>
+      <th class="description">Description</th>
+   </tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.lifecycle.NodeStatus.html">status</a>.initialStatus</td>
+   <td>
+      <i>string</i>
+   </td>
+   <td>"UP"</td>
+   <td>
+<p>TODO @signal, @statistic</p>
+   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html">pcapRecorder</a>.verbose</td>
+   <td>
+      <i>bool</i>
+   </td>
+   <td>false</td>
+   <td>
+<p>whether to log packets on the module output</p>
+   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html">pcapRecorder</a>.pcapFile</td>
+   <td>
+      <i>string</i>
+   </td>
+   <td>""</td>
+   <td>
+<p>the PCAP file to be written</p>
+   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html">pcapRecorder</a>.pcapLinkType</td>
+   <td>
+      <i>int</i>
+   </td>
+   <td>-1</td>
+   <td>
+<p>the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html (1=ethernet, 204=ppp, 105=IEEE 802.11, ...)
+(-1 means autodetect based on first recordable packet)</p>
+   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html">pcapRecorder</a>.snaplen</td>
+   <td>
+      <i>int</i>
+   </td>
+   <td>65535</td>
+   <td>
+<p>maximum number of bytes to record per packet</p>
+   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html">pcapRecorder</a>.dumpBadFrames</td>
+   <td>
+      <i>bool</i>
+   </td>
+   <td>true</td>
+   <td>
+<p>enable dump of frames with hasBitError</p>
+   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html">pcapRecorder</a>.moduleNamePatterns</td>
+   <td>
+      <i>string</i>
+   </td>
+   <td>"wlan[*] eth[*] ppp[*]"</td>
+   <td>
+<p>space-separated list of sibling module names to listen on</p>
+   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html">pcapRecorder</a>.sendingSignalNames</td>
+   <td>
+      <i>string</i>
+   </td>
+   <td>"packetSentToLower"</td>
+   <td>
+<p>space-separated list of outbound packet signals to subscribe to</p>
+   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html">pcapRecorder</a>.receivingSignalNames</td>
+   <td>
+      <i>string</i>
+   </td>
+   <td>"packetReceivedFromLower"</td>
+   <td>
+<p>space-separated list of inbound packet signals to subscribe to</p>
+   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html">pcapRecorder</a>.dumpProtocols</td>
+   <td>
+      <i>string</i>
+   </td>
+   <td>"ethernetmac ppp ieee80211mac"</td>
+   <td>
+<p>space-separated list of protocol names as defined in the Protocol class</p>
+   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html">pcapRecorder</a>.packetFilter</td>
+   <td>
+      <i>string</i>
+   </td>
+   <td>"*"</td>
+   <td>
+<p>which packets are considered, matches all packets by default</p>
+   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html">pcapRecorder</a>.packetDataFilter</td>
+   <td>
+      <i>string</i>
+   </td>
+   <td>"*"</td>
+   <td>
+<p>which packets are considered based on the data they contain, matches all packets by default</p>
+   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html">pcapRecorder</a>.helpers</td>
+   <td>
+      <i>string</i>
+   </td>
+   <td>""</td>
+   <td>
+<p>usable PcapRecorder::IHelper helpers for accept packettype and store/convert packet as specified linktype
+currently available: "inet::AckingMacToEthernetPcapRecorderHelper"</p>
+   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html">pcapRecorder</a>.alwaysFlush</td>
+   <td>
+      <i>bool</i>
+   </td>
+   <td>false</td>
+   <td>
+<p>flush the pcapFile after each write to ensure that all packets are captured in case of a crash</p>
+   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.common.packet.recorder.PcapRecorder.html">pcapRecorder</a>.displayStringTextFormat</td>
+   <td>
+      <i>string</i>
+   </td>
+   <td>"rec: %n pks"</td>
+   <td>   </td>
+</tr>
+<tr>
+   <td><a href="../../../inet/doc/neddoc/inet.networklayer.common.InterfaceTable.html">interfaceTable</a>.displayAddresses</td>
+   <td>
+      <i>bool</i>
+   </td>
+   <td>false</td>
+   <td>
+<p>whether to display IP addresses on links</p>
+   </td>
+</tr>
+</table>
+   <hr><p class="footer"><a href="http://creativecommons.org/licenses/by-sa/3.0" target="_top"><img src="by-sa.png"></a> This documentation is released under the <a href="http://creativecommons.org/licenses/by-sa/3.0" target="_top">Creative Commons license</a></p>
+   </body>
+</html>

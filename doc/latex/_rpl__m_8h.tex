@@ -1,0 +1,93 @@
+\hypertarget{_rpl__m_8h}{}\doxysection{src/\+Rpl\+\_\+m.h File Reference}
+\label{_rpl__m_8h}\index{src/Rpl\_m.h@{src/Rpl\_m.h}}
+{\ttfamily \#include $<$omnetpp.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}inet/common/\+I\+N\+E\+T\+Defs\+\_\+m.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}inet/common/packet/chunk/\+Chunk\+\_\+m.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}inet/networklayer/common/\+L3\+Address\+\_\+m.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}inet/networklayer/contract/ipv6/\+Ipv6\+Address\+\_\+m.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}inet/networklayer/icmpv6/\+Icmpv6\+Header\+\_\+m.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Rpl\+Defs.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classinet_1_1_rpl_header}{inet\+::\+Rpl\+Header}}
+\begin{DoxyCompactList}\small\item\em Class generated from {\ttfamily Rpl.\+msg\+:58} by nedtool. \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classinet_1_1_rpl_packet}{inet\+::\+Rpl\+Packet}}
+\begin{DoxyCompactList}\small\item\em Class generated from {\ttfamily Rpl.\+msg\+:63} by nedtool. \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classinet_1_1_dio}{inet\+::\+Dio}}
+\begin{DoxyCompactList}\small\item\em Class generated from {\ttfamily Rpl.\+msg\+:72} by nedtool. \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classinet_1_1_dao}{inet\+::\+Dao}}
+\begin{DoxyCompactList}\small\item\em Class generated from {\ttfamily Rpl.\+msg\+:93} by nedtool. \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classinet_1_1_dis}{inet\+::\+Dis}}
+\begin{DoxyCompactList}\small\item\em Class generated from {\ttfamily Rpl.\+msg\+:101} by nedtool. \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classinet_1_1_rpl_packet_info}{inet\+::\+Rpl\+Packet\+Info}}
+\begin{DoxyCompactList}\small\item\em Class generated from {\ttfamily Rpl.\+msg\+:106} by nedtool. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+ \mbox{\hyperlink{namespaceinet}{inet}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{_rpl__m_8h_a77f5ea746b531cbdbc322a93741e33a6}{M\+S\+G\+C\+\_\+\+V\+E\+R\+S\+I\+ON}}~0x0506
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68}{inet\+::\+Rpl\+Packet\+Code}} \{ \newline
+\mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68ac1858d3e741ed734fbd2afa2f328125e}{inet\+::\+D\+IS}} = 0, 
+\mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68a57d17b8bb224ace647ca6b2044056d45}{inet\+::\+D\+IO}} = 1, 
+\mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68a91bf3b95ef2fb459db4e468487b06f5e}{inet\+::\+D\+AO}} = 2, 
+\mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68ae87ec5a1f221df885827d11cb0ba8ee2}{inet\+::\+D\+A\+O\+\_\+\+A\+CK}} = 3, 
+\newline
+\mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68a1ad2c672a8295e7e1b48fec1d6f204b1}{inet\+::\+P\+I\+NG}} = 4, 
+\mbox{\hyperlink{namespaceinet_aeccc687bfd4a9c672ccab097bc03aa68a754ca7dd71b3086755d659554e0d151d}{inet\+::\+P\+I\+N\+G\+\_\+\+A\+CK}} = 5
+ \}
+\begin{DoxyCompactList}\small\item\em Enum generated from {\ttfamily Rpl.\+msg\+:36} by nedtool. \end{DoxyCompactList}\item 
+enum \mbox{\hyperlink{namespaceinet_af7057eca4ffe384b78820662618a7e00}{inet\+::\+Ocp}} \{ \mbox{\hyperlink{namespaceinet_af7057eca4ffe384b78820662618a7e00a2ef1c095278eb503cd6c828257292927}{inet\+::\+E\+TX}} = 0, 
+\mbox{\hyperlink{namespaceinet_af7057eca4ffe384b78820662618a7e00a9a216f5f2f590f09dbd8f4af6f5f3e0a}{inet\+::\+H\+O\+P\+\_\+\+C\+O\+U\+NT}} = 1, 
+\mbox{\hyperlink{namespaceinet_af7057eca4ffe384b78820662618a7e00a77409f1d59ded0a470bbf0336de1b2ca}{inet\+::\+E\+N\+E\+R\+GY}} = 2
+ \}
+\begin{DoxyCompactList}\small\item\em Enum generated from {\ttfamily Rpl.\+msg\+:47} by nedtool. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{namespaceinet_a19e060c155615367439fbf0718b0f2f3}{inet\+::do\+Parsim\+Packing}} (omnetpp\+::c\+Comm\+Buffer $\ast$b, const Rpl\+Header \&obj)
+\item 
+void \mbox{\hyperlink{namespaceinet_ac4c78e73cd7f9e33ea910fb1a2f044c9}{inet\+::do\+Parsim\+Unpacking}} (omnetpp\+::c\+Comm\+Buffer $\ast$b, Rpl\+Header \&obj)
+\item 
+void \mbox{\hyperlink{namespaceinet_a579108edb2e1739dcdfde31935be1d2e}{inet\+::do\+Parsim\+Packing}} (omnetpp\+::c\+Comm\+Buffer $\ast$b, const Rpl\+Packet \&obj)
+\item 
+void \mbox{\hyperlink{namespaceinet_aa1a614c4a69e80deaf426707255be120}{inet\+::do\+Parsim\+Unpacking}} (omnetpp\+::c\+Comm\+Buffer $\ast$b, Rpl\+Packet \&obj)
+\item 
+void \mbox{\hyperlink{namespaceinet_a4f8867e02bb2ea7bbab559a9298f8d34}{inet\+::do\+Parsim\+Packing}} (omnetpp\+::c\+Comm\+Buffer $\ast$b, const Dio \&obj)
+\item 
+void \mbox{\hyperlink{namespaceinet_ac1fee95b9ee5db91b538e5096f08f990}{inet\+::do\+Parsim\+Unpacking}} (omnetpp\+::c\+Comm\+Buffer $\ast$b, Dio \&obj)
+\item 
+void \mbox{\hyperlink{namespaceinet_abf135e974b246859231a4f5fb4c58a86}{inet\+::do\+Parsim\+Packing}} (omnetpp\+::c\+Comm\+Buffer $\ast$b, const Dao \&obj)
+\item 
+void \mbox{\hyperlink{namespaceinet_ae38b4991875c5116d76d298a6e083e7b}{inet\+::do\+Parsim\+Unpacking}} (omnetpp\+::c\+Comm\+Buffer $\ast$b, Dao \&obj)
+\item 
+void \mbox{\hyperlink{namespaceinet_a835abd418069f32ff72fdc47870f6827}{inet\+::do\+Parsim\+Packing}} (omnetpp\+::c\+Comm\+Buffer $\ast$b, const Dis \&obj)
+\item 
+void \mbox{\hyperlink{namespaceinet_ab3c88e1cc2b3e02024045c171f709f24}{inet\+::do\+Parsim\+Unpacking}} (omnetpp\+::c\+Comm\+Buffer $\ast$b, Dis \&obj)
+\item 
+void \mbox{\hyperlink{namespaceinet_abf5bf60422aec8cb4e4082d9808c660d}{inet\+::do\+Parsim\+Packing}} (omnetpp\+::c\+Comm\+Buffer $\ast$b, const Rpl\+Packet\+Info \&obj)
+\item 
+void \mbox{\hyperlink{namespaceinet_a60120796ae84469b84b90c7492cfa746}{inet\+::do\+Parsim\+Unpacking}} (omnetpp\+::c\+Comm\+Buffer $\ast$b, Rpl\+Packet\+Info \&obj)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{_rpl__m_8h_a77f5ea746b531cbdbc322a93741e33a6}\label{_rpl__m_8h_a77f5ea746b531cbdbc322a93741e33a6}} 
+\index{Rpl\_m.h@{Rpl\_m.h}!MSGC\_VERSION@{MSGC\_VERSION}}
+\index{MSGC\_VERSION@{MSGC\_VERSION}!Rpl\_m.h@{Rpl\_m.h}}
+\doxysubsubsection{\texorpdfstring{MSGC\_VERSION}{MSGC\_VERSION}}
+{\footnotesize\ttfamily \#define M\+S\+G\+C\+\_\+\+V\+E\+R\+S\+I\+ON~0x0506}
+
+
+
+Definition at line 15 of file Rpl\+\_\+m.\+h.
+

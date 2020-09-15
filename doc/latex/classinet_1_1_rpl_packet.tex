@@ -1,0 +1,392 @@
+\hypertarget{classinet_1_1_rpl_packet}{}\doxysection{inet\+::Rpl\+Packet Class Reference}
+\label{classinet_1_1_rpl_packet}\index{inet::RplPacket@{inet::RplPacket}}
+
+
+Class generated from {\ttfamily Rpl.\+msg\+:63} by nedtool.  
+
+
+
+
+{\ttfamily \#include $<$Rpl\+\_\+m.\+h$>$}
+
+Inheritance diagram for inet\+::Rpl\+Packet\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classinet_1_1_rpl_packet}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classinet_1_1_rpl_packet_a641d57977ccc5fe01abbb5e17b5fb52c}{Rpl\+Packet}} ()
+\item 
+\mbox{\hyperlink{classinet_1_1_rpl_packet_a71cdb57b9789a9ada485695ea5dd2a34}{Rpl\+Packet}} (const \mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}} \&other)
+\item 
+virtual \mbox{\hyperlink{classinet_1_1_rpl_packet_a77ba8e246c8d34574c118f3a538ed611}{$\sim$\+Rpl\+Packet}} ()
+\item 
+\mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}} \& \mbox{\hyperlink{classinet_1_1_rpl_packet_aad0839943f48645a274e19b4f70187dd}{operator=}} (const \mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}} \&other)
+\item 
+virtual \mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}} $\ast$ \mbox{\hyperlink{classinet_1_1_rpl_packet_af4e5f00325d40ebd9c4eb1bf7505a056}{dup}} () const override
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_packet_af4b0907e2cb8b2cbc34e46197d8cc90f}{parsim\+Pack}} (omnetpp\+::c\+Comm\+Buffer $\ast$b) const override
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_packet_abd805006838257db74c8803b3696984a}{parsim\+Unpack}} (omnetpp\+::c\+Comm\+Buffer $\ast$b) override
+\item 
+virtual int \mbox{\hyperlink{classinet_1_1_rpl_packet_a0342c2cf4d60a8fa81dba36c1450a4b9}{get\+Hop\+Limit}} () const
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_packet_a183c0d10b94982784f2e307767b411e4}{set\+Hop\+Limit}} (int \mbox{\hyperlink{classinet_1_1_rpl_packet_a9255b0d39d023dbbceec1473dce3df31}{hop\+Limit}})
+\item 
+virtual const Ipv6\+Address \& \mbox{\hyperlink{classinet_1_1_rpl_packet_a99d0c2c82ddf4d74195f9da23953212c}{get\+Dest\+Address}} () const
+\item 
+virtual Ipv6\+Address \& \mbox{\hyperlink{classinet_1_1_rpl_packet_a4a3d9cfe845d617949bce4ef26c23c47}{get\+Dest\+Address\+For\+Update}} ()
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_packet_a5e5dde13b7bb2102dd5670a493dde667}{set\+Dest\+Address}} (const Ipv6\+Address \&\mbox{\hyperlink{classinet_1_1_rpl_packet_aeb8f2b212e24bad61efb30ca962613fc}{dest\+Address}})
+\item 
+virtual const Ipv6\+Address \& \mbox{\hyperlink{classinet_1_1_rpl_packet_adc270d0a525a54dfb99d641afdf9ca38}{get\+Src\+Address}} () const
+\item 
+virtual Ipv6\+Address \& \mbox{\hyperlink{classinet_1_1_rpl_packet_a1f3f4fe99a393c27920cc6da22fe24f1}{get\+Src\+Address\+For\+Update}} ()
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_packet_ac6c8f2aa030599fd3dd042f48f7219cc}{set\+Src\+Address}} (const Ipv6\+Address \&\mbox{\hyperlink{classinet_1_1_rpl_packet_aff1db3575112464bd3cf611556365c60}{src\+Address}})
+\item 
+virtual uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_packet_a41454b233fc3e9df254c606b2d09911a}{get\+Instance\+Id}} () const
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_packet_a57be261158f06d160956b39a2a929d0e}{set\+Instance\+Id}} (uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_packet_afd5f63509e364caa5be162add25790f7}{instance\+Id}})
+\item 
+virtual const Ipv6\+Address \& \mbox{\hyperlink{classinet_1_1_rpl_packet_ace19adfe14fde1f2bb68c3fcb80406fe}{get\+Dodag\+Id}} () const
+\item 
+virtual Ipv6\+Address \& \mbox{\hyperlink{classinet_1_1_rpl_packet_a229b0f07c3a6cfd46484f50b6896aad6}{get\+Dodag\+Id\+For\+Update}} ()
+\item 
+virtual void \mbox{\hyperlink{classinet_1_1_rpl_packet_aef8d8a347337550f593f9b6802f3173d}{set\+Dodag\+Id}} (const Ipv6\+Address \&\mbox{\hyperlink{classinet_1_1_rpl_packet_ab048fa6d3bf114451e8638e793203f28}{dodag\+Id}})
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \mbox{\hyperlink{classinet_1_1_rpl_packet_a3e5ff2309e6981a19ecf6a6282418651}{operator==}} (const \mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}} \&)
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{classinet_1_1_rpl_packet_a9255b0d39d023dbbceec1473dce3df31}{hop\+Limit}} = 0
+\item 
+Ipv6\+Address \mbox{\hyperlink{classinet_1_1_rpl_packet_aeb8f2b212e24bad61efb30ca962613fc}{dest\+Address}}
+\item 
+Ipv6\+Address \mbox{\hyperlink{classinet_1_1_rpl_packet_aff1db3575112464bd3cf611556365c60}{src\+Address}}
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classinet_1_1_rpl_packet_afd5f63509e364caa5be162add25790f7}{instance\+Id}} = 0
+\item 
+Ipv6\+Address \mbox{\hyperlink{classinet_1_1_rpl_packet_ab048fa6d3bf114451e8638e793203f28}{dodag\+Id}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classinet_1_1_rpl_packet_ad3b39f5aad12ce4184079be36fcdc7b7}{copy}} (const \mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}} \&other)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Class generated from {\ttfamily Rpl.\+msg\+:63} by nedtool. 
+
+
+\begin{DoxyPre}
+class \mbox{\hyperlink{classinet_1_1_rpl_packet}{RplPacket}} extends FieldsChunk
+\{
+    int hopLimit;
+    Ipv6Address destAddress;
+    Ipv6Address srcAddress;
+    uint8\_t instanceId;             // RPL instance ID
+    Ipv6Address dodagId;            // IPv6 address of the DODAG root
+\}
+\end{DoxyPre}
+ 
+
+Definition at line 149 of file Rpl\+\_\+m.\+h.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a641d57977ccc5fe01abbb5e17b5fb52c}\label{classinet_1_1_rpl_packet_a641d57977ccc5fe01abbb5e17b5fb52c}} 
+\index{inet::RplPacket@{inet::RplPacket}!RplPacket@{RplPacket}}
+\index{RplPacket@{RplPacket}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{RplPacket()}{RplPacket()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily inet\+::\+Rpl\+Packet\+::\+Rpl\+Packet (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a71cdb57b9789a9ada485695ea5dd2a34}\label{classinet_1_1_rpl_packet_a71cdb57b9789a9ada485695ea5dd2a34}} 
+\index{inet::RplPacket@{inet::RplPacket}!RplPacket@{RplPacket}}
+\index{RplPacket@{RplPacket}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{RplPacket()}{RplPacket()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily inet\+::\+Rpl\+Packet\+::\+Rpl\+Packet (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}} \&}]{other }\end{DoxyParamCaption})}
+
+
+
+Definition at line 538 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a77ba8e246c8d34574c118f3a538ed611}\label{classinet_1_1_rpl_packet_a77ba8e246c8d34574c118f3a538ed611}} 
+\index{inet::RplPacket@{inet::RplPacket}!````~RplPacket@{$\sim$RplPacket}}
+\index{````~RplPacket@{$\sim$RplPacket}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{$\sim$RplPacket()}{~RplPacket()}}
+{\footnotesize\ttfamily inet\+::\+Rpl\+Packet\+::$\sim$\+Rpl\+Packet (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 543 of file Rpl\+\_\+m.\+cc.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_ad3b39f5aad12ce4184079be36fcdc7b7}\label{classinet_1_1_rpl_packet_ad3b39f5aad12ce4184079be36fcdc7b7}} 
+\index{inet::RplPacket@{inet::RplPacket}!copy@{copy}}
+\index{copy@{copy}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{copy()}{copy()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Packet\+::copy (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}} \&}]{other }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 555 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_af4e5f00325d40ebd9c4eb1bf7505a056}\label{classinet_1_1_rpl_packet_af4e5f00325d40ebd9c4eb1bf7505a056}} 
+\index{inet::RplPacket@{inet::RplPacket}!dup@{dup}}
+\index{dup@{dup}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{dup()}{dup()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}}$\ast$ inet\+::\+Rpl\+Packet\+::dup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classinet_1_1_rpl_packet_info_a4775025f1b9506227013eb4ad0cfcb71}{inet\+::\+Rpl\+Packet\+Info}}, \mbox{\hyperlink{classinet_1_1_dis_a173559cf3a927cd75c3f1d7938729862}{inet\+::\+Dis}}, \mbox{\hyperlink{classinet_1_1_dao_aa1cbe8b905cead5fa5bb7c044d5c6bc9}{inet\+::\+Dao}}, and \mbox{\hyperlink{classinet_1_1_dio_a7dbd438abe28853164dd5b33f38b9fea}{inet\+::\+Dio}}.
+
+
+
+Definition at line 170 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a99d0c2c82ddf4d74195f9da23953212c}\label{classinet_1_1_rpl_packet_a99d0c2c82ddf4d74195f9da23953212c}} 
+\index{inet::RplPacket@{inet::RplPacket}!getDestAddress@{getDestAddress}}
+\index{getDestAddress@{getDestAddress}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{getDestAddress()}{getDestAddress()}}
+{\footnotesize\ttfamily const Ipv6\+Address \& inet\+::\+Rpl\+Packet\+::get\+Dest\+Address (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 595 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a4a3d9cfe845d617949bce4ef26c23c47}\label{classinet_1_1_rpl_packet_a4a3d9cfe845d617949bce4ef26c23c47}} 
+\index{inet::RplPacket@{inet::RplPacket}!getDestAddressForUpdate@{getDestAddressForUpdate}}
+\index{getDestAddressForUpdate@{getDestAddressForUpdate}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{getDestAddressForUpdate()}{getDestAddressForUpdate()}}
+{\footnotesize\ttfamily virtual Ipv6\+Address\& inet\+::\+Rpl\+Packet\+::get\+Dest\+Address\+For\+Update (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 178 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_ace19adfe14fde1f2bb68c3fcb80406fe}\label{classinet_1_1_rpl_packet_ace19adfe14fde1f2bb68c3fcb80406fe}} 
+\index{inet::RplPacket@{inet::RplPacket}!getDodagId@{getDodagId}}
+\index{getDodagId@{getDodagId}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{getDodagId()}{getDodagId()}}
+{\footnotesize\ttfamily const Ipv6\+Address \& inet\+::\+Rpl\+Packet\+::get\+Dodag\+Id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 628 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a229b0f07c3a6cfd46484f50b6896aad6}\label{classinet_1_1_rpl_packet_a229b0f07c3a6cfd46484f50b6896aad6}} 
+\index{inet::RplPacket@{inet::RplPacket}!getDodagIdForUpdate@{getDodagIdForUpdate}}
+\index{getDodagIdForUpdate@{getDodagIdForUpdate}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{getDodagIdForUpdate()}{getDodagIdForUpdate()}}
+{\footnotesize\ttfamily virtual Ipv6\+Address\& inet\+::\+Rpl\+Packet\+::get\+Dodag\+Id\+For\+Update (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 186 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a0342c2cf4d60a8fa81dba36c1450a4b9}\label{classinet_1_1_rpl_packet_a0342c2cf4d60a8fa81dba36c1450a4b9}} 
+\index{inet::RplPacket@{inet::RplPacket}!getHopLimit@{getHopLimit}}
+\index{getHopLimit@{getHopLimit}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{getHopLimit()}{getHopLimit()}}
+{\footnotesize\ttfamily int inet\+::\+Rpl\+Packet\+::get\+Hop\+Limit (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 584 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a41454b233fc3e9df254c606b2d09911a}\label{classinet_1_1_rpl_packet_a41454b233fc3e9df254c606b2d09911a}} 
+\index{inet::RplPacket@{inet::RplPacket}!getInstanceId@{getInstanceId}}
+\index{getInstanceId@{getInstanceId}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{getInstanceId()}{getInstanceId()}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Rpl\+Packet\+::get\+Instance\+Id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 617 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_adc270d0a525a54dfb99d641afdf9ca38}\label{classinet_1_1_rpl_packet_adc270d0a525a54dfb99d641afdf9ca38}} 
+\index{inet::RplPacket@{inet::RplPacket}!getSrcAddress@{getSrcAddress}}
+\index{getSrcAddress@{getSrcAddress}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{getSrcAddress()}{getSrcAddress()}}
+{\footnotesize\ttfamily const Ipv6\+Address \& inet\+::\+Rpl\+Packet\+::get\+Src\+Address (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 606 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a1f3f4fe99a393c27920cc6da22fe24f1}\label{classinet_1_1_rpl_packet_a1f3f4fe99a393c27920cc6da22fe24f1}} 
+\index{inet::RplPacket@{inet::RplPacket}!getSrcAddressForUpdate@{getSrcAddressForUpdate}}
+\index{getSrcAddressForUpdate@{getSrcAddressForUpdate}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{getSrcAddressForUpdate()}{getSrcAddressForUpdate()}}
+{\footnotesize\ttfamily virtual Ipv6\+Address\& inet\+::\+Rpl\+Packet\+::get\+Src\+Address\+For\+Update (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Definition at line 181 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_aad0839943f48645a274e19b4f70187dd}\label{classinet_1_1_rpl_packet_aad0839943f48645a274e19b4f70187dd}} 
+\index{inet::RplPacket@{inet::RplPacket}!operator=@{operator=}}
+\index{operator=@{operator=}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{operator=()}{operator=()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}} \& inet\+::\+Rpl\+Packet\+::operator= (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}} \&}]{other }\end{DoxyParamCaption})}
+
+
+
+Definition at line 547 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a3e5ff2309e6981a19ecf6a6282418651}\label{classinet_1_1_rpl_packet_a3e5ff2309e6981a19ecf6a6282418651}} 
+\index{inet::RplPacket@{inet::RplPacket}!operator==@{operator==}}
+\index{operator==@{operator==}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{operator==()}{operator==()}}
+{\footnotesize\ttfamily bool inet\+::\+Rpl\+Packet\+::operator== (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classinet_1_1_rpl_packet}{Rpl\+Packet}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_af4b0907e2cb8b2cbc34e46197d8cc90f}\label{classinet_1_1_rpl_packet_af4b0907e2cb8b2cbc34e46197d8cc90f}} 
+\index{inet::RplPacket@{inet::RplPacket}!parsimPack@{parsimPack}}
+\index{parsimPack@{parsimPack}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{parsimPack()}{parsimPack()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Packet\+::parsim\+Pack (\begin{DoxyParamCaption}\item[{omnetpp\+::c\+Comm\+Buffer $\ast$}]{b }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classinet_1_1_rpl_packet_info_a36884fc97b7c640e977e8d20aad13bc6}{inet\+::\+Rpl\+Packet\+Info}}, \mbox{\hyperlink{classinet_1_1_dis_a7259d8696f239c51b6e65713031d821c}{inet\+::\+Dis}}, \mbox{\hyperlink{classinet_1_1_dao_a2c115fddde887be1eff766a30976cfe0}{inet\+::\+Dao}}, and \mbox{\hyperlink{classinet_1_1_dio_a7b54eb62e65384537d9c433bf1c0408a}{inet\+::\+Dio}}.
+
+
+
+Definition at line 564 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_abd805006838257db74c8803b3696984a}\label{classinet_1_1_rpl_packet_abd805006838257db74c8803b3696984a}} 
+\index{inet::RplPacket@{inet::RplPacket}!parsimUnpack@{parsimUnpack}}
+\index{parsimUnpack@{parsimUnpack}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{parsimUnpack()}{parsimUnpack()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Packet\+::parsim\+Unpack (\begin{DoxyParamCaption}\item[{omnetpp\+::c\+Comm\+Buffer $\ast$}]{b }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classinet_1_1_rpl_packet_info_a9be4a3b681da0ff14b15ba99e4cb02fe}{inet\+::\+Rpl\+Packet\+Info}}, \mbox{\hyperlink{classinet_1_1_dis_a3ca50adc6339db5e13946858373e6182}{inet\+::\+Dis}}, \mbox{\hyperlink{classinet_1_1_dao_a333eb8b68b5cd88c448895a675f78b21}{inet\+::\+Dao}}, and \mbox{\hyperlink{classinet_1_1_dio_a924015c0580f686930d44d0959b8cfa8}{inet\+::\+Dio}}.
+
+
+
+Definition at line 574 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a5e5dde13b7bb2102dd5670a493dde667}\label{classinet_1_1_rpl_packet_a5e5dde13b7bb2102dd5670a493dde667}} 
+\index{inet::RplPacket@{inet::RplPacket}!setDestAddress@{setDestAddress}}
+\index{setDestAddress@{setDestAddress}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{setDestAddress()}{setDestAddress()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Packet\+::set\+Dest\+Address (\begin{DoxyParamCaption}\item[{const Ipv6\+Address \&}]{dest\+Address }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 600 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_aef8d8a347337550f593f9b6802f3173d}\label{classinet_1_1_rpl_packet_aef8d8a347337550f593f9b6802f3173d}} 
+\index{inet::RplPacket@{inet::RplPacket}!setDodagId@{setDodagId}}
+\index{setDodagId@{setDodagId}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{setDodagId()}{setDodagId()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Packet\+::set\+Dodag\+Id (\begin{DoxyParamCaption}\item[{const Ipv6\+Address \&}]{dodag\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 633 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a183c0d10b94982784f2e307767b411e4}\label{classinet_1_1_rpl_packet_a183c0d10b94982784f2e307767b411e4}} 
+\index{inet::RplPacket@{inet::RplPacket}!setHopLimit@{setHopLimit}}
+\index{setHopLimit@{setHopLimit}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{setHopLimit()}{setHopLimit()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Packet\+::set\+Hop\+Limit (\begin{DoxyParamCaption}\item[{int}]{hop\+Limit }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 589 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a57be261158f06d160956b39a2a929d0e}\label{classinet_1_1_rpl_packet_a57be261158f06d160956b39a2a929d0e}} 
+\index{inet::RplPacket@{inet::RplPacket}!setInstanceId@{setInstanceId}}
+\index{setInstanceId@{setInstanceId}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{setInstanceId()}{setInstanceId()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Packet\+::set\+Instance\+Id (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{instance\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 622 of file Rpl\+\_\+m.\+cc.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_ac6c8f2aa030599fd3dd042f48f7219cc}\label{classinet_1_1_rpl_packet_ac6c8f2aa030599fd3dd042f48f7219cc}} 
+\index{inet::RplPacket@{inet::RplPacket}!setSrcAddress@{setSrcAddress}}
+\index{setSrcAddress@{setSrcAddress}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{setSrcAddress()}{setSrcAddress()}}
+{\footnotesize\ttfamily void inet\+::\+Rpl\+Packet\+::set\+Src\+Address (\begin{DoxyParamCaption}\item[{const Ipv6\+Address \&}]{src\+Address }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 611 of file Rpl\+\_\+m.\+cc.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_aeb8f2b212e24bad61efb30ca962613fc}\label{classinet_1_1_rpl_packet_aeb8f2b212e24bad61efb30ca962613fc}} 
+\index{inet::RplPacket@{inet::RplPacket}!destAddress@{destAddress}}
+\index{destAddress@{destAddress}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{destAddress}{destAddress}}
+{\footnotesize\ttfamily Ipv6\+Address inet\+::\+Rpl\+Packet\+::dest\+Address\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line 153 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_ab048fa6d3bf114451e8638e793203f28}\label{classinet_1_1_rpl_packet_ab048fa6d3bf114451e8638e793203f28}} 
+\index{inet::RplPacket@{inet::RplPacket}!dodagId@{dodagId}}
+\index{dodagId@{dodagId}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{dodagId}{dodagId}}
+{\footnotesize\ttfamily Ipv6\+Address inet\+::\+Rpl\+Packet\+::dodag\+Id\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line 156 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_a9255b0d39d023dbbceec1473dce3df31}\label{classinet_1_1_rpl_packet_a9255b0d39d023dbbceec1473dce3df31}} 
+\index{inet::RplPacket@{inet::RplPacket}!hopLimit@{hopLimit}}
+\index{hopLimit@{hopLimit}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{hopLimit}{hopLimit}}
+{\footnotesize\ttfamily int inet\+::\+Rpl\+Packet\+::hop\+Limit = 0\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line 152 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_afd5f63509e364caa5be162add25790f7}\label{classinet_1_1_rpl_packet_afd5f63509e364caa5be162add25790f7}} 
+\index{inet::RplPacket@{inet::RplPacket}!instanceId@{instanceId}}
+\index{instanceId@{instanceId}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{instanceId}{instanceId}}
+{\footnotesize\ttfamily uint8\+\_\+t inet\+::\+Rpl\+Packet\+::instance\+Id = 0\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line 155 of file Rpl\+\_\+m.\+h.
+
+\mbox{\Hypertarget{classinet_1_1_rpl_packet_aff1db3575112464bd3cf611556365c60}\label{classinet_1_1_rpl_packet_aff1db3575112464bd3cf611556365c60}} 
+\index{inet::RplPacket@{inet::RplPacket}!srcAddress@{srcAddress}}
+\index{srcAddress@{srcAddress}!inet::RplPacket@{inet::RplPacket}}
+\doxysubsubsection{\texorpdfstring{srcAddress}{srcAddress}}
+{\footnotesize\ttfamily Ipv6\+Address inet\+::\+Rpl\+Packet\+::src\+Address\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line 154 of file Rpl\+\_\+m.\+h.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/\mbox{\hyperlink{_rpl__m_8h}{Rpl\+\_\+m.\+h}}\item 
+src/\mbox{\hyperlink{_rpl__m_8cc}{Rpl\+\_\+m.\+cc}}\end{DoxyCompactItemize}
