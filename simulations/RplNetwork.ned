@@ -33,7 +33,7 @@ network RplNetwork
             @display("i=device/pocketpc_s;p=83.712,306.072");
         }
         host4: RplRouter {
-            @display("i=device/pocketpc_s;p=270.36,306.072");
+            @display("i=device/pocketpc_s;p=222.36,306.072");
         }
         host5: RplRouter {
             @display("i=device/pocketpc_s;p=222.36,430.332");
