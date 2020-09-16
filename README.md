@@ -15,9 +15,9 @@ This model is developed and tested with the following libraries versions:
 1. Set up new OMNeT++ project from existing files. 
 2. Reference INET project in the Properties->Project References.
 3. Set additional build options via Properties->OMNeT++->Makemake:
- 3.1. Select 'src' folder in the project view and click 'Options' under 'Makemake'. 
- 3.2. In the 'Compile' tab set the 'Add include paths exported from referenced projects' flag.
- 3.3. In the 'Custom' tab add the following snippet 'MSGC:=$(MSGC) --msg6' (to use newer message compiler) and click OK.
+    - Select 'src' folder in the project view and click 'Options' under 'Makemake'. 
+    - In the 'Compile' tab set the 'Add include paths exported from referenced projects' flag.
+    - In the 'Custom' tab add the following snippet 'MSGC:=$(MSGC) --msg6' (to use newer message compiler) and click OK.
  
 
 
