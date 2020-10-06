@@ -40,6 +40,20 @@ namespace inet {
 
 Define_Module(Rpl);
 
+// TODO: Store DODAG-related info in a separate class to
+// to monitor it during the simulation
+
+// TODO: Figure out 'false positives' root cause, triggering link-break signals
+// on lost NeighborAdvertisement (NA) packets
+
+// TODO: Replace plain pointers with shared pointers where possible for
+// proper garbage collection
+
+// TODO: Replace preferredParent with it's address (initialized to UNSPECIFIED_ADDRESS by default)
+// to avoid nullptr dereferencing possibility in many places
+
+// TODO: Finish source-routing headers
+
 Rpl::Rpl() :
     isRoot(false),
     detachedTimeout(2), // manual suppressing previous DODAG info [RFC 6550, 8.2.2.1]
@@ -222,7 +236,7 @@ void Rpl::processTrickleTimerMsg(cMessage *message)
              */
             if (trickleTimer->checkRedundancyConst()) {
                 EV_DETAIL << "Redundancy OK, broadcasting DIO" << endl;
-                sendRplPacket(createDio(), DIO, Ipv6Address::ALL_NODES_1);
+                sendRplPacket(createDio(), DIO, Ipv6Address::ALL_NODES_1, uniform(0, 1));
             }
             break;
         }
@@ -230,7 +244,6 @@ void Rpl::processTrickleTimerMsg(cMessage *message)
     }
     delete message;
 }
-
 
 void Rpl::processPacket(Packet *packet)
 {
@@ -240,7 +253,11 @@ void Rpl::processPacket(Packet *packet)
         delete packet;
         return;
     }
+
     auto rplHeader = packet->popAtFront<RplHeader>();
+    // in non-storing mode check for RPL Target, Transit Information options
+    if (!storing && dodagId != Ipv6Address::UNSPECIFIED_ADDRESS)
+        extractSourceRoutingData(packet);
     auto rplBody = packet->peekData<RplPacket>();
     auto senderAddr = rplBody->getSrcAddress();
     switch (rplHeader->getIcmpv6Code()) {
@@ -267,10 +284,13 @@ void Rpl::processPacket(Packet *packet)
     }
 
     delete packet;
+
+
 }
 
 void Rpl::sendPacket(cPacket *packet, double delay)
 {
+    EV_DETAIL << "Sending packet " << packet << " \n with delay " << delay << endl;
     if (delay == 0)
         send(packet, "ipOut");
     else
@@ -281,7 +301,14 @@ void Rpl::sendPacket(cPacket *packet, double delay)
 // Handling RPL packets
 //
 
-void Rpl::sendRplPacket(const Ptr<RplPacket>& body, RplPacketCode code, const L3Address& nextHop, double delay)
+void Rpl::sendRplPacket(const Ptr<RplPacket>& body, RplPacketCode code,
+        const L3Address& nextHop, double delay)
+{
+    sendRplPacket(body, code, nextHop, delay, Ipv6Address::UNSPECIFIED_ADDRESS, Ipv6Address::UNSPECIFIED_ADDRESS);
+}
+
+void Rpl::sendRplPacket(const Ptr<RplPacket>& body, RplPacketCode code,
+        const L3Address& nextHop, double delay, const Ipv6Address &target, const Ipv6Address &transit)
 {
     Packet *pkt = new Packet(std::string("inet::RplPacket::" + rplIcmpCodeToStr(code)).c_str());
     auto header = makeShared<RplHeader>();
@@ -295,6 +322,13 @@ void Rpl::sendRplPacket(const Ptr<RplPacket>& body, RplPacketCode code, const L3
     addresses->setDestAddress(nextHop);
     pkt->insertAtFront(header);
     pkt->insertAtBack(body);
+    // append RPL Target + Transit option headers if corresponding address pair was provided (non-storing mode)
+    if (!target.matches(Ipv6Address::UNSPECIFIED_ADDRESS, prefixLength)
+            && !transit.matches(Ipv6Address::UNSPECIFIED_ADDRESS, prefixLength))
+    {
+        appendDaoTransitOptions(pkt, target, transit);
+    }
+
     sendPacket(pkt, delay);
 }
 
@@ -314,6 +348,7 @@ const Ptr<Dio> Rpl::createDio()
             << " and rank " << dio->getRank() << endl;
     return dio;
 }
+
 
 const Ptr<Dao> Rpl::createDao(const Ipv6Address &reachableDest)
 {
@@ -338,6 +373,8 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
         instanceId = dio->getInstanceId();
         storing = dio->getStoring();
         dtsn = dio->getDtsn();
+        lastTarget = new Ipv6Address(getSelfAddress());
+        selfAddr = getSelfAddress();
         EV_DETAIL << "Joined new DODAG with id - " << dodagId << endl;
         // Start broadcasting DIOs, diffusing DODAG control data
         if (trickleTimer->hasStarted())
@@ -403,7 +440,7 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
     auto daoSender = dao->getSrcAddress();
     auto advertisedDest = dao->getReachableDest();
     if (dao->getDaoAckRequired()) {
-        sendRplPacket(createDao(Ipv6Address::UNSPECIFIED_ADDRESS), DAO_ACK, daoSender);
+        sendRplPacket(createDao(Ipv6Address::UNSPECIFIED_ADDRESS), DAO_ACK, daoSender, uniform(0, 1));
         EV_DETAIL << "DAO_ACK sent back to " << daoSender << endl;
     }
 
@@ -422,8 +459,13 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
      * Forward DAO 'upwards' via preferred parent advertising destination to the root [RFC6560, 6.4]
      */
     if (!isRoot && preferredParent && !matchesSuffix(daoSender, preferredParent->getSrcAddress())) {
-        sendRplPacket(createDao(advertisedDest), DAO,
+        if (!storing)
+            sendRplPacket(createDao(advertisedDest), DAO,
+                preferredParent->getSrcAddress(), daoDelay * uniform(1, 2), *lastTarget, *lastTransit);
+        else
+            sendRplPacket(createDao(advertisedDest), DAO,
                 preferredParent->getSrcAddress(), daoDelay * uniform(1, 2));
+
         EV_DETAIL << "Forwarding DAO upwards to " << preferredParent->getSrcAddress()
                 << " advertising " << advertisedDest << " reachability" << endl;
     }
@@ -471,6 +513,7 @@ void Rpl::updatePreferredParent()
     if (checkPrefParentChanged(newPrefParentAddr)) {
         emit(parentChangedSignal, newPrefParent->dup());
         updateRoutingTable(newPrefParentAddr);
+        lastTransit = new Ipv6Address(newPrefParentAddr);
         EV_DETAIL << "Updated preferred parent to - " << newPrefParentAddr << endl;
         /**
          * Reset trickle timer due to inconsistency (preferred parent changed) detected, thus
@@ -478,10 +521,12 @@ void Rpl::updatePreferredParent()
          */
         trickleTimer->reset();
         if (daoEnabled) {
-            sendRplPacket(createDao(), DAO, newPrefParentAddr,
-                    daoDelay * uniform(1, 2));
+            if (storing)
+                sendRplPacket(createDao(), DAO, newPrefParentAddr, daoDelay * uniform(1, 2));
+            else
+                sendRplPacket(createDao(), DAO, newPrefParentAddr, daoDelay * uniform(1, 2),
+                            getSelfAddress(), newPrefParentAddr);
         }
-
     }
     preferredParent = newPrefParent->dup();
     /** Recalculate rank based on the objective function */
@@ -503,6 +548,23 @@ bool Rpl::checkPrefParentChanged(const Ipv6Address &newPrefParentAddr)
 //
 // Handling routing data
 //
+
+
+void Rpl::updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest)
+{
+    auto route = routingTable->createRoute();
+    route->setSourceType(IRoute::MANET);
+    route->setPrefixLength(prefixLength);
+    route->setInterface(interfaceEntryPtr);
+    route->setDestination(dest);
+    route->setNextHop(nextHop);
+    routingTable->addRoute(route);
+
+    EV_DETAIL << "updated routing table: \n" << dest << " reachable via "
+                << nextHop << endl;
+    routingTable->printRoutingTable();
+
+}
 
 void Rpl::updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData)
 {
@@ -586,13 +648,17 @@ B Rpl::getDaoLength() {
 
 
 void Rpl::appendDaoTransitOptions(Packet *pkt) {
+    appendDaoTransitOptions(pkt, getSelfAddress(), preferredParent->getSrcAddress());
+}
+
+void Rpl::appendDaoTransitOptions(Packet *pkt, const Ipv6Address &target, const Ipv6Address &transit) {
     EV_DETAIL << "Appending target, transit options to DAO: " << pkt << endl;
     auto rplTarget = makeShared<RplTargetInfo>();
     auto rplTransit = makeShared<RplTransitInfo>();
     rplTarget->setChunkLength(getTransitOptionsLength());
     rplTransit->setChunkLength(getTransitOptionsLength());
-    rplTarget->setTarget(getSelfAddress());
-    rplTransit->setTransit(preferredParent->getSrcAddress());
+    rplTarget->setTarget(target);
+    rplTransit->setTransit(transit);
     pkt->insertAtBack(rplTarget);
     pkt->insertAtBack(rplTransit);
     EV_DETAIL << "transit => target headers appended: "
@@ -606,7 +672,10 @@ bool Rpl::checkRplRouteInfo(Packet *datagram) {
         EV_DETAIL << "Packet reached its destination, no RPI header checking needed" << endl;
         return true;
     }
-    EV_DETAIL << "Checking RPI header for packet " << datagram << endl;
+    EV_DETAIL << "Checking RPI header for packet " << datagram
+            << " \n coming from "
+            << findNetworkProtocolHeader(datagram)->getSourceAddress().toIpv6()
+            << endl;
     RplPacketInfo *rpi;
     try {
         rpi = const_cast<RplPacketInfo *> (datagram->popAtBack<RplPacketInfo>(B(4)).get());
@@ -671,22 +740,38 @@ B Rpl::getRpiHeaderLength() {
 }
 
 
-void Rpl::extractSourceRoutingData(Packet *dao) {
+void Rpl::extractSourceRoutingData(Packet *pkt) {
     try {
-        auto transit = dao->popAtBack<RplTransitInfo>(getTransitOptionsLength()).get()->getTransit();
-        auto target = dao->popAtBack<RplTargetInfo>(getTransitOptionsLength()).get()->getTarget();
-        sourceRoutingTable.insert( std::pair<Ipv6Address, Ipv6Address>(target, transit) );
+        lastTransit = new Ipv6Address(pkt->popAtBack<RplTransitInfo>(getTransitOptionsLength()).get()->getTransit());
+        lastTarget = new Ipv6Address(pkt->popAtBack<RplTargetInfo>(getTransitOptionsLength()).get()->getTarget());
+        if (!isRoot)
+            return;
 
-        EV_DETAIL << "Source routing table updated: " << printMap(sourceRoutingTable) << endl;
+        sourceRoutingTable.insert( std::pair<Ipv6Address, Ipv6Address>(*lastTarget, *lastTransit) );
+        EV_DETAIL << "Source routing table updated with new:\n"
+                << "target: " << lastTarget << "\n transit: " << lastTransit << "\n"
+                << printMap(sourceRoutingTable) << endl;
     }
     catch (std::exception &e) {
-        EV_WARN << "Couldn't update source routing table: " << e.what() << endl;
+        EV_WARN << "Couldn't pop RPL Target, Transit Information options from packet: "
+                << pkt << endl;
     }
+}
+
+bool Rpl::checkDestReached(Packet *datagram)
+{
+    auto dest = findNetworkProtocolHeader(datagram)->getDestinationAddress().toIpv6();
+    EV_DETAIL << "Checking if datagram destined to us - " << getSelfAddress()
+            << "\n extracted destination - " << dest << endl;
+
+    return dest.matches(getSelfAddress(), prefixLength);
 }
 
 
 INetfilter::IHook::Result Rpl::checkRplHeaders(Packet *datagram) {
     // skip further checks if node doesn't belong to a DODAG
+    auto datagramName = std::string(datagram->getFullName());
+    EV_INFO << "packet fullname " << datagramName << endl;
     if (!isRoot && (preferredParent == nullptr
             || dodagId.matches(Ipv6Address::UNSPECIFIED_ADDRESS, prefixLength)))
     {
@@ -694,68 +779,125 @@ INetfilter::IHook::Result Rpl::checkRplHeaders(Packet *datagram) {
                 " no forwarding/rank error checks will be performed" << endl;
         return ACCEPT;
     }
-    auto datagramName = std::string(datagram->getFullName());
-    EV_DETAIL << "packet fullname " << datagramName << endl;
-    bool res = true;
 
-    if (isDao(datagram) && !storing) {
-        EV_DETAIL << "Checking source routing headers in DAO: " << datagram << endl;
-        if (isRoot)
-            extractSourceRoutingData(datagram);
-        else if (selfGeneratedPkt(datagram))
-            appendDaoTransitOptions(datagram);
-    }
     if (isUdp(datagram)) {
-        EV_DETAIL << "Udp datagram detected" << endl;
-        if (isRoot && selfGeneratedPkt(datagram) && !storing) {
-            appendSrcRoutingHeader(datagram);
+
+        // if non-storing MOP, source routing header is needed for downwards traffic
+        if (!storing) {
+            // generate one if sender is a root
+            if (isRoot) {
+                if (selfGeneratedPkt(datagram)) {
+                    appendSrcRoutingHeader(datagram);
+                    return ACCEPT;
+                }
+                else
+                    EV_DETAIL << "P2P source-routing not yet supported" << endl;
+            }
+            // or forward packet further using the routing header
+            else {
+                if (!destIsRoot(datagram))
+                    forwardSourceRoutedPacket(datagram);
+                return ACCEPT;
+            }
         }
-        else if (sourceRouted(datagram)) {
-            forwardSourceRoutedPacket(datagram);
-            return ACCEPT;
-        }
-        else
-            res = checkRplRouteInfo(datagram);
+
+        // check for loops
+        return checkRplRouteInfo(datagram) ? ACCEPT : DROP;
     }
 
-    return res ? ACCEPT : DROP;
+    return ACCEPT;
+}
+
+
+bool Rpl::destIsRoot(Packet *datagram) {
+    return findNetworkProtocolHeader(datagram).get()->getDestinationAddress().toIpv6().matches(dodagId, prefixLength);
+}
+
+void Rpl::saveDaoTransitOptions(Packet *dao) {
+    try {
+        lastTransit = new Ipv6Address(dao->popAtBack<RplTransitInfo>(getTransitOptionsLength()).get()->getTransit());
+        lastTarget = new Ipv6Address(dao->popAtBack<RplTargetInfo>(getTransitOptionsLength()).get()->getTarget());
+        EV_DETAIL << "Updated lastTransit => lastTarget to: " << *lastTransit << " => " << *lastTarget << endl;
+    }
+    catch (std::exception &e) {
+        EV_DETAIL << "No Target, Transit headers found on packet:\n " << *dao << endl;
+        return;
+    }
 }
 
 void Rpl::appendSrcRoutingHeader(Packet *datagram) {
     Ipv6Address dest = findNetworkProtocolHeader(datagram)->getDestinationAddress().toIpv6();
     std::deque<Ipv6Address> srhAddresses;
     EV_DETAIL << "Appending routing header to datagram " << datagram << endl;
-    Ipv6Address nextHop = sourceRoutingTable.find(dest)->second;
+    if ( sourceRoutingTable.find(dest) == sourceRoutingTable.end() ) {
+        EV_WARN << "Required destination " << dest << " not yet present in source-routing table: \n"
+                << printMap(sourceRoutingTable) << endl;
+        return;
+    }
+
+    Ipv6Address nextHop = sourceRoutingTable[dest];
+    srhAddresses.push_front(dest);
     srhAddresses.push_front(nextHop);
-    while (!nextHop.matches(getSelfAddress(), prefixLength)) {
-        nextHop = sourceRoutingTable.find(nextHop)->second;
+    EV_DETAIL << "constructing routing header for dest - " << dest
+            << "\n next hop: " << nextHop << endl;
+    EV_DETAIL << "Current source-routing table: \n" << printMap(sourceRoutingTable) << endl;
+
+    while ( sourceRoutingTable.find(nextHop) != sourceRoutingTable.end() )
+    {
+        nextHop = sourceRoutingTable[nextHop];
         srhAddresses.push_front(nextHop);
     }
+    // pop unnecessary link-local next hop, which is already known from the routing table
+    srhAddresses.pop_front();
+
     EV_DETAIL << "Source routing header constructed : " << endl;
     for (auto i : srhAddresses) {
         EV_DETAIL << i << " => ";
     }
-    EV_DETAIL << dest << endl;
-    // TODO: appending Source Routing Header (SRH) directly to datagram
-    // and manual forwarding on each hop by modifying IP destination field
+
+    auto srh = makeShared<SourceRoutingHeader>();
+    srh->setAddresses(srhAddresses);
+    srh->setChunkLength(getSrhSize());
+    datagram->insertAtBack(srh);
 }
 
 
 void Rpl::forwardSourceRoutedPacket(Packet *datagram) {
-    EV_DETAIL << "forwarding source-routed datagram - " << datagram << endl;
-    auto srh = const_cast<SourceRoutingHeader *> (datagram->popAtBack<SourceRoutingHeader>(B(64)).get());
+    EV_DETAIL << "processing source-routed datagram - " << datagram
+            << "\n with routing header: " << endl;
+    auto srh = const_cast<SourceRoutingHeader *> (datagram->popAtBack<SourceRoutingHeader>(getSrhSize()).get());
     auto srhAddresses = srh->getAddresses();
-    auto nextHop = srhAddresses.front();
-    srhAddresses.pop_front();
-    (const_cast<NetworkHeaderBase *>(findNetworkProtocolHeader(datagram).get()))->setDestinationAddress(nextHop);
 
+
+    if (srhAddresses.back().matches(getSelfAddress(), prefixLength)) {
+        EV_DETAIL << "Source-routed destination "
+                << getSelfAddress() << " reached" << endl;
+        return;
+    }
+
+    for (auto addr : srhAddresses)
+            EV_DETAIL << addr << " => ";
+
+    Ipv6Address nextHop;
+    for (auto it = srhAddresses.cbegin(); it != srhAddresses.cend(); it++) {
+        if (it->matches(getSelfAddress(), prefixLength)) {
+            nextHop = *(++it);
+            break;
+        }
+    }
+    EV_DETAIL << "\n Forwarding source-routed datagram to " << nextHop << endl;
+
+    updateRoutingTable(nextHop, nextHop);
+    // TODO: Figure out why dequeue remains unchanged at each next hop,
+    // regardless of explicitly removing element from the back
+    srhAddresses.pop_front();
+//
+//    // re-insert updated routing header
     auto updatedSrh =  makeShared<SourceRoutingHeader>();
+    updatedSrh->setChunkLength(getSrhSize());
     updatedSrh->setAddresses(srhAddresses);
     datagram->insertAtBack(updatedSrh);
-
-    EV_DETAIL << "Set nextHop " << nextHop
-            << "\n for source-routed packet - " << datagram
-            << "\n sending via 'ipOut' gate" << endl;
+    (const_cast<NetworkHeaderBase *>(findNetworkProtocolHeader(datagram).get()))->setDestinationAddress(nextHop);
 }
 
 bool Rpl::selfGeneratedPkt(Packet *pkt) {
@@ -768,7 +910,8 @@ bool Rpl::selfGeneratedPkt(Packet *pkt) {
     else {
         auto srcAddr = findNetworkProtocolHeader(pkt)->getSourceAddress().toIpv6();
         res = srcAddr.matches(getSelfAddress(), prefixLength);
-        EV_DETAIL << "Checking if packet is self generated by source address: " << srcAddr << endl;
+        EV_DETAIL << "Checking if packet is self generated by source address: "
+                << srcAddr << "; is self-generated: " << boolStr(res) << endl;
     }
     return res;
 }
@@ -786,16 +929,6 @@ std::string Rpl::rplIcmpCodeToStr(RplPacketCode code) {
     }
 }
 
-bool Rpl::isUdp(Packet *datagram) {
-    return std::string(datagram->getFullName()).find("Udp") != std::string::npos;
-}
-
-bool Rpl::isDao(Packet *pkt) {
-    bool res = std::string(pkt->getFullName()).find("Dao") != std::string::npos;
-    EV_DETAIL << "Packet " << pkt << " " << boolStr(res, "is", "isn't") << " DAO packet " << endl;
-
-    return res;
-}
 
 bool Rpl::checkRankError(RplPacketInfo *rpi) {
     auto senderRank = rpi->getSenderRank();
@@ -885,7 +1018,7 @@ template<typename Map>
 std::string Rpl::printMap(const Map& map) {
     std::ostringstream out;
     for (const auto& p : map)
-        out <<p.first <<","<< p.second <<std::endl;
+        out << p.first << " => " << p.second << endl;
     return out.str();
 }
 

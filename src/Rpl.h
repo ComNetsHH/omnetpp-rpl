@@ -65,6 +65,10 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     /** RPL configuration parameters and state management */
     uint8_t dodagVersion;
     Ipv6Address dodagId;
+    Ipv6Address selfAddr;
+    Ipv6Address *lastTarget;
+    Ipv6Address *lastTransit;
+    Packet *savedUdpDatagram;
     uint8_t instanceId;
     double daoDelay;
     bool isRoot;
@@ -146,6 +150,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param dao DAO packet object for processing
      */
     void processDao(const Ptr<const Dao>& dao);
+    void forwardDaoWithoutProcessing(Packet *dao);
 
     /**
      * Process DAO_ACK packet if daoAckRequried flag is set
@@ -154,6 +159,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      */
     void processDaoAck(const Ptr<const Dao>& daoAck);
     void processDis(const Ptr<const Dis>& dis);
+    void saveDaoTransitOptions(Packet *dao);
 
     /**
      * Send RPL packet (@see createDao(), createDio(), createDis()) via 'ipOut'
@@ -163,9 +169,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param nextHop next hop for the RPL packet to be sent out to (unicast DAO, broadcast DIO, DIS)
      * @param delay transmission delay before sending packet from outgoing gate
      */
-    void sendRplPacket(const Ptr<RplPacket>& packet, RplPacketCode code, const L3Address& nextHop, double delay);
-    void sendRplPacket(const Ptr<RplPacket>& packet, RplPacketCode code, const L3Address& nextHop) {
-        sendRplPacket(packet, code, nextHop, 0); }
+    void sendRplPacket(const Ptr<RplPacket>& body, RplPacketCode code, const L3Address& nextHop, double delay, const Ipv6Address &target, const Ipv6Address &transit);
+    void sendRplPacket(const Ptr<RplPacket>& body, RplPacketCode code, const L3Address& nextHop, double delay);
 
     /**
      * Create DIO packet to broadcast DODAG info and configuration parameters
@@ -192,6 +197,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData);
     void updateRoutingTable(Dao *dao);
     void updateRoutingTable(const Ipv6Address &nextHop);
+    void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest);
+
     void purgeDaoRoutes();
 
     /**
@@ -357,6 +364,11 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      */
     B getRpiHeaderLength();
 
+    B getSrhSize() { return B(64); }
+    bool isDao(Packet *pkt) { return std::string(pkt->getFullName()).find("Dao") != std::string::npos; }
+    bool isUdp(Packet *datagram) { return std::string(datagram->getFullName()).find("Udp") != std::string::npos; }
+
+
     /**
      * Used by sink to collect Transit -> Target reachability information
      * for source-routing purposes [RFC6550, 9.7]
@@ -396,6 +408,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      *
      * @param pkt DAO packet to insert option headers [RFC6550, 6.7.7-6.7.8]
      */
+    void appendDaoTransitOptions(Packet *pkt, const Ipv6Address &target, const Ipv6Address &transit);
     void appendDaoTransitOptions(Packet *pkt);
 
     /**
@@ -405,8 +418,6 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @return
      */
     bool checkRplRouteInfo(Packet *datagram);
-    bool isDao(Packet *datagram);
-    bool isUdp(Packet *datagram);
 
     /**
      * Check if packet has source-routing header (SRH) present
@@ -443,6 +454,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     /** Source-routing methods */
     Ipv6Address* constructSrcRoutingHeader(const Ipv6Address& dest);
     B getDaoLength();
+    bool checkDestReached(Packet *datagram);
+    bool destIsRoot(Packet *datagram);
 
     /**
      * Handle signals by implementing @see cListener interface to

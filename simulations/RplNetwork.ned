@@ -19,25 +19,27 @@ network RplNetwork
         configurator: Ipv6FlatNetworkConfigurator {
             @display("p=550,150;is=s");
         }
-
         sink: RplRouter {
-            @display("i=device/pocketpc_s;p=149.112,75.864");
+            @display("i=device/pocketpc_s;p=213.204,133.416");
         }
         host1: RplRouter {
-            @display("i=device/pocketpc_s;p=83.712,179.196");
+            @display("i=device/pocketpc_s;p=147.804,236.748");
         }
         host2: RplRouter {
-            @display("i=device/pocketpc_s;p=222.36,179.196");
+            @display("i=device/pocketpc_s;p=283.836,236.748");
         }
         host3: RplRouter {
-            @display("i=device/pocketpc_s;p=83.712,306.072");
+            @display("i=device/pocketpc_s;p=147.804,363.624");
         }
         host4: RplRouter {
-            @display("i=device/pocketpc_s;p=222.36,306.072");
+            @display("i=device/pocketpc_s;p=283.836,363.624");
         }
         host5: RplRouter {
-            @display("i=device/pocketpc_s;p=222.36,430.332");
+            @display("i=device/pocketpc_s;p=283.836,487.884");
         }
+//        host6: RplRouter {
+//            @display("i=device/pocketpc_s;p=147.804,487.884");
+//        }
 
     connections allowunconnected:
 
