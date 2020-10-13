@@ -44,7 +44,7 @@ Define_Module(Rpl);
 // to monitor it during the simulation
 
 // TODO: Figure out 'false positives' root cause, triggering link-break signals
-// on lost NeighborAdvertisement (NA) packets
+// on lost Neighbor Advertisement (NA) packets
 
 // TODO: Replace plain pointers with shared pointers where possible for
 // proper garbage collection
