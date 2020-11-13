@@ -1,6 +1,6 @@
 # local and generated files not to be committed
-**/makefrag
-**/Makefile
+#**/makefrag
+#**/Makefile
 src/Makefile.vc
 *_m.h
 *_m.cc
