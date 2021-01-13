@@ -41,6 +41,8 @@ namespace inet {
 
 /** Misc */
 #define DEFAULT_PARENT_LIFETIME 5000
+#define UNDEFINED_CH_OFFSET 127
+#define SCHEDULE_PHASE_II_TIMEOUT 15
 const Ipv6Address LL_RPL_MULTICAST("FF02:0:0:0:0:0:0:1A");
 
 enum TRICKLE_EVENTS {
@@ -50,8 +52,41 @@ enum TRICKLE_EVENTS {
 };
 
 enum RPL_SELF_MSG {
-    DETACHED_TIMEOUT
+    DETACHED_TIMEOUT,
+    START_PHASE_II,
+    DAO_ACK_TIMEOUT
 };
+
+struct SlotframeChunk
+{
+    uint16_t end;
+    uint16_t start;
+    friend std::ostream& operator << (std::ostream &os, const SlotframeChunk &s) {
+        return os << "(" << s.start << ", " << s.end << ")";
+    }
+
+    std::string toString()
+    {
+        return "(" + std::to_string(start) + ", " + std::to_string(end) + ")";
+    }
+
+
+    std::string to_string(SlotframeChunk const& arg)
+    {
+        std::ostringstream ss;
+        ss << arg;
+        return std::move(ss).str();
+    }
+};
+typedef std::list<SlotframeChunk> SlotframeChunkList;
+
+inline std::ostream& operator<<(std::ostream& os, std::list<uint8_t> &list)
+{
+    for (auto const &el: list)
+        os << el << ", ";
+    os << ";";
+    return os;
+}
 
 } // namespace inet
 

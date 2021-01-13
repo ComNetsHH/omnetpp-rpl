@@ -33,22 +33,24 @@ cplusplus {{
 	
 namespace inet;
 
-
-enum RplPacketCode {
-    DIS = 0;
-    DIO = 1;
-    DAO = 2;
-    DAO_ACK = 3;
-    // for manual testing purposes, to be removed
-    PING = 4;
-    PING_ACK = 5;
-};
+class SlotframeChunk { @existingClass;}
+class SlotframeChunkList { @existingClass;}
 
 // Objective Code Point - defines objective function of RPL instance
 enum Ocp {
     ETX = 0;
     HOP_COUNT = 1;
     ENERGY = 2;
+};
+
+enum RplPacketCode {
+    DIS = 0;
+    DIO = 1;
+    DAO = 2;
+    DAO_ACK = 3;
+    PING = 4;
+    PING_ACK = 5;
+    CROSS_LAYER_CTRL = 6;
 };
 
 
@@ -72,6 +74,7 @@ class RplPacket extends FieldsChunk {
 class Dio extends RplPacket {
     // DODAG version number, may be incremented by the root to trigger topology refresh 
     uint8_t dodagVersion;       	
+    uint64_t nodeId; 				// Node's MAC (temp. workaround for 6TiSCH)
 	uint16_t rank;            	 	// Node's rank within the DODAG 
     bool storing;					// Mode of operation: storing / non-storing                
     bool grounded;              	// DODAG grounded flag, indicates whether sink is connected to backbone	   
@@ -86,14 +89,23 @@ class Dio extends RplPacket {
     int dioRedundancyConst;              
     int dioNumDoublings;						
     Ocp ocp;                
+    
+    // Cross-layer info for phase 2 scheduling
+    SlotframeChunkList slotframeChunks;
+    SlotframeChunk advSlotOffsets;
+    uint16_t slotframeLength;
+    uint16_t branchSize;   
+    uint16_t advChOffset;
 }
 
 
 // Destination Advertisement Object [RFC 6550, 6.4] 
 class Dao extends RplPacket {
-    uint8_t daoSeqNum;			// ID for each unique DAO sent by a node
+    uint8_t seqNum;				// ID for each unique DAO sent by a node
     bool daoAckRequired;		// indicates whether DAO-ACK is expected by the sender 
     Ipv6Address reachableDest;	// advertised reachable destination		
+    uint8_t chOffset;			// advertised channel offset (unique per branch)
+    						    // as part of cross-layer scheduling 
 
 }
 

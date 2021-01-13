@@ -41,8 +41,7 @@
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "Rpl_m.h"
-#include "RplDefs.h"
+#include "MsfControlInfo.h"
 #include "RplRouteData.h"
 #include "TrickleTimer.h"
 #include "ObjectiveFunction.h"
@@ -66,21 +65,34 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     uint8_t dodagVersion;
     Ipv6Address dodagId;
     Ipv6Address selfAddr;
+    Ipv6Address terminusNode; // Cross-layer 6TiSCH workaround to start phase 2
     Ipv6Address *lastTarget;
     Ipv6Address *lastTransit;
     Packet *savedUdpDatagram;
     uint8_t instanceId;
     double daoDelay;
+    double daoAckTimeout;
+    double clKickoffTimeout; // timeout for auto-triggering phase II of CL SF
+    uint8_t daoRtxCtn;
+    uint8_t daoRtxThresh;
     bool isRoot;
     bool daoEnabled;
     bool storing;
+    bool pDaoAckEnabled;
+    bool pManualParentAssignment; // allow hard-coded parent pre-selection
+    bool clStartOnTimeout; // start CL SF on a timeout rather that event-based
     uint16_t rank;
     uint8_t dtsn;
+    uint32_t advertisedChOffset;
+    uint16_t branchSize;
+    int daoSeqNum;
     Dio *preferredParent;
     std::string objectiveFunctionType;
     std::map<Ipv6Address, Dio *> backupParents;
     std::map<Ipv6Address, Dio *> candidateParents;
     std::map<Ipv6Address, Ipv6Address> sourceRoutingTable;
+    std::map<Ipv6Address, std::pair<cMessage *, uint8_t>> pendingDaoAcks;
+    std::list<int> channelOffsets;
 
     /** Statistics collection */
     simsignal_t dioReceivedSignal;
@@ -88,13 +100,27 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     simsignal_t parentChangedSignal;
     simsignal_t parentUnreachableSignal;
 
+    /** Cross-layer controls */
+    simsignal_t joinedDodag;
+    simsignal_t reschedule;
+    simsignal_t setChOffset;
+    double crossLayerInfoFwdTimeout;
+    bool pCrossLayerEnabled;
+    bool pJoinAtSinkAllowed;
+    int pTschNumChannels;
+    int slotframeLength;
+    int pManualParentInc;
+    SlotframeChunk slotOffsets;
+
     /** Misc */
     bool floating;
     bool verbose;
+    bool pUseWarmup;
+    bool pLockParent;
     uint8_t detachedTimeout; // temporary variable to suppress msg processing after just leaving the DODAG
     cMessage *detachedTimeoutEvent; // temporary msg corresponding to triggering above functionality
+    cMessage *daoAckTimeoutEvent; // temporary msg corresponding to triggering above functionality
     uint8_t prefixLength;
-
 
   public:
     Rpl();
@@ -103,9 +129,15 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     static std::string boolStr(bool cond, std::string positive, std::string negative);
     static std::string boolStr(bool cond) { return boolStr(cond, "true", "false"); }
 
+    friend std::ostream& operator<<(std::ostream& os, std::list<uint8_t> const& chOffsets)
+    {
+        for (auto chof : chOffsets)
+            os << std::to_string(((int) chof)) << ", ";
+        return os;
+    }
+
   protected:
     /** module interface */
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     void initialize(int stage) override;
     void handleMessageWhenUp(cMessage *message) override;
 
@@ -142,6 +174,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      */
     void processDio(const Ptr<const Dio>& dio);
 
+    void processCrossLayerMsg(const Ptr<const Dio>& dio);
+
     /**
      * Process DAO packet advertising node's reachability,
      * update routing table if destination advertised was unknown and
@@ -150,7 +184,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param dao DAO packet object for processing
      */
     void processDao(const Ptr<const Dao>& dao);
-    void forwardDaoWithoutProcessing(Packet *dao);
+//    void retransmitDao(Dao *dao);
+    void retransmitDao(Ipv6Address advDest);
 
     /**
      * Process DAO_ACK packet if daoAckRequried flag is set
@@ -158,7 +193,6 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param daoAck decapsulated DAO_ACK packet for processing
      */
     void processDaoAck(const Ptr<const Dao>& daoAck);
-    void processDis(const Ptr<const Dis>& dis);
     void saveDaoTransitOptions(Packet *dao);
 
     /**
@@ -185,8 +219,12 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param reachableDest reachable destination, may be own address or forwarded from sub-dodag
      * @return initialized DAO packet object
      */
-    const Ptr<Dao> createDao(const Ipv6Address &reachableDest);
+    const Ptr<Dao> createDao(const Ipv6Address &reachableDest, uint8_t channelOffset);
+    const Ptr<Dao> createDao(const Ipv6Address &reachableDest, bool ackRequired);
     const Ptr<Dao> createDao() {return createDao(getSelfAddress()); };
+    const Ptr<Dao> createDao(const Ipv6Address &reachableDest) {
+        return createDao(reachableDest, (uint8_t) UNDEFINED_CH_OFFSET);
+    }
 
     /**
      * Update routing table with new route to destination reachable via next hop
@@ -195,7 +233,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param dest discovered destination address being added to the routing table
      */
     void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData);
-    void updateRoutingTable(Dao *dao);
+    void updateRoutingTable(const Dao *dao);
     void updateRoutingTable(const Ipv6Address &nextHop);
     void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest);
 
@@ -217,6 +255,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      */
     void deletePrefParent() { deletePrefParent(false); };
     void deletePrefParent(bool poisoned);
+    void clearParentRoutes();
 
     /**
      * Update preferred parent based on the current best candidate
@@ -419,6 +458,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      */
     bool checkRplRouteInfo(Packet *datagram);
 
+    bool checkDuplicateRoute(Ipv6Route *route);
+
     /**
      * Check if packet has source-routing header (SRH) present
      * @param pkt packet to check for
@@ -454,7 +495,6 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     /** Source-routing methods */
     Ipv6Address* constructSrcRoutingHeader(const Ipv6Address& dest);
     B getDaoLength();
-    bool checkDestReached(Packet *datagram);
     bool destIsRoot(Packet *datagram);
 
     /**
@@ -467,6 +507,25 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param details
      */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+
+    /** Cross-layer part */
+    void startSecondSchedulingPhase();
+    std::vector<uint16_t> getNodesPerHopDistance();
+    SlotframeChunkList allocateSlotframeChunks(std::vector<uint16_t> nodesPerHopDist, uint16_t slotframeLen);
+    int getTschSlotframeLength();
+    int getNumTschChannels();
+    void advertiseChOffset(Ipv6Address &child, double delay);
+    void initChOffsetList(int maxChOffset);
+    bool matchesRequiredParent(const Ipv6Address &addr);
+    bool checkRplPacket(Packet *packet);
+
+    std::string printSlotframeChunks(std::list<inet::SlotframeChunk> &list);
+    void clearDaoAckTimer(Ipv6Address daoDest);
+//    void clearDaoAckTimers();
+    std::vector<Ipv6Address> getNearestChildren();
+    uint16_t calcBranchSize(Ipv6Address& rootChild);
+    SlotframeChunk calcAdvSlotOffsets();
+    uint16_t calcBranchSize();
 
 };
 

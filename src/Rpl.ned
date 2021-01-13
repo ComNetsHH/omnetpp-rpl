@@ -36,7 +36,6 @@ module Rpl like IManetRouting
         @statistic[parentChanged](title = "Preferred parent has changed"; source="parentChanged"; record=count; interpolationmode=none);
         @statistic[parentUnreachable](title = "Preferred parent unreachability detected"; source="parentUnreachable"; record=count; interpolationmode=none);
         
-        
         // properties
         @class("inet::Rpl");
         @display("i=block/routing");
@@ -49,10 +48,21 @@ module Rpl like IManetRouting
         bool isRoot = default(false);
         bool disabled = default(false);
         bool daoEnabled = default(true);
-        bool storing = default(false);
-        bool poisoning = default(true);
+        bool storing = default(true);
+        bool poisoning = default(false);
         bool useBackupAsPreferred = default(false);
+        bool crossLayerEnabled = default(false);
         bool unreachabilityDetectionEnabled = default(false);
+        bool daoAckEnabled = default(true);
+        bool assignParentManual = default(false);
+        bool useWarmup = default(true);
+        bool allowJoinAtSink = default(false);
+        bool disableParentSwitching = default(false);
+        bool clStartOnTimeout = default(false);
+        int numSkipTrickleIntervalUpdates = default(0);
+        double clPhase2Timeout = default(120); // timeout after which sink initiates second cross-layer scheduling phase
+        int maxChOffset = default(15);
+        int manualParentIncrement = default(1);    
         string objectiveFunctionType = default("hopCount");	 // hopCount, ETX, energy, ...
 
     gates:

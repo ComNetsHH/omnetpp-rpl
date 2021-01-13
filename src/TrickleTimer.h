@@ -49,6 +49,8 @@ class TrickleTimer : public cSimpleModule
     uint8_t minInterval;
     uint8_t numDoublings;
     int currentInterval;
+    int skipIntDoublings;
+    int intervalUpdatesCtn;
     int maxInterval;
     bool started;
     cMessage *trickleTriggerEvent;
@@ -63,8 +65,8 @@ class TrickleTimer : public cSimpleModule
     ~TrickleTimer();
 
     /** Lifecycle **/
-    void start() { start(false); };
-    void start(bool warmupDelay);
+    void start() { start(false, 0); };
+    void start(bool warmupDelay, int skipIntervalDoublings);
     virtual void reset();
     virtual void stop();
     virtual void suspend();

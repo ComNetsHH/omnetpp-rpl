@@ -28,6 +28,7 @@ Define_Module(TrickleTimer);
 TrickleTimer::TrickleTimer() :
     trickleTriggerEvent(nullptr),
     intervalTriggerEvent(nullptr),
+    intervalUpdatesCtn(0),
     numDoublings(DEFAULT_DIO_INTERVAL_DOUBLINGS),
     redundancyConst(DEFAULT_DIO_REDUNDANCY_CONST),
     started(false),
@@ -50,9 +51,10 @@ void TrickleTimer::stop() {
 
 }
 
-void TrickleTimer::start(bool warmupDelay) {
+void TrickleTimer::start(bool warmupDelay, int skipIntervalDoublings) {
     Enter_Method("TrickleTimer::start()");
     EV_INFO << "Trickle timer started" << endl;
+    skipIntDoublings = skipIntervalDoublings;
     started = true;
     minInterval = DEFAULT_DIO_INTERVAL_MIN;
     currentInterval = warmupDelay ? minInterval * 2 : minInterval;
@@ -86,13 +88,20 @@ void TrickleTimer::processSelfMessage(cMessage *message)
 {
     switch (message->getKind()) {
         case TRICKLE_INTERVAL_UPDATE_EVENT: {
-            if (currentInterval < maxInterval)
-                currentInterval *= 2;
+            if (skipIntDoublings)
+                intervalUpdatesCtn++;
+
+            if (currentInterval < maxInterval) {
+                if (intervalUpdatesCtn >= skipIntDoublings) {
+                    currentInterval *= 2;
+                    EV_INFO << "Trickle interval doubled, current - " << currentInterval << endl;
+                }
+            }
+
             ctrlMsgReceivedCtn = 0;
             scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
             scheduleNext();
-            EV_INFO << "Trickle interval doubled, current = " <<
-                    currentInterval << endl;
+
             break;
         }
         case TRICKLE_TRIGGER_EVENT: {
@@ -131,6 +140,7 @@ void TrickleTimer::reset() {
     Enter_Method_Silent("TrickleTimer::reset()");
     ctrlMsgReceivedCtn = 0;
     currentInterval = minInterval;
+    intervalUpdatesCtn = 0;
     try {
         cancelEvent(intervalTriggerEvent);
         cancelEvent(trickleTriggerEvent);
