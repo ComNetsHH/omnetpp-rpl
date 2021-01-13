@@ -36,7 +36,7 @@
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "Rpl.h"
-//#include "/home/yevhenii/omnetpp-5.6.2/samples/omnetpp-cross-layer-6tisch/tsch/src/linklayer/ieee802154e/sixtisch/Tsch6pInterface.h"
+
 
 namespace inet {
 
@@ -225,7 +225,6 @@ void Rpl::processSelfMessage(cMessage *message)
                 EV_WARN << "Received DAO_ACK timeout for deleted entry, ignoring" << endl;
             }
             else
-//                retransmitDao(((Dao*) message->getContextPointer())->dup());
                 retransmitDao(*advDest);
             break;
         }
@@ -241,7 +240,6 @@ void Rpl::clearDaoAckTimer(Ipv6Address daoDest) {
     pendingDaoAcks.erase(daoDest);
 }
 
-//void Rpl::retransmitDao(Dao *dao)
 
 void Rpl::retransmitDao(Ipv6Address advDest) {
     EV_DETAIL << "DAO_ACK for " << advDest << " timed out, attempting retransmit" << endl;
@@ -498,7 +496,7 @@ void Rpl::processCrossLayerMsg(const Ptr<const Dio>& ctrlDio) {
             slotOffsets.start = (uint16_t) (slotframeLength - getNearestChildren().size() * slotframeLength / branchSize);
             EV_DETAIL << "Calculated slot offset range - " << slotOffsets << endl;
         }
-        inet::MsfControlInfo *mci = new inet::MsfControlInfo();
+        inet::SfControlInfo *mci = new inet::SfControlInfo();
         mci->setSlotRange(slotOffsets);
         emit(reschedule, 0, (cObject *) mci);
         EV_DETAIL << "Notifying SF about available slot range - " << slotOffsets << endl;
@@ -566,14 +564,6 @@ void Rpl::sendRplPacket(const Ptr<RplPacket> &body, RplPacketCode code,
         EV_DETAIL << "Scheduling DAO_ACK timeout at " << timeout << " for advertised dest "
                 << advertisedDest << endl;
 
-//        // check if there's already an entry for this packet (more than one retransmission attempt)
-//        if (pendingDaoAcks[advertisedDest].first != nullptr) {
-//            EV_DETAIL << "Found already existing entry in pending DAO acks map for adv dest -  "
-//                    << advertisedDest << endl;
-//            scheduleAt(daoTimeoutTimestamp, pendingDaoAcks[advertisedDest].first);
-//            EV_DETAIL << "Another DAO timeout scheduled for " << daoTimeoutTimestamp << endl;
-//            return;
-//        }
         cMessage *daoTimeoutMsg = new cMessage("", DAO_ACK_TIMEOUT);
         daoTimeoutMsg->setContextPointer(new Ipv6Address(advertisedDest));
         EV_DETAIL << "Created DAO_ACK timeout msg with context pointer - "
@@ -861,7 +851,6 @@ std::vector<Ipv6Address> Rpl::getNearestChildren() {
 }
 
 int Rpl::getTschSlotframeLength() {
-//    return getModuleByPath("^.wlan[0].mac.sixtischInterface.sf")->par("slotframeLen").intValue();
     return getModuleByPath("^.wlan[0].mac.schedule")->par("macSlotframeSize").intValue();
 }
 

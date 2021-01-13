@@ -41,10 +41,10 @@
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "MsfControlInfo.h"
 #include "RplRouteData.h"
 #include "TrickleTimer.h"
 #include "ObjectiveFunction.h"
+#include "SfControlInfo.h"
 
 namespace inet {
 
