@@ -33,7 +33,7 @@ module Rpl like IManetRouting
         @signal[parentUnreachable](type=Dio);
         @statistic[dioReceived](title = "DIO packets received"; source="dioReceived"; record=count; interpolationmode=none);  
         @statistic[daoReceived](title = "DAO packets received"; source="daoReceived"; record=count; interpolationmode=none);
-        @statistic[parentChanged](title = "Preferred parent has changed"; source="parentChanged"; record=count; interpolationmode=none);
+        @statistic[parentChanged](title = "Preferred parent has changed"; source="parentChangedStat"; record=count; interpolationmode=none);
         @statistic[parentUnreachable](title = "Preferred parent unreachability detected"; source="parentUnreachable"; record=count; interpolationmode=none);
         
         // properties
@@ -54,7 +54,9 @@ module Rpl like IManetRouting
         bool crossLayerEnabled = default(false);
         bool unreachabilityDetectionEnabled = default(false);
         bool daoAckEnabled = default(true);
-        bool assignParentManual = default(false);
+        // locks parent selection for cleaner tree topology so that node only considers parent with ID = nodeId - 1,
+		// e.g. 'host3' will only choose 'host2' as preferred parent, etc. 
+        bool assignParentManual = default(false);  
         bool useWarmup = default(true);
         bool allowJoinAtSink = default(false);
         bool disableParentSwitching = default(false);

@@ -97,13 +97,14 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     /** Statistics collection */
     simsignal_t dioReceivedSignal;
     simsignal_t daoReceivedSignal;
-    simsignal_t parentChangedSignal;
+    simsignal_t parentChangedSignalStats;
     simsignal_t parentUnreachableSignal;
 
-    /** Cross-layer controls */
+    /** Cross-layer / MSF controls */
     simsignal_t joinedDodag;
     simsignal_t reschedule;
     simsignal_t setChOffset;
+    simsignal_t parentChangedSignal;
     double crossLayerInfoFwdTimeout;
     bool pCrossLayerEnabled;
     bool pJoinAtSinkAllowed;

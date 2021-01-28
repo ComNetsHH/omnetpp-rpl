@@ -128,6 +128,7 @@ void Rpl::initialize(int stage)
         // statistic & control signals
         dioReceivedSignal = registerSignal("dioReceived");
         daoReceivedSignal = registerSignal("daoReceived");
+        parentChangedSignalStats = registerSignal("parentChangedStat");
         parentChangedSignal = registerSignal("parentChanged");
         parentUnreachableSignal = registerSignal("parentUnreachable");
         joinedDodag = registerSignal("joinedDodag");
@@ -163,7 +164,7 @@ void Rpl::start()
 
     dodagId = Ipv6Address::UNSPECIFIED_ADDRESS;
     rank = INF_RANK - 1;
-    detachedTimeoutEvent = new cMessage("", DETACHED_TIMEOUT);
+    detachedTimeoutEvent = new cMessage("Floating state timeout event", DETACHED_TIMEOUT);
 
     if (pCrossLayerEnabled)
         pTschNumChannels = getNumTschChannels();
@@ -178,7 +179,7 @@ void Rpl::start()
         if (pCrossLayerEnabled) {
             initChOffsetList(pTschNumChannels);
             if (clStartOnTimeout)
-                scheduleAt(simTime() + clKickoffTimeout, new cMessage("", START_PHASE_II));
+                scheduleAt(simTime() + clKickoffTimeout, new cMessage("Cross-layer scheduling phase II", START_PHASE_II));
         }
     }
 }
@@ -221,9 +222,8 @@ void Rpl::processSelfMessage(cMessage *message)
         }
         case DAO_ACK_TIMEOUT: {
             Ipv6Address *advDest = (Ipv6Address*) message->getContextPointer();
-            if (pendingDaoAcks.find(*advDest) == pendingDaoAcks.end()) {
+            if (pendingDaoAcks.find(*advDest) == pendingDaoAcks.end())
                 EV_WARN << "Received DAO_ACK timeout for deleted entry, ignoring" << endl;
-            }
             else
                 retransmitDao(*advDest);
             break;
@@ -450,7 +450,7 @@ void Rpl::processCrossLayerMsg(const Ptr<const Dio>& ctrlDio) {
             || ctrlDio->getSrcAddress() != preferredParent->getSrcAddress()
             || !pCrossLayerEnabled)
     {
-        EV_DETAIL << "Not processing cross-layer ctrl DIO due to some reasons" << endl;
+        EV_DETAIL << "Not processing cross-layer control DIO" << endl;
         return;
     }
 
@@ -561,10 +561,10 @@ void Rpl::sendRplPacket(const Ptr<RplPacket> &body, RplPacketCode code,
         auto advertisedDest = outgoingDao->getReachableDest();
         auto timeout = simTime() + delay + daoAckTimeout;
 
-        EV_DETAIL << "Scheduling DAO_ACK timeout at " << timeout << " for advertised dest "
+        EV_DETAIL << "Scheduling DAO_ACK timeout at " << timeout << " for advertised dest - "
                 << advertisedDest << endl;
 
-        cMessage *daoTimeoutMsg = new cMessage("", DAO_ACK_TIMEOUT);
+        cMessage *daoTimeoutMsg = new cMessage("DAO_ACK timeout event", DAO_ACK_TIMEOUT);
         daoTimeoutMsg->setContextPointer(new Ipv6Address(advertisedDest));
         EV_DETAIL << "Created DAO_ACK timeout msg with context pointer - "
                 << *((Ipv6Address *) daoTimeoutMsg->getContextPointer()) << endl;
@@ -575,9 +575,8 @@ void Rpl::sendRplPacket(const Ptr<RplPacket> &body, RplPacketCode code,
             EV_DETAIL << "Found existing entry in DAO_ACKs map for dest - " << advertisedDest
                     << " updating timeout event ptr" << endl;
         }
-        else  {
+        else
             pendingDaoAcks[advertisedDest] = {daoTimeoutMsg, 0};
-        }
 
         EV_DETAIL << "Pending DAO_ACKs:" << endl;
         for (auto e : pendingDaoAcks)
@@ -785,7 +784,7 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
         // Kick-off phase II of the cross-layer scheduling using
         // heuristics to estimate which DAO is the last one
         if (advertisedDest == terminusNode && !clStartOnTimeout)
-            scheduleAt(simTime() + SCHEDULE_PHASE_II_TIMEOUT, new cMessage("", START_PHASE_II));
+            scheduleAt(simTime() + SCHEDULE_PHASE_II_TIMEOUT, new cMessage("Cross-layer scheduling phase II", START_PHASE_II));
         // check if DAO received is from a 1-hop neighbor
         // to allocate unique channel offsets per branch
         if (advertisedDest == daoSender)
@@ -972,11 +971,13 @@ void Rpl::updatePreferredParent()
         }
 
         if (preferredParent && par("disableParentSwitching").boolValue()) {
-            EV_DETAIL << "Parent update pending, but switching parents not allowed" << endl;
+            EV_DETAIL << "Parent update pending, but switching parents is not allowed" << endl;
             return;
         }
 
-        emit(parentChangedSignal, newPrefParent->dup());
+        emit(parentChangedSignalStats, newPrefParent->dup());
+        // Notify SF (if present) about parent change to reschedule the cells
+        emit(parentChangedSignal, (long) newPrefParent->getNodeId());
         clearParentRoutes();
         daoSeqNum = 0;
         updateRoutingTable(newPrefParentAddr);
