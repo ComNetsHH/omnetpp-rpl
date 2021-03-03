@@ -25,7 +25,7 @@ namespace inet {
 
 ObjectiveFunction::ObjectiveFunction() :
     type(HOP_COUNT),
-    minHopRankIncrease(DEFAULT_MIN_HOP_RANK_INCREASE)
+    minHopRankIncrease(0)
 {}
 
 ObjectiveFunction::ObjectiveFunction(std::string objFunctionType) {
@@ -42,7 +42,7 @@ ObjectiveFunction::~ObjectiveFunction() {
 
 }
 
-Dio* ObjectiveFunction::getPreferredParent(std::map<Ipv6Address, Dio *> candidateParents) {
+Dio* ObjectiveFunction::getPreferredParent(std::map<Ipv6Address, Dio *> candidateParents, Dio* currentPreferredParent) {
     // determine parent with lowest rank
     if (candidateParents.empty()) {
         EV_WARN << "Couldn't determine preferred parent, provided set is empty" << endl;
@@ -52,17 +52,24 @@ Dio* ObjectiveFunction::getPreferredParent(std::map<Ipv6Address, Dio *> candidat
     for (auto cp : candidateParents)
         EV_DETAIL << cp.first << " - " << cp.second << endl;
 
-    Dio *preferredParent = candidateParents.begin()->second;
-    uint16_t minRank = preferredParent->getRank();
+    Dio *newPrefParent = candidateParents.begin()->second;
+    uint16_t currentMinRank = newPrefParent->getRank();
     for (std::pair<Ipv6Address, Dio *> candidate : candidateParents) {
         uint16_t candidateParentRank = candidate.second->getRank();
-        if (candidateParentRank < minRank) {
-            minRank = candidateParentRank;
-            preferredParent = candidate.second;
+        if (candidateParentRank < currentMinRank) {
+            currentMinRank = candidateParentRank;
+            newPrefParent = candidate.second;
+            break;
         }
     }
 
-    return preferredParent;
+    if (!currentPreferredParent)
+        return newPrefParent;
+
+    if (currentPreferredParent->getRank() - newPrefParent->getRank() >= minHopRankIncrease)
+        return newPrefParent;
+    else
+        return currentPreferredParent;
 }
 
 uint16_t ObjectiveFunction::calcRank(Dio* preferredParent) {
@@ -75,7 +82,7 @@ uint16_t ObjectiveFunction::calcRank(Dio* preferredParent) {
         case HOP_COUNT:
             return prefParentRank + 1;
         default:
-            return prefParentRank + minHopRankIncrease;
+            return prefParentRank + DEFAULT_MIN_HOP_RANK_INCREASE;
     }
 }
 

@@ -53,8 +53,10 @@ enum TRICKLE_EVENTS {
 
 enum RPL_SELF_MSG {
     DETACHED_TIMEOUT,
-    START_PHASE_II,
-    DAO_ACK_TIMEOUT
+    DAO_ACK_TIMEOUT,
+    START_CROSS_LAYER_PHASE_II,
+    BRANCH_CH_ADV,
+    RPL_START
 };
 
 struct SlotframeChunk
@@ -62,12 +64,12 @@ struct SlotframeChunk
     uint16_t end;
     uint16_t start;
     friend std::ostream& operator << (std::ostream &os, const SlotframeChunk &s) {
-        return os << "(" << s.start << ", " << s.end << ")";
+        return os << "(" << s.start << ":" << s.end << ")";
     }
 
     std::string toString()
     {
-        return "(" + std::to_string(start) + ", " + std::to_string(end) + ")";
+        return "(" + std::to_string(start) + ":" + std::to_string(end) + ")";
     }
 
 

@@ -1,9 +1,9 @@
 /*
  * Simulation model for RPL (Routing Protocol for Low-Power and Lossy Networks)
  *
- * Copyright (C) 2021  Institute of Communication Networks (ComNets),
+ * Copyright (C) 2020  Institute of Communication Networks (ComNets),
  *                     Hamburg University of Technology (TUHH)
- *           (C) 2021  Yevhenii Shudrenko
+ *           (C) 2020  Yevhenii Shudrenko
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,27 +19,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef TSCHSFCONTROLINFO_H_
+#define TSCHSFCONTROLINFO_H_
 
-#ifndef SFCONTROLINFO_H_
-#define SFCONTROLINFO_H_
-
+#include "inet/common/INETDefs.h"
 #include "RplDefs.h"
 
 namespace inet {
 
-class SfControlInfo : public cObject {
+class TschSfControlInfo : public cObject {
     private:
         uint64_t nodeId;
         SlotframeChunkList slotframeChunks;
         SlotframeChunk slotRange;
+//        Ipv6Address dest;
 
     public:
-        SfControlInfo() {};
-        SfControlInfo(uint64_t nodeId) {
+        TschSfControlInfo() {};
+        TschSfControlInfo(uint64_t nodeId) {
             this->nodeId = nodeId;
         }
 
-        SfControlInfo(SlotframeChunkList slotframeChunks) {
+        TschSfControlInfo(SlotframeChunkList slotframeChunks) {
             this->slotframeChunks = slotframeChunks;
         }
 
@@ -53,9 +54,12 @@ class SfControlInfo : public cObject {
 
         SlotframeChunk getSlotRange() const { return slotRange; }
         void setSlotRange(inet::SlotframeChunk slotRange) { this->slotRange = slotRange; }
+
+//        void setDestAddress(Ipv6Address dest) { this->dest = dest; }
+//        Ipv6Address getDestAddress() { return dest; }
 };
 
 }
 
 
-#endif /* SFCONTROLINFO_H_ */
+#endif /* TSCHSFCONTROLINFO_H_ */

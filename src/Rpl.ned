@@ -26,14 +26,23 @@ import inet.routing.contract.IManetRouting;
 module Rpl like IManetRouting
 {
     parameters:
-        // statistics collection
-        @signal[dioReceived](type=Dio);
-        @signal[daoReceived](type=Dao);
-        @signal[parentChanged](type=Dio);
-        @signal[parentUnreachable](type=Dio);
+        // Control signals
+        @signal[joinedDodag](type=long);
+        @signal[parentChanged](type=long);
+        @signal[parentUnreachable](type=long);
+        @signal[reschedule](type=long);
+        @signal[setChOffset](type=long);
+        @signal[oneHopChildJoined](type=long);
+        
+        // Statistics collections
+        @signal[dioReceived](type=inet::Dio);
+        @signal[daoReceived](type=inet::Dao);
+     	@signal[isSink](type=bool);
+     	@signal[pickedRandomChOffset](type=int);
+     	@statistic[isSink](title="Node is a sink"; source="isSink"; record=count; interplationmode=none);
         @statistic[dioReceived](title = "DIO packets received"; source="dioReceived"; record=count; interpolationmode=none);  
         @statistic[daoReceived](title = "DAO packets received"; source="daoReceived"; record=count; interpolationmode=none);
-        @statistic[parentChanged](title = "Preferred parent has changed"; source="parentChangedStat"; record=count; interpolationmode=none);
+        @statistic[parentChanged](title = "Preferred parent has changed"; source="parentChanged"; record=count; interpolationmode=none);
         @statistic[parentUnreachable](title = "Preferred parent unreachability detected"; source="parentUnreachable"; record=count; interpolationmode=none);
         
         // properties
@@ -45,27 +54,49 @@ module Rpl like IManetRouting
         string routingTableModule = default(absPath("^.ipv6.routingTable"));
         string networkProtocolModule = default(absPath("^.ipv6.ipv6"));
     	
+    	// General parameters
         bool isRoot = default(false);
         bool disabled = default(false);
         bool daoEnabled = default(true);
         bool storing = default(true);
         bool poisoning = default(false);
         bool useBackupAsPreferred = default(false);
-        bool crossLayerEnabled = default(false);
         bool unreachabilityDetectionEnabled = default(false);
         bool daoAckEnabled = default(true);
-        // locks parent selection for cleaner tree topology so that node only considers parent with ID = nodeId - 1,
-		// e.g. 'host3' will only choose 'host2' as preferred parent, etc. 
-        bool assignParentManual = default(false);  
+        int numDaoRetransmitAttempts = default(3);
+        int minHopRankIncrease = default(0);
+        double startDelay = default(0);
+        string objectiveFunctionType = default("hopCount");	 // hopCount, ETX, energy, ...
+        
+        // Utility params (mostly required for specific simulation scenarios)
+        bool assignParentManual = default(false);
         bool useWarmup = default(true);
-        bool allowJoinAtSink = default(false);
+        bool allowJoinAtSink = default(true);
         bool disableParentSwitching = default(false);
+        bool allowDodagSwitching = default(false);
         bool clStartOnTimeout = default(false);
         int numSkipTrickleIntervalUpdates = default(0);
-        double clPhase2Timeout = default(120); // timeout after which sink initiates second cross-layer scheduling phase
+        int numHops = default(0);
+      
+        // Layout construction and canvas params
+        bool branchesLayout = default(false);
+        int numBranches = default(3);
+        double yAnchor = default(200); // first sink's location
+        double xAnchor = default(200); // 
+        double padY = default(5);
+        double padX = default(10);
+        double gridColumnsGapMultiplier = default(4); // Determines width of the central 'hallway' in aircraft
+		int connectorColorId = default(0); // index of the connector line color from the color palette vector
+		bool drawConnectors = default(true);
+		bool multiGwConfigurator = default(false);
+        bool layoutConfigurator = default(false);
+		
+		// Cross-layer scheduling
+		double clPhase2Timeout = default(120); // timeout after which sink initiates second phase of cross-layer scheduling
         int maxChOffset = default(15);
-        int manualParentIncrement = default(1);    
-        string objectiveFunctionType = default("hopCount");	 // hopCount, ETX, energy, ...
+        bool crossLayerEnabled = default(false);
+        int startChOffset = default(0);
+        int endChOffset = default(15);
 
     gates:
         input ipIn;

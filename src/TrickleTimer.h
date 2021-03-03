@@ -25,21 +25,9 @@
 #include <map>
 #include <vector>
 
-#include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/INetfilter.h"
-#include "inet/networklayer/contract/IRoutingTable.h"
-#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#include "inet/networklayer/ipv6/Ipv6Route.h"
+#include "ObjectiveFunction.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
-#include "inet/transportlayer/udp/UdpHeader_m.h"
-#include "inet/common/INETMath.h"
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "Rpl_m.h"
-#include "RplDefs.h"
-
 
 namespace inet {
 

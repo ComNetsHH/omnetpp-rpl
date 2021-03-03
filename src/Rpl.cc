@@ -22,27 +22,18 @@
 #include <deque>
 #include <numeric>
 #include <string>
-#include "inet/common/INETMath.h"
-#include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/networklayer/common/HopLimitTag_m.h"
-#include "inet/networklayer/common/IpProtocolId_m.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/common/L3Tools.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/transportlayer/contract/udp/UdpControlInfo.h"
-#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
-#include "Rpl.h"
+#include <random>
+#include <algorithm>
+#include <regex>
+#include <math.h>
 
+#include "Rpl.h"
 
 namespace inet {
 
 Define_Module(Rpl);
 
-std::ostream& operator<<(std::ostream& os, std::vector<inet::Ipv6Address> &list)
+std::ostream& operator<<(std::ostream& os, std::vector<Ipv6Address> &list)
 {
     for (auto const &addr: list) {
         os << addr << ", " << endl;
@@ -68,22 +59,23 @@ std::ostream& operator<<(std::ostream& os, std::map<Ipv6Address, std::pair<cMess
 // TODO: Replace plain pointers with shared pointers where possible for
 // better garbage collection
 
-// TODO: Replace preferredParent with it's address (initialized to UNSPECIFIED_ADDRESS by default)
-// to avoid nullptr dereferencing checks
-
-
 Rpl::Rpl() :
     isRoot(false),
+    hasStarted(false),
     daoDelay(DEFAULT_DAO_DELAY),
     branchSize(0),
-    daoAckTimeout(10),
+    udpPacketsRecv(0),
+    dodagId(Ipv6Address::UNSPECIFIED_ADDRESS),
+//    daoAckTimeout(10),
+    daoAckTimeout(10), // 5
     detachedTimeout(2), // manual suppressing previous DODAG info [RFC 6550, 8.2.2.1]
     daoRtxCtn(0),
-    daoRtxThresh(3),
     daoSeqNum(0),
     prefixLength(112),
     slotframeLength(0),
-    slotOffsets({0, 0}),
+    clSlotframeChunk({0, 0}),
+    prefParentConnector(nullptr),
+    dodagColor(cFigure::BLACK),
 //    prefixLength(128),
     objectiveFunctionType("hopCount"),
     terminusNode(Ipv6Address("fe80::8aa:ff:fe00:5")),
@@ -91,7 +83,7 @@ Rpl::Rpl() :
     floating(false),
     crossLayerInfoFwdTimeout(5),
     channelOffsets({}),
-    advertisedChOffset(UNDEFINED_CH_OFFSET)
+    branchChOffset(UNDEFINED_CH_OFFSET)
 {}
 
 Rpl::~Rpl()
@@ -109,32 +101,55 @@ void Rpl::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
+
         routingTable = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule"), this);
         trickleTimer = check_and_cast<TrickleTimer *>(getModuleByPath("^.trickleTimer"));
-        isRoot = par("isRoot").boolValue();
+
         daoEnabled = par("daoEnabled").boolValue();
         host = getContainingNode(this);
-        objectiveFunction = new ObjectiveFunction(par("objectiveFunctionType").stdstringValue());
 
-        pCrossLayerEnabled = par("crossLayerEnabled").boolValue();
+        objectiveFunction = new ObjectiveFunction(par("objectiveFunctionType").stdstringValue());
+        objectiveFunction->setMinHopRankIncrease(par("minHopRankIncrease").intValue());
+        daoRtxThresh = par("numDaoRetransmitAttempts").intValue();
+        allowDodagSwitching = par("allowDodagSwitching").boolValue();
+
         pDaoAckEnabled = par("daoAckEnabled").boolValue();
         pManualParentAssignment = par("assignParentManual").boolValue();
         pUseWarmup = par("useWarmup").boolValue();
         pJoinAtSinkAllowed = par("allowJoinAtSink").boolValue();
-        pManualParentInc = par("manualParentIncrement").intValue();
         clStartOnTimeout = par("clStartOnTimeout").boolValue();
         clKickoffTimeout = par("clPhase2Timeout").doubleValue();
 
-        // statistic & control signals
+        // cross-layer params
+        pCrossLayerEnabled = par("crossLayerEnabled").boolValue();
+        pTschNumChannels = pCrossLayerEnabled ? getNumTschChannels() : 0;
+        EV_DETAIL << "Discovered " << pTschNumChannels << " TSCH channels" << endl;
+
+        // statistic signals
         dioReceivedSignal = registerSignal("dioReceived");
         daoReceivedSignal = registerSignal("daoReceived");
-        parentChangedSignalStats = registerSignal("parentChangedStat");
         parentChangedSignal = registerSignal("parentChanged");
         parentUnreachableSignal = registerSignal("parentUnreachable");
-        joinedDodag = registerSignal("joinedDodag");
+
+        // cross-layer control & stats signals
+        nodeIsSinkSignal = registerSignal("isSink");
         reschedule = registerSignal("reschedule");
         setChOffset = registerSignal("setChOffset");
+        oneHopChildJoined = registerSignal("oneHopChildJoined");
+        pickedRandomChOffsetSignal = registerSignal("pickedRandomChOffset");
+        startDelay = par("startDelay").doubleValue();
 
+        cModule* net = host->getParentModule();
+
+        if (par("multiGwConfigurator").boolValue() && pCrossLayerEnabled)
+            allocateSinkChOffsets(pTschNumChannels, net);
+
+        if (par("layoutConfigurator").boolValue())
+            generateLayout(net);
+
+        WATCH(pTschChOffStart);
+        WATCH(pTschChOffEnd);
+        WATCH(branchChOffset);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
@@ -144,6 +159,210 @@ void Rpl::initialize(int stage)
     }
 }
 
+void Rpl::generateLayout(cModule *net) {
+    auto sink = net->getSubmodule("sink", 0);
+    if (!sink)
+        throw cRuntimeError("Couldn't find sink[0] module during layout configuration");
+
+    auto sinkPos = sink->getSubmodule("mobility");
+
+    Coord *anchor = new Coord(sinkPos->par("initialX").doubleValue(), sinkPos->par("initialY").doubleValue());
+    double padX = par("padX").doubleValue();
+    double padY = par("padY").doubleValue();
+    double gap = par("gridColumnsGapMultiplier").doubleValue();
+
+    // optional
+    bool bLayout = par("branchesLayout").boolValue();
+    int numBranches = par("numBranches").intValue();
+    int numHosts = net->par("numHosts").intValue();
+
+    configureTopologyLayout(*anchor, padX, padY, gap, net, bLayout, numBranches, numHosts);
+}
+
+int Rpl::getNodeId(std::string nodeName) {
+    const std::regex base_regex("host\\[([0-9]+)\\]");
+    std::smatch base_match;
+
+    if (std::regex_match(nodeName, base_match, base_regex)) {
+        // The first sub_match is the whole string; the next
+        // sub_match is the first parenthesized expression.
+        if (base_match.size() == 2) {
+            std::ssub_match base_sub_match = base_match[1];
+            std::string base = base_sub_match.str();
+            return std::stoi(base);
+        }
+    }
+    return -1;
+}
+
+bool Rpl::isSinkNode(std::string nodeName)
+{
+    const std::regex base_regex("sink\\[([0-9]+)\\]");
+    std::smatch base_match;
+
+    if (std::regex_match(nodeName, base_match, base_regex)) {
+        // The first sub_match is the whole string; the next
+        // sub_match is the first parenthesized expression.
+        if (base_match.size() == 2)
+            return true;
+    }
+    return false;
+}
+
+cFigure::Color Rpl::pickRandomColor() {
+    auto palette = selfId % 2 == 0 ? cFigure::GOOD_DARK_COLORS : cFigure::GOOD_LIGHT_COLORS;
+    auto numColors = selfId % 2 == 0 ? cFigure::NUM_GOOD_DARK_COLORS : cFigure::NUM_GOOD_LIGHT_COLORS;
+    return host->getParentModule()->par("numSinks").intValue() == 1 ?  cFigure::BLACK : palette[intrand(numColors, 0) - 1];
+}
+
+void Rpl::allocateSinkChOffsets(int numTschChannels, cModule *network) {
+    if (!network)
+        throw cRuntimeError("No network module provided");
+
+    auto numSinks = network->par("numSinks").intValue();
+
+    if (numSinks <= 0)
+      throw cRuntimeError("Invalid number of sinks");
+
+    EV_DETAIL << "Allocating channel offsets to sinks" << endl;
+
+    int j = 0;
+    int chOffsetsPerSink = (int) ceil(numTschChannels / numSinks);
+
+    for (cModule::SubmoduleIterator it(network); !it.end(); ++it) {
+        cModule *subm = *it;
+        std::string sname(subm->getFullName());
+        auto subRpl = subm->getSubmodule("rpl");
+        if (sname.find("sink") != std::string::npos) {
+            subRpl->par("startChOffset") = (int) chOffsetsPerSink * j;
+            j++;
+            int lastChOf = chOffsetsPerSink * j - 1;
+            subRpl->par("endChOffset") = lastChOf >= numTschChannels ? numTschChannels - 1 : lastChOf;
+            EV_DETAIL << sname << ": " << chOffsetsPerSink * j << ".." << lastChOf << endl;
+        }
+    }
+}
+
+void Rpl::configureTopologyLayout(Coord anchorPoint, double padX, double padY, double columnGapMultiplier,
+        cModule *network, bool branchLayout, int numBranches, int numHosts)
+{
+    EV_DETAIL << "Configuring topology for " << boolStr(branchLayout, "branch", "seatbelt") << " layout" << endl;
+
+    int i = 1;
+    int k = 1;
+    int l = 0;
+    int m = 0;
+    int hopCtn = 0;
+    int middleBranchId = (int) floor(numBranches / 2);
+    int nodesPerBranch = branchLayout ? (int) ceil(numHosts / numBranches) : 0;
+
+    double skewMod = numBranches % 2 == 0 ? 1.5 : 1.2;
+    int numHops = par("numHops").intValue();
+
+    double currentX = anchorPoint.x - (branchLayout ? (numBranches * skewMod) : columnGapMultiplier) * padX;
+    double defaultY = branchLayout ? (anchorPoint.y + padY) : anchorPoint.y;
+    double currentY = defaultY;
+
+    for (cModule::SubmoduleIterator it(network); !it.end(); ++it) {
+        cModule *subm = *it;
+        std::string sname(subm->getFullName());
+        auto nodeId = getNodeId(sname);
+        auto subMobility = subm->getSubmodule("mobility");
+
+        if (branchLayout) {
+            if (nodeId <= 0)
+                continue;
+
+            subMobility->par("initialX") = currentX;
+            subMobility->par("initialY") = currentY;
+
+            if (currentY == defaultY) {
+                // allow branch roots join the sink directly, since they are closest to it
+                subm->getSubmodule("rpl")->par("allowJoinAtSink") = true;
+                hopCtn = 1;
+                if (m != (int) ceil(numBranches / 2)) {
+                    auto drift = ((m < middleBranchId ? padX : -padX) * pow((m - middleBranchId + 0.0001) / 1.3, 2));
+                    subMobility->par("initialX") = currentX + drift;
+                } else
+                    k = numBranches % 2;
+                m++;
+            } else {
+                subm->getSubmodule("rpl")->par("allowJoinAtSink") = false;
+                subm->getSubmodule("rpl")->par("assignParentManual") = true;
+            }
+
+            currentX += pow(-1, k++);
+            // switching to next branch
+            if (nodeId % nodesPerBranch == 0) {
+                currentX += padX * columnGapMultiplier;
+                EV_DETAIL << "Switching to next branch, updated currentX to " << currentX << endl;
+                currentY = defaultY;
+            } else
+                currentY += padY;
+
+            if (numHops > 0) {
+                subm->par("numApps") = hopCtn == numHops ? 1 : 0;
+                hopCtn++;
+            }
+
+        } else {
+            if (sname.find("sink") != std::string::npos) {
+                double initialY = anchorPoint.y + pow(-1, k++) * padY * l * numHosts / 12;
+                if (l == 0 || k % 2 == 0)
+                    l++;
+                subMobility->par("initialY") = initialY;
+                subMobility->par("initialX") = anchorPoint.x;
+            } else {
+                if (nodeId <= 0)
+                    continue;
+
+                subMobility->par("initialX") = currentX;
+                subMobility->par("initialY") = currentY;
+                // switching to next row
+                if (nodeId % 6 == 0) {
+                    currentX = anchorPoint.x - columnGapMultiplier * padX;
+                    currentY = anchorPoint.y + pow(-1, i) * padY * i++;
+                    // 'jumping' over aircraft's central hallway
+                } else if (nodeId % 3 == 0)
+                    currentX += columnGapMultiplier * padX;
+                else
+                    currentX += padX;
+            }
+        }
+    }
+}
+
+cModule* Rpl::findSubmodule(std::string sname, cModule *host) {
+    for (cModule::SubmoduleIterator it(host); !it.end(); ++it) {
+        cModule *subm = *it;
+        std::string s(subm->getFullName());
+
+        if (s.find(sname) != std::string::npos)
+            return *it;
+    }
+    return nullptr;
+}
+
+std::vector<int> Rpl::pickRandomly(int total, int numRequested) {
+    // shuffle the array
+    std::random_device rd;
+    std::mt19937 e{rd()};
+
+    std::vector<int> values(total);
+
+    std::iota(values.begin(), values.end(), 1);
+
+    std::shuffle(values.begin(), values.end(), e);
+
+    // copy the picked ones
+    std::vector<int> picked(numRequested);
+//    for (auto i = 0; i < numRequested; i++)
+//        picked.push_back(inputVec[i]);
+
+    std::copy(values.begin(), values.begin() + numRequested, picked.begin());
+    return picked;
+}
+
 //
 // Lifecycle operations
 //
@@ -151,6 +370,18 @@ void Rpl::initialize(int stage)
 void Rpl::start()
 {
     InterfaceEntry* ie = nullptr;
+
+    if (startDelay > 0) {
+        scheduleAt(simTime() + startDelay, new cMessage("", RPL_START));
+        return;
+    }
+    hasStarted = true;
+
+    isRoot = par("isRoot").boolValue(); // Initialization of this parameter should be here to ensure
+                                        // multi-gateway configurator will have time to assign 'root' roles
+                                        // to randomly chosen nodes
+    position = *(new Coord());
+
     // set network interface entry pointer (TODO: Update for IEEE 802.15.4)
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
     {
@@ -162,33 +393,61 @@ void Rpl::start()
         }
     }
 
-    dodagId = Ipv6Address::UNSPECIFIED_ADDRESS;
-    rank = INF_RANK - 1;
-    detachedTimeoutEvent = new cMessage("Floating state timeout event", DETACHED_TIMEOUT);
+    selfId = interfaceTable->getInterface(1)->getMacAddress().getInt();
+    auto mobility = check_and_cast<StationaryMobility*> (getParentModule()->getSubmodule("mobility"));
+    position = mobility->getCurrentPosition();
 
-    if (pCrossLayerEnabled)
-        pTschNumChannels = getNumTschChannels();
+    udpApp = findSubmodule("app", host);
+
+//    if (!isRoot) {
+//          // TODO: refactor this submodule search
+//          udpApp = findSubmodule("app", host);
+//          if (app)
+//              app->subscribe("packetReceived", this);
+//
+//          udpApp = app ? check_and_cast<UdpBasicApp*> (app) : nullptr;
+//    }
+
+    rank = INF_RANK - 1;
+    detachedTimeoutEvent = new cMessage("", DETACHED_TIMEOUT);
 
     if (isRoot && !par("disabled").boolValue()) {
         trickleTimer->start(pUseWarmup, par("numSkipTrickleIntervalUpdates").intValue());
+        dodagColor = pickRandomColor();
         rank = ROOT_RANK;
         dodagVersion = DEFAULT_INIT_DODAG_VERSION;
         instanceId = RPL_DEFAULT_INSTANCE;
         dtsn = 0;
         storing = par("storing").boolValue();
         if (pCrossLayerEnabled) {
-            initChOffsetList(pTschNumChannels);
+            // parameter initialization occurs here to allow multi-gateway configurator to
+            // set everything properly
+            pTschNumChannels = getNumTschChannels();
+            if (!pTschNumChannels)
+                throw cRuntimeError("Cross-layer framework enabled, but couldn't determine number of TSCH channels");
+
+            pTschChOffStart = par("startChOffset").intValue();
+            pTschChOffEnd = par("endChOffset").intValue();
+            initChOffsetList(pTschChOffStart, pTschChOffEnd);
             if (clStartOnTimeout)
-                scheduleAt(simTime() + clKickoffTimeout, new cMessage("Cross-layer scheduling phase II", START_PHASE_II));
+                scheduleAt(simTime() + clKickoffTimeout, new cMessage("", START_CROSS_LAYER_PHASE_II));
         }
+        emit(nodeIsSinkSignal, true);
+        udpApp->subscribe("packetReceived", this);
     }
 }
 
-void Rpl::initChOffsetList(int maxChOffset) {
-    for (int i = 0; i < maxChOffset; i++)
+void Rpl::refreshDisplay() const {
+    if (isRoot) {
+        host->getDisplayString().setTagArg("t", 0, std::string(" num rcvd: " + std::to_string(udpPacketsRecv)).c_str());
+        host->getDisplayString().setTagArg("t", 1, "l"); // set display text position to 'left'
+    }
+}
+
+void Rpl::initChOffsetList(int minChOffset, int maxChOffset) {
+    for (int i = minChOffset; i < maxChOffset; i++)
         channelOffsets.push_back(i);
-//    EV_DETAIL << "Initialized channel offset list: " << channelOffsets << endl;
-    EV_DETAIL << "Initialized channel offset list: ";
+    EV_DETAIL << "Initialized channel offset list (to advertise to branches later on): ";
     for (auto chof : channelOffsets)
         EV_DETAIL << chof << ", ";
     EV_DETAIL << endl;
@@ -216,8 +475,20 @@ void Rpl::processSelfMessage(cMessage *message)
             EV_DETAIL << "Detached state ended, processing new incoming RPL packets" << endl;
             break;
         }
-        case START_PHASE_II: {
+        case RPL_START: {
+            startDelay = 0;
+            start();
+            break;
+        }
+        case START_CROSS_LAYER_PHASE_II: {
             startSecondSchedulingPhase();
+            break;
+        }
+        case BRANCH_CH_ADV: {
+            auto branchRoot = (Ipv6Address*) message->getContextPointer();
+            EV_DETAIL << "Preparing to send chOf advertisement to one of the branch roots - " << *branchRoot << endl;
+
+            advertiseChOffset(*branchRoot, 0);
             break;
         }
         case DAO_ACK_TIMEOUT: {
@@ -240,6 +511,7 @@ void Rpl::clearDaoAckTimer(Ipv6Address daoDest) {
     pendingDaoAcks.erase(daoDest);
 }
 
+//void Rpl::retransmitDao(Dao *dao)
 
 void Rpl::retransmitDao(Ipv6Address advDest) {
     EV_DETAIL << "DAO_ACK for " << advDest << " timed out, attempting retransmit" << endl;
@@ -253,8 +525,8 @@ void Rpl::retransmitDao(Ipv6Address advDest) {
 
     auto rtxCtn = pendingDaoAcks[advDest].second++;
     if (rtxCtn > daoRtxThresh) {
-        EV_DETAIL << "Retransmission threshold - " << std::to_string(daoRtxThresh)
-            << " exceed, erasing corresponding entry from pending acks table" << endl;
+        EV_DETAIL << "Retransmission threshold (" << std::to_string(daoRtxThresh)
+            << ") exceeded, erasing corresponding entry from pending ACKs" << endl;
         clearDaoAckTimer(advDest);
         return;
     }
@@ -284,6 +556,7 @@ void Rpl::detachFromDodag() {
     EV_DETAIL << "Detached state enabled, no RPL packets will be processed for "
             << (int)detachedTimeout << "s" << endl;
     cancelEvent(detachedTimeoutEvent);
+    drawConnector(position, cFigure::BLACK);
     scheduleAt(simTime() + detachedTimeout, detachedTimeoutEvent);
 }
 
@@ -317,6 +590,8 @@ void Rpl::poisonSubDodag() {
 
 void Rpl::processMessage(cMessage *message)
 {
+    if (!hasStarted || par("disabled").boolValue())
+        return;
     std::string arrivalGateName = std::string(message->getArrivalGate()->getBaseName());
     if (arrivalGateName.compare("ttModule") == 0)
         processTrickleTimerMsg(message);
@@ -389,19 +664,11 @@ void Rpl::processPacket(Packet *packet)
             break;
         }
         case DAO: {
-            if (daoEnabled)
-                processDao(dynamicPtrCast<const Dao>(rplBody));
-            else
-                EV_DETAIL << "DAO support not enabled, discarding packet" << endl;
+            processDao(dynamicPtrCast<const Dao>(rplBody));
             break;
         }
         case DAO_ACK: {
-            EV_DETAIL << "Received DAO_ACK" << endl;
             processDaoAck(dynamicPtrCast<const Dao>(rplBody));
-            break;
-        }
-        case CROSS_LAYER_CTRL: {
-            processCrossLayerMsg(dynamicPtrCast<const Dio>(rplBody));
             break;
         }
         default: EV_WARN << "Unknown Rpl packet" << endl;
@@ -445,61 +712,81 @@ uint16_t Rpl::calcBranchSize(Ipv6Address& rootChild) {
 }
 
 void Rpl::processCrossLayerMsg(const Ptr<const Dio>& ctrlDio) {
+    if (!pCrossLayerEnabled || !preferredParent)
+        return;
 
-    if (preferredParent == nullptr
-            || ctrlDio->getSrcAddress() != preferredParent->getSrcAddress()
-            || !pCrossLayerEnabled)
+    if (ctrlDio->getSrcAddress() != preferredParent->getSrcAddress())
     {
-        EV_DETAIL << "Not processing cross-layer control DIO" << endl;
+        EV_DETAIL << "Not processing cross-layer DIOs coming not from our preferred parent" << endl;
+        return;
+    }
+
+    if (preferredParent->getSrcAddress() != dodagId && ctrlDio->getAdvChOffset() == UNDEFINED_CH_OFFSET)
+    {
+        EV_DETAIL << "No channel offset advertised in DIO coming from "
+                << "a non-root parent, aborting cross-layer scheduling" << endl;
         return;
     }
 
     EV_DETAIL << "Processing cross-layer control DIO from " << ctrlDio->getSrcAddress() << endl;
 
+    if (preferredParent->getSrcAddress() == dodagId && branchChOffset == UNDEFINED_CH_OFFSET) {
+        branchChOffset = intrand(pTschNumChannels);
+        EV_WARN << "DIO is directly from the sink, but still no channel offset fixed for this branch "
+                << "(may have missed DAO_ACK advertising it), choosing randomly - " << branchChOffset << endl;
+    }
+
     slotframeLength = ctrlDio->getSlotframeLength();
     if (slotframeLength == 0) {
-        EV_WARN << "Invalid slotframe length advertised, aborting cross-layer scheduling" << endl;
+        EV_WARN << "Invalid slotframe length advertised" << endl;
         return;
     }
-    if (advertisedChOffset == UNDEFINED_CH_OFFSET) {
-        if (ctrlDio->getAdvChOffset() == UNDEFINED_CH_OFFSET) {
-            advertisedChOffset = intrand(pTschNumChannels);
-            EV_WARN << "Undefined channel offset advertised, picking one randomly - "
-                    << std::to_string(advertisedChOffset) << endl;
 
-        } else {
-            advertisedChOffset = ctrlDio->getAdvChOffset();
-            EV_DETAIL << "Exracted advertised channel offset (for a branch) - "
-                << std::to_string(advertisedChOffset) << endl;
-        }
-
-        emit(setChOffset, (long) advertisedChOffset);
+    if (branchChOffset == UNDEFINED_CH_OFFSET) {
+//        if (ctrlDio->getAdvChOffset() == UNDEFINED_CH_OFFSET) {
+//            advertisedChOffset = intrand(pTschNumChannels);
+//            EV_WARN << "Undefined channel offset advertised, picking one randomly - "
+//                    << std::to_string(advertisedChOffset) << endl;
+//
+//        } else {
+//
+//        }
+        branchChOffset = ctrlDio->getAdvChOffset();
     }
+
+    emit(setChOffset, (long) branchChOffset);
+
     if (branchSize == 0) {
         auto advBranchSize = ctrlDio->getBranchSize();
         if (advBranchSize == 0) {
             branchSize = calcBranchSize();
-            EV_DETAIL << "Branch size calculated via enumerating unicast routes - " << branchSize << endl;
+            if (!branchSize) {
+                EV_WARN << "No children found on this branch? Aborting cross-layer scheduling" << endl;
+                return;
+            }
+            EV_DETAIL << "Branch size calculated by enumerating unicast routes - " << branchSize << endl;
         }
         else
             branchSize = advBranchSize;
     }
-    if (slotOffsets.start == 0 && slotOffsets.end == 0)  {
-        auto advSlotOffsets = ctrlDio->getAdvSlotOffsets();
-        if ( !(advSlotOffsets.start == 0 && advSlotOffsets.end == 0) ) {
-            slotOffsets.start = advSlotOffsets.start;
-            slotOffsets.end = advSlotOffsets.end;
-            EV_DETAIL << "Extracted advertised slot offset range: " << slotOffsets << endl;
+    // If no cross-layer scheduling info fixed yet, try to extract it from DIO
+    if (clSlotframeChunk.start == 0 && clSlotframeChunk.end == 0)  {
+        auto advChunk = ctrlDio->getAdvSlotOffsets();
+//        if ( !(advSlotOffsets.start == 0 && advSlotOffsets.end == 0) ) {
+        if (isValidSlotframeChunk(advChunk.start, advChunk.end, slotframeLength)) {
+            clSlotframeChunk.start = advChunk.start;
+            clSlotframeChunk.end = advChunk.end;
+            EV_DETAIL << "Extracted advertised slotframe chunk: " << clSlotframeChunk << endl;
         }
         else {
-            slotOffsets.end = slotframeLength;
-            slotOffsets.start = (uint16_t) (slotframeLength - getNearestChildren().size() * slotframeLength / branchSize);
-            EV_DETAIL << "Calculated slot offset range - " << slotOffsets << endl;
+            EV_DETAIL << "Branch root calculating slotframe chunk" << endl;
+            clSlotframeChunk.end = slotframeLength;
+            clSlotframeChunk.start = (uint16_t) (slotframeLength - getNearestChildren().size() * slotframeLength / branchSize);
+            EV_DETAIL << "Calculated slot offset range - " << clSlotframeChunk << endl;
         }
-        inet::SfControlInfo *mci = new inet::SfControlInfo();
-        mci->setSlotRange(slotOffsets);
+        inet::TschSfControlInfo *mci = new inet::TschSfControlInfo();
+        mci->setSlotRange(clSlotframeChunk);
         emit(reschedule, 0, (cObject *) mci);
-        EV_DETAIL << "Notifying SF about available slot range - " << slotOffsets << endl;
     }
 
     // forward ctrl dio immediately and reset trickle timer
@@ -545,8 +832,8 @@ void Rpl::sendRplPacket(const Ptr<RplPacket> &body, RplPacketCode code,
     header->setIcmpv6Code(code);
     pkt->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     pkt->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
-    if (interfaceEntryPtr)
-        pkt->addTag<InterfaceReq>()->setInterfaceId(interfaceEntryPtr->getInterfaceId());
+//    if (interfaceEntryPtr)
+//        pkt->addTag<InterfaceReq>()->setInterfaceId(interfaceEntryPtr->getInterfaceId());
     auto addresses = pkt->addTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
     addresses->setDestAddress(nextHop);
@@ -559,12 +846,20 @@ void Rpl::sendRplPacket(const Ptr<RplPacket> &body, RplPacketCode code,
     if (code == DAO && ((dynamicPtrCast<Dao>) (body))->getDaoAckRequired()) {
         auto outgoingDao = (dynamicPtrCast<Dao>) (body);
         auto advertisedDest = outgoingDao->getReachableDest();
-        auto timeout = simTime() + delay + daoAckTimeout;
+        auto timeout = simTime() + SimTime(daoAckTimeout, SIMTIME_S) * uniform(1, 3); // + delay?
 
-        EV_DETAIL << "Scheduling DAO_ACK timeout at " << timeout << " for advertised dest - "
+        EV_DETAIL << "Scheduling DAO_ACK timeout at " << timeout << " for advertised dest "
                 << advertisedDest << endl;
 
-        cMessage *daoTimeoutMsg = new cMessage("DAO_ACK timeout event", DAO_ACK_TIMEOUT);
+//        // check if there's already an entry for this packet (more than one retransmission attempt)
+//        if (pendingDaoAcks[advertisedDest].first != nullptr) {
+//            EV_DETAIL << "Found already existing entry in pending DAO acks map for adv dest -  "
+//                    << advertisedDest << endl;
+//            scheduleAt(daoTimeoutTimestamp, pendingDaoAcks[advertisedDest].first);
+//            EV_DETAIL << "Another DAO timeout scheduled for " << daoTimeoutTimestamp << endl;
+//            return;
+//        }
+        cMessage *daoTimeoutMsg = new cMessage("", DAO_ACK_TIMEOUT);
         daoTimeoutMsg->setContextPointer(new Ipv6Address(advertisedDest));
         EV_DETAIL << "Created DAO_ACK timeout msg with context pointer - "
                 << *((Ipv6Address *) daoTimeoutMsg->getContextPointer()) << endl;
@@ -587,23 +882,23 @@ void Rpl::sendRplPacket(const Ptr<RplPacket> &body, RplPacketCode code,
 
 }
 
-SlotframeChunk Rpl::calcAdvSlotOffsets() {
-    if (slotOffsets.start == 0 && slotOffsets.end == 0)
+SlotframeChunk Rpl::calcAdvSlotframeChunk() {
+    if (clSlotframeChunk.start == 0 && clSlotframeChunk.end == 0)
         return {0, 0};
 
     if (branchSize == 0) {
-        EV_WARN << "slofOffsets set to " << slotOffsets
+        EV_WARN << "slofOffsets set to " << clSlotframeChunk
                 << "but branch size is undefined, cannot calculate"
                 << " slot offsets to advertise" << endl;
         return {0, 0};
     }
 
-    if (slotOffsets.start - slotframeLength * getNearestChildren().size() / branchSize > slotframeLength || slotOffsets.start - 1 < 0)
-        return { slotOffsets.end, 5 };
+    if (clSlotframeChunk.start - slotframeLength * getNearestChildren().size() / branchSize > slotframeLength || clSlotframeChunk.start - 1 < 0)
+        return { clSlotframeChunk.end, 5 };
 
     return {
-        (uint16_t) (slotOffsets.start - 1),
-        (uint16_t) (slotOffsets.start - slotframeLength * getNearestChildren().size() / branchSize)
+        (uint16_t) (clSlotframeChunk.start - 1),
+        (uint16_t) (clSlotframeChunk.start - slotframeLength * getNearestChildren().size() / branchSize)
     };
 }
 
@@ -611,25 +906,31 @@ const Ptr<Dio> Rpl::createDio()
 {
     auto dio = makeShared<Dio>();
     dio->setInstanceId(instanceId);
-    dio->setChunkLength(b(128)); // TODO: Set DIO size as constant or via function
+    dio->setChunkLength(getDioSize());
     dio->setStoring(storing);
     dio->setRank(rank);
     dio->setDtsn(dtsn);
-    dio->setNodeId(interfaceTable->getInterface(1)->getMacAddress().getInt());
+    dio->setNodeId(selfId);
     dio->setDodagVersion(dodagVersion);
     dio->setDodagId(isRoot ? getSelfAddress() : dodagId);
     dio->setSrcAddress(getSelfAddress());
+    dio->setPosition(position);
+    if (isRoot)
+        dio->setColor(dodagColor);
+    else
+        dio->setColor(preferredParent ? preferredParent->getColor() : cFigure::GREY);
+
     EV_DETAIL << "DIO created advertising DODAG - " << dio->getDodagId()
                 << " and rank " << dio->getRank() << endl;
 
     if (pCrossLayerEnabled) {
-        dio->setAdvChOffset(advertisedChOffset);
-        dio->setAdvSlotOffsets(calcAdvSlotOffsets());
+        dio->setAdvChOffset(branchChOffset);
+        dio->setAdvSlotOffsets(calcAdvSlotframeChunk());
         dio->setSlotframeLength(slotframeLength);
         dio->setBranchSize(branchSize);
 
         EV_DETAIL << "Cross-layer info included:\n" << "chOffset - "
-                << advertisedChOffset << ", advSlotOffsets - " << dio->getAdvSlotOffsets()
+                << branchChOffset << ", advSlotframeChunk - " << dio->getAdvSlotOffsets()
                 << "\nslotframe length - " << slotframeLength << ", branch size - " << branchSize << endl;
     }
 
@@ -646,6 +947,7 @@ const Ptr<Dao> Rpl::createDao(const Ipv6Address &reachableDest, uint8_t channelO
     dao->setSrcAddress(getSelfAddress());
     dao->setReachableDest(reachableDest);
     dao->setSeqNum(daoSeqNum++);
+    dao->setNodeId(selfId);
     dao->setDaoAckRequired(pDaoAckEnabled);
     EV_DETAIL << "Created DAO with seqNum = " << std::to_string(dao->getSeqNum()) << " advertising " << reachableDest << endl;
     return dao;
@@ -660,28 +962,45 @@ const Ptr<Dao> Rpl::createDao(const Ipv6Address &reachableDest, bool ackRequired
     dao->setSrcAddress(getSelfAddress());
     dao->setReachableDest(reachableDest);
     dao->setSeqNum(daoSeqNum++);
+    dao->setNodeId(selfId);
     dao->setDaoAckRequired(ackRequired);
     EV_DETAIL << "Created DAO with seqNum = " << std::to_string(dao->getSeqNum()) << " advertising " << reachableDest << endl;
     return dao;
 }
 
 bool Rpl::matchesRequiredParent(const Ipv6Address &addr) {
-    auto ownSuffix = std::to_string(getSelfAddress().str().back());
-    auto ppSuffix = std::to_string(addr.str().back());
-    bool res = (std::stoi(ownSuffix) - pManualParentInc) == std::stoi(ppSuffix);
+    // Because decimal repr. of node's own IPv6 address is wrong somehow, we take only
+    // last 2 HEX digits and calculate if the advertised address matches the required
+    auto mySuffix = getSelfAddress().str().substr(getSelfAddress().str().length() - 2);
+    auto advSuffix = addr.str().substr(addr.str().length() - 2);
 
-    return res || pJoinAtSinkAllowed || !pManualParentAssignment;
+    if (mySuffix.find(":") != std::string::npos)
+        mySuffix = mySuffix.back();
+    if (advSuffix.find(":") != std::string::npos)
+        advSuffix = advSuffix.back();
+
+    bool doesMatch = (std::stoi(mySuffix, nullptr, 16) - 1) == std::stoi(advSuffix, nullptr, 16);
+
+    return doesMatch || pJoinAtSinkAllowed || !pManualParentAssignment;
 }
 
 void Rpl::processDio(const Ptr<const Dio>& dio)
 {
+    if (isRoot)
+        return;
     EV_DETAIL << "Processing DIO from " << dio->getSrcAddress() << endl;
     emit(dioReceivedSignal, dio->dup());
 
     // If node's not a part of any DODAG, join the one advertised
-    if ( !isRoot && dodagId == Ipv6Address::UNSPECIFIED_ADDRESS && dio->getRank() != INF_RANK
-            && matchesRequiredParent(dio->getSrcAddress()) )
+    if (dodagId == Ipv6Address::UNSPECIFIED_ADDRESS && dio->getRank() != INF_RANK)
     {
+        // Artificial restriction to limit the number of nodes joining directly at the sink
+        if (dio->getSrcAddress() == dio->getDodagId() && !pJoinAtSinkAllowed)
+            return;
+        // Allows creating deep branched tree
+        if (!matchesRequiredParent(dio->getSrcAddress()))
+            return;
+
         dodagId = dio->getDodagId();
         dodagVersion = dio->getDodagVersion();
         instanceId = dio->getInstanceId();
@@ -689,18 +1008,24 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
         dtsn = dio->getDtsn();
         lastTarget = new Ipv6Address(getSelfAddress());
         selfAddr = getSelfAddress();
+        dodagColor = dio->getColor();
         EV_DETAIL << "Joined DODAG with id - " << dodagId << endl;
-        // Start broadcasting DIOs, diffusing DODAG control data
+        // Start broadcasting DIOs, diffusing DODAG control data, TODO: refactor TT lifecycle
         if (trickleTimer->hasStarted())
             trickleTimer->reset();
         else
             trickleTimer->start(false, par("numSkipTrickleIntervalUpdates").intValue());
-        emit(joinedDodag, (long) dio->getNodeId());
-    } else {
+        if (udpApp)
+            udpApp->par("destAddresses") = dio->getDodagId().str();
+    }
+    else {
+        if (!allowDodagSwitching && dio->getDodagId() != dodagId) {
+            EV_DETAIL << "Node already joined a DODAG, skipping DIO advertising other ones" << endl;
+            return;
+        }
         /**
-         * Immediately check if INFINITE_RANK is advertised, and the advertising
-         * node is a preferred parent, in case 'poisoning' detected, delete
-         * preferred parent and remove it from candidate neighbors
+         * If INFINITE_RANK is advertised from a preferred parent (route poisoning),
+         * delete preferred parent and remove it from candidate neighbors
          */
         if (checkPoisonedParent(dio)) {
             EV_DETAIL << "Received poisoned DIO from preferred parent - "
@@ -712,19 +1037,17 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
     }
     trickleTimer->ctrlMsgReceived();
 
-    EV_DETAIL << "Checking if DIO is advertising cross-layer info:\n"
-            << " my chOf = " << advertisedChOffset << ", dio's chOf = " << dio->getAdvChOffset() << endl;
-
-    if ( (advertisedChOffset == UNDEFINED_CH_OFFSET && dio->getAdvChOffset() != UNDEFINED_CH_OFFSET)
+    // TODO: Distinguish CL packets more reliably
+    if ( (branchChOffset == UNDEFINED_CH_OFFSET && dio->getAdvChOffset() != UNDEFINED_CH_OFFSET)
                     || (slotframeLength == 0 && dio->getSlotframeLength() != 0) )
     {
         processCrossLayerMsg(dio);
     }
-    // Do not process DIO from unknown DAG/RPL instance or if receiver is root
-    if (checkUnknownDio(dio) || isRoot) {
-        EV_DETAIL << "Unknown DODAG/InstanceId, or receiver is root - discarding DIO" << endl;
-        return;
-    }
+//    // Do not process DIO from unknown DAG/RPL instance or if receiver is root
+//    if (checkUnknownDio(dio) || isRoot) {
+//        EV_DETAIL << "Unknown DODAG/InstanceId, or receiver is root - discarding DIO" << endl;
+//        return;
+//    }
     if (dio->getRank() > rank) {
         EV_DETAIL << "Higher rank advertised, discarding DIO" << endl;
         return;
@@ -739,16 +1062,21 @@ bool Rpl::checkPoisonedParent(const Ptr<const Dio>& dio) {
 }
 
 void Rpl::processDao(const Ptr<const Dao>& dao) {
+    if (!daoEnabled) {
+        EV_WARN << "DAO support not enabled, discarding packet" << endl;
+        return;
+    }
+
     emit(daoReceivedSignal, dao->dup());
     auto daoSender = dao->getSrcAddress();
     auto advertisedDest = dao->getReachableDest();
-    EV_DETAIL << "Processing DAO with seq num " << std::to_string(dao->getSeqNum()) << " from " << daoSender <<
-            " advertising " << advertisedDest << endl;
+    EV_DETAIL << "Processing DAO with seq num " << std::to_string(dao->getSeqNum()) << " from "
+            << daoSender << " advertising " << advertisedDest << endl;
 
     if (dao->getDaoAckRequired()) {
         sendRplPacket(createDao(advertisedDest), DAO_ACK, daoSender, uniform(1, 3));
         EV_DETAIL << "DAO_ACK sent to " << daoSender
-                << " acknowleding advertised dest - " << advertisedDest << endl;
+                << " acknowledging advertised dest - " << advertisedDest << endl;
     }
 
     /**
@@ -757,7 +1085,18 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
      */
     if (storing || isRoot) {
         if (!checkDestKnown(daoSender, advertisedDest)) {
-            updateRoutingTable(dao.get());
+            updateRoutingTable(daoSender, advertisedDest, prepRouteData(dao.get()));
+
+            // Notify CLSF about new one-hop neighbor to schedule dedicated TX to it
+            if (daoSender == advertisedDest && pCrossLayerEnabled && isRoot) {
+                emit(oneHopChildJoined, (long) dao->getNodeId());
+                // Check if DAO received is from a 1-hop neighbor
+                // to allocate unique channel offset per branch
+                auto msg = new cMessage("", BRANCH_CH_ADV);
+                msg->setContextPointer(new Ipv6Address(advertisedDest));
+                scheduleAt(simTime() + uniform(40, 50), msg);
+            }
+
             EV_DETAIL << "Destination learned from DAO - " << advertisedDest
                     << " reachable via " << daoSender << endl;
         }
@@ -784,19 +1123,15 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
         // Kick-off phase II of the cross-layer scheduling using
         // heuristics to estimate which DAO is the last one
         if (advertisedDest == terminusNode && !clStartOnTimeout)
-            scheduleAt(simTime() + SCHEDULE_PHASE_II_TIMEOUT, new cMessage("Cross-layer scheduling phase II", START_PHASE_II));
-        // check if DAO received is from a 1-hop neighbor
-        // to allocate unique channel offsets per branch
-        if (advertisedDest == daoSender)
-            advertiseChOffset(daoSender, uniform(3, 7)); // uniform(2,3)
+            scheduleAt(simTime() + SCHEDULE_PHASE_II_TIMEOUT, new cMessage("", START_CROSS_LAYER_PHASE_II));
     }
 
 }
 
-void Rpl::advertiseChOffset(Ipv6Address &child, double delay) {
+void Rpl::advertiseChOffset(Ipv6Address child, double delay) {
     if (channelOffsets.empty()) {
         EV_DETAIL << "Refreshing empty channel offset list" << endl;
-        initChOffsetList(pTschNumChannels);
+        initChOffsetList(pTschChOffStart, pTschChOffEnd);
     }
     auto ctrlDao = createDao();
 //
@@ -807,14 +1142,14 @@ void Rpl::advertiseChOffset(Ipv6Address &child, double delay) {
 
     auto advChOffset = channelOffsets.back();
     EV_DETAIL << "Advertising chOffset - " << std::to_string(advChOffset)
-        << " to branch rooted at " << child << endl;
+        << " to branch rooted at " << child << " after " << delay << " s delay" << endl;
     channelOffsets.pop_back();
     ctrlDao->setChOffset((uint8_t) advChOffset);
     sendRplPacket(ctrlDao, DAO_ACK, child, delay);
 }
 
 void Rpl::startSecondSchedulingPhase() {
-    EV_DETAIL << "Starting second scheduling phase" << endl;
+    EV_DETAIL << "Starting CLSF phase 2" << endl;
 
 //    auto children = getNearestChildren();
 //    EV_DETAIL << "Found one-hop neighbors: " << children << endl;
@@ -822,6 +1157,11 @@ void Rpl::startSecondSchedulingPhase() {
 //        calcBranchSize(ch);
 
     slotframeLength = getTschSlotframeLength();
+    if (!slotframeLength) {
+        EV_WARN << "Cannot proceed with cross-layer scheduling, TSCH slotframe length undefined" << endl;
+        return;
+    }
+
     EV_DETAIL << "Slotframe length set to " << slotframeLength << endl;
     auto ctrlDio = createDio();
 
@@ -849,14 +1189,21 @@ std::vector<Ipv6Address> Rpl::getNearestChildren() {
     return neighbrs;
 }
 
+// TODO: Handle case with multiple wireless interfaces
 int Rpl::getTschSlotframeLength() {
-    return getModuleByPath("^.wlan[0].mac.schedule")->par("macSlotframeSize").intValue();
+//    return getModuleByPath("^.wlan[0].mac.sixtischInterface.sf")->par("slotframeLen").intValue();
+    auto tschSchedule = getModuleByPath("^.wlan[0].mac.schedule");
+    if (tschSchedule)
+        return tschSchedule->par("macSlotframeSize").intValue();
+    return 0;
 }
 
 int Rpl::getNumTschChannels() {
-    return getModuleByPath("^.wlan[0].mac.sixtischInterface")->par("nbRadioChannels").intValue();
+    auto sixpInt = getModuleByPath("^.wlan[0].mac.sixtischInterface");
+    if (sixpInt)
+        return sixpInt->par("nbRadioChannels").intValue();
+    return 0;
 }
-
 
 SlotframeChunkList Rpl::allocateSlotframeChunks(std::vector<uint16_t> nodesPerLevel, uint16_t slotframeLen) {
     uint16_t weight = static_cast<uint16_t>(slotframeLen / std::accumulate(nodesPerLevel.begin(), nodesPerLevel.end(), 0));
@@ -889,12 +1236,12 @@ void Rpl::processDaoAck(const Ptr<const Dao>& daoAck) {
             << " for advertised dest - "  << advDest << endl;
 
     if (pCrossLayerEnabled) {
-        if (daoAck->getChOffset() != UNDEFINED_CH_OFFSET && advertisedChOffset == UNDEFINED_CH_OFFSET)
+        if (branchChOffset == UNDEFINED_CH_OFFSET && daoAck->getChOffset() != UNDEFINED_CH_OFFSET)
         {
-            advertisedChOffset = daoAck->getChOffset();
+            branchChOffset = daoAck->getChOffset();
             EV_DETAIL << "Channel offset extracted from DAO_ACK (fixed for the branch) - "
-                    << std::to_string(advertisedChOffset) << endl;;
-            emit(setChOffset, (long) advertisedChOffset);
+                    << std::to_string(branchChOffset) << endl;;
+            emit(setChOffset, (long) branchChOffset);
             return;
         }
     }
@@ -938,6 +1285,29 @@ void Rpl::processDaoAck(const Ptr<const Dao>& daoAck) {
 
 }
 
+void Rpl::drawConnector(Coord target, cFigure::Color col) {
+    // (0, 0) corresponds to default Coord constructor, meaning no target position was provided
+    if (!target.x && !target.y || !par("drawConnectors").boolValue())
+        return;
+
+    cCanvas *canvas = getParentModule()->getParentModule()->getCanvas();
+    if (prefParentConnector) {
+        prefParentConnector->setLineColor(col);
+        prefParentConnector->setEnd(cFigure::Point(target.x, target.y));
+        return;
+    }
+
+    prefParentConnector = new cLineFigure("preferredParentConnector");
+    prefParentConnector->setStart(cFigure::Point(position.x, position.y));
+    prefParentConnector->setEnd(cFigure::Point(target.x, target.y));
+    prefParentConnector->setLineWidth(2);
+    prefParentConnector->setLineColor(col);
+    prefParentConnector->setLineOpacity(0.6);
+    prefParentConnector->setEndArrowhead(cFigure::ARROW_BARBED);
+    prefParentConnector->setVisible(true);
+    canvas->addFigure(prefParentConnector);
+}
+
 void Rpl::updatePreferredParent()
 {
     Dio *newPrefParent;
@@ -945,19 +1315,17 @@ void Rpl::updatePreferredParent()
             << boolStr(candidateParents.empty() && par("useBackupAsPreferred").boolValue(),
                     "backup", "candidate") << " parent set" << endl;
     /**
-     * Determine preferred parent from the candidate neighbor set or
-     * leave DODAG if this set is empty
+     * Choose parent from candidate neighbor set or leave DODAG if it's empty
      */
-    if (candidateParents.empty()) {
+    if (candidateParents.empty())
         if (par("useBackupAsPreferred").boolValue())
-            newPrefParent = objectiveFunction->getPreferredParent(backupParents);
+            newPrefParent = objectiveFunction->getPreferredParent(backupParents, preferredParent);
         else {
             detachFromDodag();
             return;
         }
-
-    } else
-        newPrefParent = objectiveFunction->getPreferredParent(candidateParents);
+    else
+        newPrefParent = objectiveFunction->getPreferredParent(candidateParents, preferredParent);
 
     auto newPrefParentAddr = newPrefParent->getSrcAddress();
     /**
@@ -965,27 +1333,31 @@ void Rpl::updatePreferredParent()
      * update default route to DODAG sink with the new nextHop
      */
     if (checkPrefParentChanged(newPrefParentAddr)) {
-        if (!matchesRequiredParent(newPrefParentAddr)) {
-            EV_WARN << newPrefParentAddr << " - desired parent addr mismatch, returning" << endl;
+        // Hacky ways to achieve required topology / stability
+        if (newPrefParentAddr == dodagId && !pJoinAtSinkAllowed) // -----//-------
             return;
-        }
-
-        if (preferredParent && par("disableParentSwitching").boolValue()) {
-            EV_DETAIL << "Parent update pending, but switching parents is not allowed" << endl;
+        if (preferredParent && par("disableParentSwitching").boolValue()) // preventing
             return;
-        }
+        if (!matchesRequiredParent(newPrefParentAddr))
+            return;
 
-        emit(parentChangedSignalStats, newPrefParent->dup());
-        // Notify SF (if present) about parent change to reschedule the cells
+        auto newPrefParentDodagId = newPrefParent->getDodagId();
+        /** Silently join new DODAG and update UdpApp dest address, TODO: Check with RFC 6550 */
+        dodagId = newPrefParentDodagId;
+        if (udpApp)
+            udpApp->par("destAddresses") = newPrefParentDodagId.str();
+
         emit(parentChangedSignal, (long) newPrefParent->getNodeId());
         clearParentRoutes();
         daoSeqNum = 0;
-        updateRoutingTable(newPrefParentAddr);
+        drawConnector(newPrefParent->getPosition(), newPrefParent->getColor());
+
+        updateRoutingTable(newPrefParentAddr, dodagId, nullptr, true);
         lastTransit = new Ipv6Address(newPrefParentAddr);
         EV_DETAIL << "Updated preferred parent to - " << newPrefParentAddr << endl;
         /**
          * Reset trickle timer due to inconsistency (preferred parent changed) detected, thus
-         * maintaining higher topology reactivity and convergence rate [RFC6560, 8.3]
+         * maintaining higher topology reactivity and convergence rate [RFC 6550, 8.3]
          */
         trickleTimer->reset();
         if (daoEnabled) {
@@ -1019,29 +1391,29 @@ bool Rpl::checkPrefParentChanged(const Ipv6Address &newPrefParentAddr)
 // Handling routing data
 //
 
+//void Rpl::updateRoutingTable(const Dao *dao) {
+//    auto routeData = new RplRouteData();
+//    routeData->setDodagId(dao->getDodagId());
+//    routeData->setInstanceId(dao->getInstanceId());
+//    routeData->setDtsn(dao->getSeqNum());
+//    routeData->setExpirationTime(-1);
+//    updateRoutingTable(dao->getSrcAddress(), dao->getReachableDest(), routeData);
+//}
 
-void Rpl::updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest)
-{
-    auto route = routingTable->createRoute();
-    route->setSourceType(IRoute::MANET);
-    route->setPrefixLength(prefixLength);
-    route->setInterface(interfaceEntryPtr);
-    route->setDestination(dest);
-    route->setNextHop(nextHop);
-    if (!checkDuplicateRoute((Ipv6Route*) route))
-        routingTable->addRoute(route);
-
-    EV_DETAIL << "updated routing table: \n" << dest << " reachable via "
-                << nextHop << endl;
-    routingTable->printRoutingTable();
-
+RplRouteData* Rpl::prepRouteData(const Dao *dao) {
+    auto routeData = new RplRouteData();
+    routeData->setDodagId(dao->getDodagId());
+    routeData->setInstanceId(dao->getInstanceId());
+    routeData->setDtsn(dao->getSeqNum());
+    routeData->setExpirationTime(-1);
+    return routeData;
 }
 
-void Rpl::updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData)
+void Rpl::updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData, bool defaultRoute)
 {
     auto route = routingTable->createRoute();
     route->setSourceType(IRoute::MANET);
-    route->setPrefixLength(prefixLength);
+    route->setPrefixLength(isRoot ? 128 : prefixLength);
     route->setInterface(interfaceEntryPtr);
     route->setDestination(dest);
     route->setNextHop(nextHop);
@@ -1049,11 +1421,11 @@ void Rpl::updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest
      * If a route through preferred parent is being added
      * (i.e. not downward route, learned from DAO), set it as default route
      */
-    if (!routeData) {
+    if (defaultRoute) {
         routingTable->addDefaultRoute(nextHop, interfaceEntryPtr->getInterfaceId(), DEFAULT_PARENT_LIFETIME);
         EV_DETAIL << "Adding default route via " << nextHop << endl;
     }
-    else
+    if (routeData)
         route->setProtocolData(routeData);
 
     if (!checkDuplicateRoute((Ipv6Route*) route))
@@ -1078,19 +1450,6 @@ bool Rpl::checkDuplicateRoute(Ipv6Route *route) {
     return false;
 }
 
-void Rpl::updateRoutingTable(const Dao *dao) {
-    auto routeData = new RplRouteData();
-    routeData->setDodagId(dao->getDodagId());
-    routeData->setInstanceId(dao->getInstanceId());
-    routeData->setDtsn(dao->getSeqNum());
-    routeData->setExpirationTime(-1);
-    updateRoutingTable(dao->getSrcAddress(), dao->getReachableDest(), routeData);
-}
-
-void Rpl::updateRoutingTable(const Ipv6Address &nextHop) {
-    updateRoutingTable(nextHop, dodagId, nullptr);
-}
-
 void Rpl::appendRplPacketInfo(Packet *datagram) {
     auto rpi = makeShared<RplPacketInfo>();
     rpi->setChunkLength(B(4));
@@ -1105,8 +1464,8 @@ void Rpl::appendRplPacketInfo(Packet *datagram) {
 }
 
 bool Rpl::packetTravelsDown(Packet *datagram) {
-    auto networkProtocol = findNetworkProtocolHeader(datagram);
-    auto dest = networkProtocol->getDestinationAddress().toIpv6();
+    auto networkProtocolHeader = findNetworkProtocolHeader(datagram);
+    auto dest = networkProtocolHeader->getDestinationAddress().toIpv6();
     EV_DETAIL << "Determining packet forwarding direction:\n destination - " << dest << endl;
     auto ri = routingTable->doLongestPrefixMatch(dest);
     if (ri == nullptr) {
@@ -1368,7 +1727,7 @@ void Rpl::forwardSourceRoutedPacket(Packet *datagram) {
     }
     EV_DETAIL << "\n Forwarding source-routed datagram to " << nextHop << endl;
 
-    updateRoutingTable(nextHop, nextHop);
+    updateRoutingTable(nextHop, nextHop, nullptr, false);
     // TODO: Figure out why dequeue remains unchanged at each next hop,
     // regardless of explicitly removing element from the back
     srhAddresses.pop_front();
@@ -1592,12 +1951,19 @@ void Rpl::addNeighbour(const Ptr<const Dio>& dio)
 
 void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
+
+//    Enter_Method("receiveChangeNotification");
+//
+    Enter_Method_Silent();
+
+    EV_DETAIL << "Processing signal - " << signalID << endl;
+    if (signalID == packetReceivedSignal)
+        udpPacketsRecv++;
+
     /**
      * Upon receiving broken link signal from MAC layer, check whether
      * preferred parent is unreachable
      */
-    Enter_Method("receiveChangeNotification");
-    EV_DETAIL << "Processing signal - " << signalID << endl;
     if (signalID == linkBrokenSignal) {
         EV_WARN << "Received link break" << endl;
         Packet *datagram = check_and_cast<Packet *>(obj);
@@ -1615,8 +1981,7 @@ void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
              * If candidate parent set is empty, leave current DODAG
              * (becoming either floating DODAG or poison child routes altogether)
              */
-            if (preferredParent
-                    && destination == preferredParent->getSrcAddress()
+            if (preferredParent && destination == preferredParent->getSrcAddress()
                     && par("unreachabilityDetectionEnabled").boolValue())
             {
                 deletePrefParent();

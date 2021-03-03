@@ -27,6 +27,7 @@ import inet.networklayer.icmpv6.Icmpv6Header;
 
 cplusplus {{
 	#include "RplDefs.h"
+	#include "inet/common/geometry/common/Coord.h"
 	#include <deque>
 	#include <stdint.h>
 }}
@@ -35,6 +36,8 @@ namespace inet;
 
 class SlotframeChunk { @existingClass;}
 class SlotframeChunkList { @existingClass;}
+class Coord { @existingClass;}
+class cFigure::Color { @existingClass;}
 
 // Objective Code Point - defines objective function of RPL instance
 enum Ocp {
@@ -68,13 +71,13 @@ class RplPacket extends FieldsChunk {
     Ipv6Address srcAddress;
     uint8_t instanceId;        	  	// RPL instance ID
     Ipv6Address dodagId;            // IPv6 address of the DODAG root
+	uint64_t nodeId; 				// Node's MAC (temp. workaround for cross-layer 6TiSCH)
 }
 
 // DODAG Information Option [RFC 6550, 6.3]
 class Dio extends RplPacket {
     // DODAG version number, may be incremented by the root to trigger topology refresh 
     uint8_t dodagVersion;       	
-    uint64_t nodeId; 				// Node's MAC (temp. workaround for 6TiSCH)
 	uint16_t rank;            	 	// Node's rank within the DODAG 
     bool storing;					// Mode of operation: storing / non-storing                
     bool grounded;              	// DODAG grounded flag, indicates whether sink is connected to backbone	   
@@ -90,12 +93,18 @@ class Dio extends RplPacket {
     int dioNumDoublings;						
     Ocp ocp;                
     
+    // Non-RFC fields
     // Cross-layer info for phase 2 scheduling
     SlotframeChunkList slotframeChunks;
     SlotframeChunk advSlotOffsets;
     uint16_t slotframeLength;
     uint16_t branchSize;   
     uint16_t advChOffset;
+    int colorId; // DODAG color id (from static palette) for multi-GW scenario
+    
+    // Misc
+    Coord position; // DIO sender node location to draw directed parent-child connectors on canvas
+    cFigure::Color color; // Color of the parent-child connector line, per DODAG
 }
 
 
@@ -106,7 +115,6 @@ class Dao extends RplPacket {
     Ipv6Address reachableDest;	// advertised reachable destination		
     uint8_t chOffset;			// advertised channel offset (unique per branch)
     						    // as part of cross-layer scheduling 
-
 }
 
 // DODAG Information Solicitation

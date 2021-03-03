@@ -23,7 +23,7 @@
 #define RPLROUTEDATA_H_
 
 #include <omnetpp/cobject.h>
-#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/networklayer/ipv6/Ipv6.h"
 
 namespace inet {
 
