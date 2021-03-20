@@ -64,7 +64,7 @@ module Rpl like IManetRouting
         bool unreachabilityDetectionEnabled = default(false);
         bool daoAckEnabled = default(true);
         int numDaoRetransmitAttempts = default(3);
-        int minHopRankIncrease = default(0);
+        int minHopRankIncrease = default(1);
         double startDelay = default(0);
         string objectiveFunctionType = default("hopCount");	 // hopCount, ETX, energy, ...
         

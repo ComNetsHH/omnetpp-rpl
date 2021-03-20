@@ -100,12 +100,22 @@ class Dio extends RplPacket {
     uint16_t slotframeLength;
     uint16_t branchSize;   
     uint16_t advChOffset;
-    int colorId; // DODAG color id (from static palette) for multi-GW scenario
     
+    bool hasClInfo;
+   
     // Misc
     Coord position; // DIO sender node location to draw directed parent-child connectors on canvas
     cFigure::Color color; // Color of the parent-child connector line, per DODAG
+	int colorId; // DODAG color id (from static palette) for multi-GW scenario
+    
 }
+
+cplusplus (Dio) {{
+	std::vector<uint16_t> advChOffsets; 
+	
+	std::vector<uint16_t> getadvChOffsets() { return this->advChOffsets; }
+	void setadvChOffsets(std::vector<uint16_t> advChOffsets) { handleChange(); this->advChOffsets = advChOffsets; }
+}}
 
 
 // Destination Advertisement Object [RFC 6550, 6.4] 
@@ -116,6 +126,13 @@ class Dao extends RplPacket {
     uint8_t chOffset;			// advertised channel offset (unique per branch)
     						    // as part of cross-layer scheduling 
 }
+
+cplusplus (Dao) {{
+	std::vector<Ipv6Address> knownTargets; 
+	
+	std::vector<Ipv6Address> getKnownTargets() { return this->knownTargets; }
+	void setKnownTargets(std::vector<Ipv6Address> knownTargets) { handleChange(); this->knownTargets = knownTargets; }
+}}
 
 // DODAG Information Solicitation
 class Dis extends RplPacket {

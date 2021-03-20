@@ -44,6 +44,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     /** Environment */
     IInterfaceTable *interfaceTable;
     Ipv6RoutingTable *routingTable;
+    Ipv6NeighbourDiscovery *nd;
     InterfaceEntry *interfaceEntryPtr;
     INetfilter *networkProtocol;
     ObjectiveFunction *objectiveFunction;
@@ -83,7 +84,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     std::map<Ipv6Address, Dio *> candidateParents;
     std::map<Ipv6Address, Ipv6Address> sourceRoutingTable;
     std::map<Ipv6Address, std::pair<cMessage *, uint8_t>> pendingDaoAcks;
-    std::list<int> channelOffsets;
+    std::vector<int> channelOffsets;
 
     /** Statistics collection */
     simsignal_t dioReceivedSignal;
@@ -97,13 +98,17 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     simsignal_t joinedDodag;
     simsignal_t reschedule;
     simsignal_t setChOffset;
+    simsignal_t setRplRank;
     simsignal_t oneHopChildJoined;
     double crossLayerInfoFwdTimeout;
     bool pCrossLayerEnabled;
     bool pJoinAtSinkAllowed;
     int pTschNumChannels;
-    int slotframeLength;
+    int pTschMinimalCells;
+    int pTschSlotframeLength;
+    int numDaoDropped;
     int pManualParentInc;
+    bool hasClInfo;
     SlotframeChunk clSlotframeChunk;
     int pTschChOffStart; // starting channel offset to advertise to sub-trees (branches)
     int pTschChOffEnd; // ending channel offset to advertise to sub-trees (branches)
@@ -113,6 +118,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     bool verbose;
     bool pUseWarmup;
     bool pLockParent;
+    bool isLeaf;
     uint8_t detachedTimeout; // temporary variable to suppress msg processing after just leaving the DODAG
     cMessage *detachedTimeoutEvent; // temporary msg corresponding to triggering above functionality
     cMessage *daoAckTimeoutEvent; // temporary msg corresponding to triggering above functionality
@@ -144,6 +150,9 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
             os << val << ", ";
         return os;
     }
+
+    int numParentUpdates;
+    int numDaoForwarded;
 
   protected:
     /** module interface */
@@ -508,6 +517,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     B getDaoLength();
     bool destIsRoot(Packet *datagram);
 
+    void collectNumParentUpdates(cModule *network);
+
     /**
      * Handle signals by implementing @see cListener interface to
      * get notified when MAC layer reports link break
@@ -531,8 +542,12 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     void initChOffsetList(int maxChOffset) { initChOffsetList(0, maxChOffset); }
     bool matchesRequiredParent(const Ipv6Address &addr);
     bool checkRplPacket(Packet *packet);
-    bool static isValidSlotframeChunk(uint16_t start, uint16_t end, int slotframeLen) {
-        return !(start > slotframeLen || end > slotframeLen || end <= start || end <= 0 || start <= 0);
+    bool static isValidSlotframeChunk(int start, int end, int slotframeLen) {
+        return !(start > slotframeLen || end > slotframeLen || end <= start || end <= 0 || start < 0);
+    }
+
+    bool isValidSlotframeChunk(SlotframeChunk chunk) {
+        return isValidSlotframeChunk((int) chunk.start, (int) chunk.end, pTschSlotframeLength);
     }
 
 
@@ -541,9 +556,10 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
 
 //    void clearDaoAckTimers();
     std::vector<Ipv6Address> getNearestChildren();
-    uint16_t calcBranchSize(Ipv6Address& rootChild);
+//    uint16_t calcBranchSize(Ipv6Address& rootChild);
     SlotframeChunk calcAdvSlotframeChunk();
-    uint16_t calcBranchSize();
+    int getNumDownlinks();
+    int getNumTschMinCells();
 
     /** Misc */
     void drawConnector(Coord target, cFigure::Color col);
@@ -553,11 +569,11 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * topology using provided params
      */
     void configureTopologyLayout(Coord anchorPoint, double padX, double padY, double columnGapMultiplier,
-            cModule *network, bool branchLayout, int numBranches, int numHosts);
+            cModule *network, bool branchLayout, int numBranches, int numHosts, int numSinks);
 
     void configureTopologyLayout(Coord anchorPoint, double padX, double padY, double columnGapMultiplier, cModule *network)
     {
-        configureTopologyLayout(anchorPoint, padX, padY, columnGapMultiplier, network, false, 0, 0);
+        configureTopologyLayout(anchorPoint, padX, padY, columnGapMultiplier, network, false, 0, 0, 0);
     };
 
     /** Distribute available @param numTschChannels channels between sinks found in the @param network module */

@@ -59,7 +59,7 @@ Dio* ObjectiveFunction::getPreferredParent(std::map<Ipv6Address, Dio *> candidat
         if (candidateParentRank < currentMinRank) {
             currentMinRank = candidateParentRank;
             newPrefParent = candidate.second;
-            break;
+//            break;
         }
     }
 
