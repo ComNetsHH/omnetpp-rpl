@@ -10,3 +10,4 @@ OMNeT++ 5.6.2, INET 4.3
 2. In INET project settings -> OMNeT++ -> Project Features disable 'Visualization' and 'Mobile IPv6 Protocol (xMIPv6)'
 3. In RPL project settings -> OMNeT++ -> Makemake -> src -> Build Makemake Options -> Custom add the following line:  
 `MSGC:=$(MSGC) --msg6`
+4. Compile and test included sample scenarios in the .ini file.
