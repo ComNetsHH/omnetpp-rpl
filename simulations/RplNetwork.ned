@@ -8,6 +8,7 @@ network RplNetwork
 {
     parameters:
         int numNodes;
+        int numSinks = default(1);
         @display("bgb=450,650");
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
@@ -33,10 +34,10 @@ network RplNetwork
             @display("i=device/pocketpc_s;p=83.712,306.072");
         }
         host4: RplRouter {
-            @display("i=device/pocketpc_s;p=270.36,306.072");
+            @display("i=device/pocketpc_s;p=269.448,294.3");
         }
         host5: RplRouter {
-            @display("i=device/pocketpc_s;p=222.36,430.332");
+            @display("i=device/pocketpc_s;p=241.98,410.712");
         }
 
     connections allowunconnected:

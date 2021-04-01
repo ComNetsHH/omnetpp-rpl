@@ -34,8 +34,6 @@ cplusplus {{
 	
 namespace inet;
 
-class SlotframeChunk { @existingClass;}
-class SlotframeChunkList { @existingClass;}
 class Coord { @existingClass;}
 class cFigure::Color { @existingClass;}
 
@@ -93,30 +91,12 @@ class Dio extends RplPacket {
     int dioNumDoublings;						
     Ocp ocp;                
     
-    // Non-RFC fields
-    // Cross-layer info for phase 2 scheduling
-    SlotframeChunkList slotframeChunks;
-    SlotframeChunk advSlotOffsets;
-    uint16_t slotframeLength;
-    uint16_t branchSize;   
-    uint16_t advChOffset;
-    
-    bool hasClInfo;
-   
-    // Misc
+    // Non-RFC fields, misc
     Coord position; // DIO sender node location to draw directed parent-child connectors on canvas
     cFigure::Color color; // Color of the parent-child connector line, per DODAG
 	int colorId; // DODAG color id (from static palette) for multi-GW scenario
     
 }
-
-cplusplus (Dio) {{
-	std::vector<uint16_t> advChOffsets; 
-	
-	std::vector<uint16_t> getadvChOffsets() { return this->advChOffsets; }
-	void setadvChOffsets(std::vector<uint16_t> advChOffsets) { handleChange(); this->advChOffsets = advChOffsets; }
-}}
-
 
 // Destination Advertisement Object [RFC 6550, 6.4] 
 class Dao extends RplPacket {

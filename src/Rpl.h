@@ -56,10 +56,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     uint8_t dodagVersion;
     Ipv6Address dodagId;
     Ipv6Address selfAddr;
-    Ipv6Address terminusNode; // Cross-layer 6TiSCH workaround to start phase 2
     Ipv6Address *lastTarget;
     Ipv6Address *lastTransit;
-    Packet *savedUdpDatagram;
     uint8_t instanceId;
     double daoDelay;
     double daoAckTimeout;
@@ -70,9 +68,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     bool daoEnabled;
     bool storing;
     bool pDaoAckEnabled;
-    bool pManualParentAssignment; // allow hard-coded parent pre-selection
-    bool clStartOnTimeout; // start CL SF on a timeout rather that event-based
-    bool pConfigureLayout; // flag for MultiGW configurator to generate node's positions in a grid-like manner
+    bool hasStarted;
+    bool allowDodagSwitching;
     uint16_t rank;
     uint8_t dtsn;
     uint32_t branchChOffset;
@@ -84,34 +81,16 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     std::map<Ipv6Address, Dio *> candidateParents;
     std::map<Ipv6Address, Ipv6Address> sourceRoutingTable;
     std::map<Ipv6Address, std::pair<cMessage *, uint8_t>> pendingDaoAcks;
-    std::vector<int> channelOffsets;
 
     /** Statistics collection */
     simsignal_t dioReceivedSignal;
     simsignal_t daoReceivedSignal;
     simsignal_t parentChangedSignal;
     simsignal_t parentUnreachableSignal;
-    simsignal_t nodeIsSinkSignal;
-    simsignal_t pickedRandomChOffsetSignal;
 
-    /** Cross-layer controls */
-    simsignal_t joinedDodag;
-    simsignal_t reschedule;
-    simsignal_t setChOffset;
-    simsignal_t setRplRank;
-    simsignal_t oneHopChildJoined;
-    double crossLayerInfoFwdTimeout;
-    bool pCrossLayerEnabled;
     bool pJoinAtSinkAllowed;
-    int pTschNumChannels;
-    int pTschMinimalCells;
-    int pTschSlotframeLength;
     int numDaoDropped;
     int pManualParentInc;
-    bool hasClInfo;
-    SlotframeChunk clSlotframeChunk;
-    int pTschChOffStart; // starting channel offset to advertise to sub-trees (branches)
-    int pTschChOffEnd; // ending channel offset to advertise to sub-trees (branches)
 
     /** Misc */
     bool floating;
@@ -129,20 +108,19 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     int udpPacketsRecv;
     cFigure::Color dodagColor;
 
-
   public:
     Rpl();
     ~Rpl();
 
+    /** Conveniently display boolean variable with custom true / false format */
     static std::string boolStr(bool cond, std::string positive, std::string negative);
     static std::string boolStr(bool cond) { return boolStr(cond, "true", "false"); }
 
-    friend std::ostream& operator<<(std::ostream& os, std::list<uint8_t> const& chOffsets)
-    {
-        for (auto chof : chOffsets)
-            os << std::to_string(((int) chof)) << ", ";
-        return os;
-    }
+    /** Search for a submodule of @param host by its name @param sname */
+    static cModule* findSubmodule(std::string sname, cModule *host);
+
+    /** Randomly pick @param numRequested elements from a [0..@param total] array*/
+    static std::vector<int> pickRandomly(int total, int numRequested);
 
     friend std::ostream& operator<<(std::ostream& os, std::vector<int> const& vec)
     {
@@ -530,74 +508,23 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
-    /** Cross-layer part */
-    void startSecondSchedulingPhase();
     std::vector<uint16_t> getNodesPerHopDistance();
-    SlotframeChunkList allocateSlotframeChunks(std::vector<uint16_t> nodesPerHopDist, uint16_t slotframeLen);
-    int getTschSlotframeLength();
-    int getNumTschChannels();
-    void advertiseChOffset(Ipv6Address child, double delay);
-    /** Initialize list of channel offsets for branches (cross-layer scheduling) */
-    void initChOffsetList(int minChOffset, int maxChOffset);
-    void initChOffsetList(int maxChOffset) { initChOffsetList(0, maxChOffset); }
-    bool matchesRequiredParent(const Ipv6Address &addr);
-    bool checkRplPacket(Packet *packet);
-    bool static isValidSlotframeChunk(int start, int end, int slotframeLen) {
-        return !(start > slotframeLen || end > slotframeLen || end <= start || end <= 0 || start < 0);
-    }
-
-    bool isValidSlotframeChunk(SlotframeChunk chunk) {
-        return isValidSlotframeChunk((int) chunk.start, (int) chunk.end, pTschSlotframeLength);
-    }
-
-
-    std::string printSlotframeChunks(std::list<inet::SlotframeChunk> &list);
+    bool isRplPacket(Packet *packet);
     void clearDaoAckTimer(Ipv6Address daoDest);
 
-//    void clearDaoAckTimers();
     std::vector<Ipv6Address> getNearestChildren();
-//    uint16_t calcBranchSize(Ipv6Address& rootChild);
-    SlotframeChunk calcAdvSlotframeChunk();
     int getNumDownlinks();
-    int getNumTschMinCells();
 
     /** Misc */
     void drawConnector(Coord target, cFigure::Color col);
     static int getNodeId(std::string nodeName);
 
-    /** Create seatbelt (high density, 6 columns of seats) or branches (single-root deep tree with multiple branches)
-     * topology using provided params
-     */
-    void configureTopologyLayout(Coord anchorPoint, double padX, double padY, double columnGapMultiplier,
-            cModule *network, bool branchLayout, int numBranches, int numHosts, int numSinks);
-
-    void configureTopologyLayout(Coord anchorPoint, double padX, double padY, double columnGapMultiplier, cModule *network)
-    {
-        configureTopologyLayout(anchorPoint, padX, padY, columnGapMultiplier, network, false, 0, 0, 0);
-    };
-
-    /** Distribute available @param numTschChannels channels between sinks found in the @param network module */
-    void allocateSinkChOffsets(int numTschChannels, cModule *network);
-
     cLineFigure *prefParentConnector;
-    std::vector<int> pickRandomly(int total, int numRequested);
-    bool isSinkNode(std::string nodeName);
-    double startDelay;
-    bool hasStarted;
-    bool allowDodagSwitching;
 
-    /** Wrapper function to parse NED params and call @ref configureTopologyLayout
-     *
-     * @param net simulation network module*
-     */
-    void generateLayout(cModule *net);
+    double startDelay;
 
     /** Pick random color for parent-child connector drawing (if node's sink) */
     cFigure::Color pickRandomColor();
-
-    /** Search for a submodule of @param host by its name @param sname */
-    cModule* findSubmodule(std::string sname, cModule *host);
-
 };
 
 } // namespace inet
