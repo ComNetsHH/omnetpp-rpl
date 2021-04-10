@@ -1,9 +1,9 @@
 //
 //  Simulation model for RPL (Routing Protocol for Low-Power and Lossy Networks)
 // 
-//  Copyright (C) 2020  Institute of Communication Networks (ComNets),
+//  Copyright (C) 2021  Institute of Communication Networks (ComNets),
 //                      Hamburg University of Technology (TUHH)
-//            (C) 2020  Yevhenii Shudrenko
+//            (C) 2021  Yevhenii Shudrenko
 // 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -27,28 +27,31 @@ import inet.networklayer.icmpv6.Icmpv6Header;
 
 cplusplus {{
 	#include "RplDefs.h"
+	#include "inet/common/geometry/common/Coord.h"
 	#include <deque>
 	#include <stdint.h>
 }}
 	
 namespace inet;
 
-
-enum RplPacketCode {
-    DIS = 0;
-    DIO = 1;
-    DAO = 2;
-    DAO_ACK = 3;
-    // for manual testing purposes, to be removed
-    PING = 4;
-    PING_ACK = 5;
-};
+class Coord { @existingClass;}
+class cFigure::Color { @existingClass;}
 
 // Objective Code Point - defines objective function of RPL instance
 enum Ocp {
     ETX = 0;
     HOP_COUNT = 1;
     ENERGY = 2;
+};
+
+enum RplPacketCode {
+    DIS = 0;
+    DIO = 1;
+    DAO = 2;
+    DAO_ACK = 3;
+    PING = 4;
+    PING_ACK = 5;
+    CROSS_LAYER_CTRL = 6;
 };
 
 
@@ -66,6 +69,7 @@ class RplPacket extends FieldsChunk {
     Ipv6Address srcAddress;
     uint8_t instanceId;        	  	// RPL instance ID
     Ipv6Address dodagId;            // IPv6 address of the DODAG root
+	uint64_t nodeId; 				// Node's MAC (temp. workaround for cross-layer 6TiSCH)
 }
 
 // DODAG Information Option [RFC 6550, 6.3]
@@ -86,16 +90,29 @@ class Dio extends RplPacket {
     int dioRedundancyConst;              
     int dioNumDoublings;						
     Ocp ocp;                
+    
+    // Non-RFC fields, misc
+    Coord position; // DIO sender node location to draw directed parent-child connectors on canvas
+    cFigure::Color color; // Color of the parent-child connector line, per DODAG
+	int colorId; // DODAG color id (from static palette) for multi-GW scenario
+    
 }
-
 
 // Destination Advertisement Object [RFC 6550, 6.4] 
 class Dao extends RplPacket {
-    uint8_t daoSeqNum;			// ID for each unique DAO sent by a node
+    uint8_t seqNum;				// ID for each unique DAO sent by a node
     bool daoAckRequired;		// indicates whether DAO-ACK is expected by the sender 
     Ipv6Address reachableDest;	// advertised reachable destination		
-
+    uint8_t chOffset;			// advertised channel offset (unique per branch)
+    						    // as part of cross-layer scheduling 
 }
+
+cplusplus (Dao) {{
+	std::vector<Ipv6Address> knownTargets; 
+	
+	std::vector<Ipv6Address> getKnownTargets() { return this->knownTargets; }
+	void setKnownTargets(std::vector<Ipv6Address> knownTargets) { handleChange(); this->knownTargets = knownTargets; }
+}}
 
 // DODAG Information Solicitation
 class Dis extends RplPacket {

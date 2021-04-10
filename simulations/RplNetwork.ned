@@ -8,6 +8,7 @@ network RplNetwork
 {
     parameters:
         int numNodes;
+        int numSinks = default(1);
         @display("bgb=450,650");
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
@@ -16,30 +17,28 @@ network RplNetwork
         radioMedium: UnitDiskRadioMedium {
             @display("p=550,250;is=s");
         }
-        configurator: Ipv6FlatNetworkConfigurator {
-            @display("p=550,150;is=s");
-        }
+//        configurator: Ipv6FlatNetworkConfigurator {
+//            @display("p=550,150;is=s");
+//        }
+
         sink: RplRouter {
-            @display("i=device/pocketpc_s;p=213.204,133.416");
+            @display("i=device/pocketpc_s;p=149.112,75.864");
         }
         host1: RplRouter {
-            @display("i=device/pocketpc_s;p=147.804,236.748");
+            @display("i=device/pocketpc_s;p=83.712,179.196");
         }
         host2: RplRouter {
-            @display("i=device/pocketpc_s;p=283.836,236.748");
+            @display("i=device/pocketpc_s;p=222.36,179.196");
         }
         host3: RplRouter {
-            @display("i=device/pocketpc_s;p=147.804,363.624");
+            @display("i=device/pocketpc_s;p=83.712,306.072");
         }
         host4: RplRouter {
-            @display("i=device/pocketpc_s;p=283.836,363.624");
+            @display("i=device/pocketpc_s;p=269.448,294.3");
         }
         host5: RplRouter {
-            @display("i=device/pocketpc_s;p=283.836,487.884");
+            @display("i=device/pocketpc_s;p=241.98,410.712");
         }
-//        host6: RplRouter {
-//            @display("i=device/pocketpc_s;p=147.804,487.884");
-//        }
 
     connections allowunconnected:
 

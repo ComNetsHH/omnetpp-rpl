@@ -1,9 +1,9 @@
 /*
  * Simulation model for RPL (Routing Protocol for Low-Power and Lossy Networks)
  *
- * Copyright (C) 2020  Institute of Communication Networks (ComNets),
+ * Copyright (C) 2021  Institute of Communication Networks (ComNets),
  *                     Hamburg University of Technology (TUHH)
- *           (C) 2020  Yevhenii Shudrenko
+ *           (C) 2021  Yevhenii Shudrenko
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,21 +25,9 @@
 #include <map>
 #include <vector>
 
-#include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/INetfilter.h"
-#include "inet/networklayer/contract/IRoutingTable.h"
-#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#include "inet/networklayer/ipv6/Ipv6Route.h"
+#include "ObjectiveFunction.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
-#include "inet/transportlayer/udp/UdpHeader_m.h"
-#include "inet/common/INETMath.h"
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "Rpl_m.h"
-#include "RplDefs.h"
-
 
 namespace inet {
 
@@ -49,6 +37,8 @@ class TrickleTimer : public cSimpleModule
     uint8_t minInterval;
     uint8_t numDoublings;
     int currentInterval;
+    int skipIntDoublings;
+    int intervalUpdatesCtn;
     int maxInterval;
     bool started;
     cMessage *trickleTriggerEvent;
@@ -63,8 +53,8 @@ class TrickleTimer : public cSimpleModule
     ~TrickleTimer();
 
     /** Lifecycle **/
-    void start() { start(false); };
-    void start(bool warmupDelay);
+    void start() { start(false, 0); };
+    void start(bool warmupDelay, int skipIntervalDoublings);
     virtual void reset();
     virtual void stop();
     virtual void suspend();

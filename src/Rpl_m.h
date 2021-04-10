@@ -42,6 +42,7 @@ class SourceRoutingHeader;
 
 // cplusplus {{
 	#include "RplDefs.h"
+	#include "inet/common/geometry/common/Coord.h"
 	#include <deque>
 	#include <stdint.h>
 // }}
@@ -50,31 +51,7 @@ class SourceRoutingHeader;
 namespace inet {
 
 /**
- * Enum generated from <tt>Rpl.msg:37</tt> by nedtool.
- * <pre>
- * enum RplPacketCode
- * {
- *     DIS = 0;
- *     DIO = 1;
- *     DAO = 2;
- *     DAO_ACK = 3;
- *     // for manual testing purposes, to be removed
- *     PING = 4;
- *     PING_ACK = 5;
- * }
- * </pre>
- */
-enum RplPacketCode {
-    DIS = 0,
-    DIO = 1,
-    DAO = 2,
-    DAO_ACK = 3,
-    PING = 4,
-    PING_ACK = 5
-};
-
-/**
- * Enum generated from <tt>Rpl.msg:48</tt> by nedtool.
+ * Enum generated from <tt>Rpl.msg:41</tt> by nedtool.
  * <pre>
  * // Objective Code Point - defines objective function of RPL instance
  * enum Ocp
@@ -83,11 +60,6 @@ enum RplPacketCode {
  *     HOP_COUNT = 1;
  *     ENERGY = 2;
  * }
- * 
- * 
- * //
- * // RPL packets
- * //
  * </pre>
  */
 enum Ocp {
@@ -97,7 +69,37 @@ enum Ocp {
 };
 
 /**
- * Class generated from <tt>Rpl.msg:59</tt> by nedtool.
+ * Enum generated from <tt>Rpl.msg:47</tt> by nedtool.
+ * <pre>
+ * enum RplPacketCode
+ * {
+ *     DIS = 0;
+ *     DIO = 1;
+ *     DAO = 2;
+ *     DAO_ACK = 3;
+ *     PING = 4;
+ *     PING_ACK = 5;
+ *     CROSS_LAYER_CTRL = 6;
+ * }
+ * 
+ * 
+ * //
+ * // RPL packets
+ * //
+ * </pre>
+ */
+enum RplPacketCode {
+    DIS = 0,
+    DIO = 1,
+    DAO = 2,
+    DAO_ACK = 3,
+    PING = 4,
+    PING_ACK = 5,
+    CROSS_LAYER_CTRL = 6
+};
+
+/**
+ * Class generated from <tt>Rpl.msg:62</tt> by nedtool.
  * <pre>
  * class RplHeader extends Icmpv6Header
  * {
@@ -138,7 +140,7 @@ inline void doParsimPacking(omnetpp::cCommBuffer *b, const RplHeader& obj) {obj.
 inline void doParsimUnpacking(omnetpp::cCommBuffer *b, RplHeader& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>Rpl.msg:64</tt> by nedtool.
+ * Class generated from <tt>Rpl.msg:67</tt> by nedtool.
  * <pre>
  * class RplPacket extends FieldsChunk
  * {
@@ -146,6 +148,7 @@ inline void doParsimUnpacking(omnetpp::cCommBuffer *b, RplHeader& obj) {obj.pars
  *     Ipv6Address srcAddress;
  *     uint8_t instanceId;        	  	// RPL instance ID
  *     Ipv6Address dodagId;            // IPv6 address of the DODAG root
+ *     uint64_t nodeId; 				// Node's MAC (temp. workaround for cross-layer 6TiSCH)
  * }
  * </pre>
  */
@@ -156,6 +159,7 @@ class RplPacket : public ::inet::FieldsChunk
     Ipv6Address srcAddress;
     uint8_t instanceId = 0;
     Ipv6Address dodagId;
+    uint64_t nodeId = 0;
 
   private:
     void copy(const RplPacket& other);
@@ -185,13 +189,15 @@ class RplPacket : public ::inet::FieldsChunk
     virtual const Ipv6Address& getDodagId() const;
     virtual Ipv6Address& getDodagIdForUpdate() { handleChange();return const_cast<Ipv6Address&>(const_cast<RplPacket*>(this)->getDodagId());}
     virtual void setDodagId(const Ipv6Address& dodagId);
+    virtual uint64_t getNodeId() const;
+    virtual void setNodeId(uint64_t nodeId);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const RplPacket& obj) {obj.parsimPack(b);}
 inline void doParsimUnpacking(omnetpp::cCommBuffer *b, RplPacket& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>Rpl.msg:72</tt> by nedtool.
+ * Class generated from <tt>Rpl.msg:76</tt> by nedtool.
  * <pre>
  * // DODAG Information Option [RFC 6550, 6.3]
  * class Dio extends RplPacket
@@ -212,6 +218,12 @@ inline void doParsimUnpacking(omnetpp::cCommBuffer *b, RplPacket& obj) {obj.pars
  *     int dioRedundancyConst;
  *     int dioNumDoublings;
  *     Ocp ocp;
+ * 
+ *     // Non-RFC fields, misc
+ *     Coord position; // DIO sender node location to draw directed parent-child connectors on canvas
+ *     cFigure::Color color; // Color of the parent-child connector line, per DODAG
+ *     int colorId; // DODAG color id (from static palette) for multi-GW scenario
+ * 
  * }
  * </pre>
  */
@@ -228,6 +240,9 @@ class Dio : public ::inet::RplPacket
     int dioRedundancyConst = 0;
     int dioNumDoublings = 0;
     inet::Ocp ocp = static_cast<inet::Ocp>(-1);
+    Coord position;
+    cFigure::Color color;
+    int colorId = 0;
 
   private:
     void copy(const Dio& other);
@@ -266,30 +281,40 @@ class Dio : public ::inet::RplPacket
     virtual void setDioNumDoublings(int dioNumDoublings);
     virtual inet::Ocp getOcp() const;
     virtual void setOcp(inet::Ocp ocp);
+    virtual const Coord& getPosition() const;
+    virtual Coord& getPositionForUpdate() { handleChange();return const_cast<Coord&>(const_cast<Dio*>(this)->getPosition());}
+    virtual void setPosition(const Coord& position);
+    virtual const cFigure::Color& getColor() const;
+    virtual cFigure::Color& getColorForUpdate() { handleChange();return const_cast<cFigure::Color&>(const_cast<Dio*>(this)->getColor());}
+    virtual void setColor(const cFigure::Color& color);
+    virtual int getColorId() const;
+    virtual void setColorId(int colorId);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const Dio& obj) {obj.parsimPack(b);}
 inline void doParsimUnpacking(omnetpp::cCommBuffer *b, Dio& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>Rpl.msg:93</tt> by nedtool.
+ * Class generated from <tt>Rpl.msg:102</tt> by nedtool.
  * <pre>
  * // Destination Advertisement Object [RFC 6550, 6.4] 
  * class Dao extends RplPacket
  * {
- *     uint8_t daoSeqNum;			// ID for each unique DAO sent by a node
+ *     uint8_t seqNum;				// ID for each unique DAO sent by a node
  *     bool daoAckRequired;		// indicates whether DAO-ACK is expected by the sender 
  *     Ipv6Address reachableDest;	// advertised reachable destination		
- * 
+ *     uint8_t chOffset;			// advertised channel offset (unique per branch)
+ *     						    // as part of cross-layer scheduling 
  * }
  * </pre>
  */
 class Dao : public ::inet::RplPacket
 {
   protected:
-    uint8_t daoSeqNum = 0;
+    uint8_t seqNum = 0;
     bool daoAckRequired = false;
     Ipv6Address reachableDest;
+    uint8_t chOffset = 0;
 
   private:
     void copy(const Dao& other);
@@ -308,20 +333,27 @@ class Dao : public ::inet::RplPacket
     virtual void parsimUnpack(omnetpp::cCommBuffer *b) override;
 
     // field getter/setter methods
-    virtual uint8_t getDaoSeqNum() const;
-    virtual void setDaoSeqNum(uint8_t daoSeqNum);
+    virtual uint8_t getSeqNum() const;
+    virtual void setSeqNum(uint8_t seqNum);
     virtual bool getDaoAckRequired() const;
     virtual void setDaoAckRequired(bool daoAckRequired);
     virtual const Ipv6Address& getReachableDest() const;
     virtual Ipv6Address& getReachableDestForUpdate() { handleChange();return const_cast<Ipv6Address&>(const_cast<Dao*>(this)->getReachableDest());}
     virtual void setReachableDest(const Ipv6Address& reachableDest);
+    virtual uint8_t getChOffset() const;
+    virtual void setChOffset(uint8_t chOffset);
+
+	std::vector<Ipv6Address> knownTargets; 
+	
+	std::vector<Ipv6Address> getKnownTargets() { return this->knownTargets; }
+	void setKnownTargets(std::vector<Ipv6Address> knownTargets) { handleChange(); this->knownTargets = knownTargets; }
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const Dao& obj) {obj.parsimPack(b);}
 inline void doParsimUnpacking(omnetpp::cCommBuffer *b, Dao& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>Rpl.msg:101</tt> by nedtool.
+ * Class generated from <tt>Rpl.msg:118</tt> by nedtool.
  * <pre>
  * // DODAG Information Solicitation
  * class Dis extends RplPacket
@@ -356,7 +388,7 @@ inline void doParsimPacking(omnetpp::cCommBuffer *b, const Dis& obj) {obj.parsim
 inline void doParsimUnpacking(omnetpp::cCommBuffer *b, Dis& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>Rpl.msg:106</tt> by nedtool.
+ * Class generated from <tt>Rpl.msg:123</tt> by nedtool.
  * <pre>
  * // RPL Information Packet header [RFC 6550 11.2]
  * class RplPacketInfo extends RplPacket
@@ -407,7 +439,7 @@ inline void doParsimPacking(omnetpp::cCommBuffer *b, const RplPacketInfo& obj) {
 inline void doParsimUnpacking(omnetpp::cCommBuffer *b, RplPacketInfo& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>Rpl.msg:114</tt> by nedtool.
+ * Class generated from <tt>Rpl.msg:131</tt> by nedtool.
  * <pre>
  * class RplTargetInfo extends RplPacket
  * {
@@ -447,7 +479,7 @@ inline void doParsimPacking(omnetpp::cCommBuffer *b, const RplTargetInfo& obj) {
 inline void doParsimUnpacking(omnetpp::cCommBuffer *b, RplTargetInfo& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>Rpl.msg:119</tt> by nedtool.
+ * Class generated from <tt>Rpl.msg:136</tt> by nedtool.
  * <pre>
  * class RplTransitInfo extends RplPacket
  * {
@@ -487,7 +519,7 @@ inline void doParsimPacking(omnetpp::cCommBuffer *b, const RplTransitInfo& obj) 
 inline void doParsimUnpacking(omnetpp::cCommBuffer *b, RplTransitInfo& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>Rpl.msg:126</tt> by nedtool.
+ * Class generated from <tt>Rpl.msg:143</tt> by nedtool.
  * <pre>
  * class SourceRoutingHeader extends FieldsChunk
  * {

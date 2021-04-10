@@ -207,6 +207,448 @@ inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
     return out;
 }
 
+class CoordDescriptor : public omnetpp::cClassDescriptor
+{
+  private:
+    mutable const char **propertynames;
+    enum FieldConstants {
+    };
+  public:
+    CoordDescriptor();
+    virtual ~CoordDescriptor();
+
+    virtual bool doesSupport(omnetpp::cObject *obj) const override;
+    virtual const char **getPropertyNames() const override;
+    virtual const char *getProperty(const char *propertyname) const override;
+    virtual int getFieldCount() const override;
+    virtual const char *getFieldName(int field) const override;
+    virtual int findField(const char *fieldName) const override;
+    virtual unsigned int getFieldTypeFlags(int field) const override;
+    virtual const char *getFieldTypeString(int field) const override;
+    virtual const char **getFieldPropertyNames(int field) const override;
+    virtual const char *getFieldProperty(int field, const char *propertyname) const override;
+    virtual int getFieldArraySize(void *object, int field) const override;
+
+    virtual const char *getFieldDynamicTypeString(void *object, int field, int i) const override;
+    virtual std::string getFieldValueAsString(void *object, int field, int i) const override;
+    virtual bool setFieldValueAsString(void *object, int field, int i, const char *value) const override;
+
+    virtual const char *getFieldStructName(int field) const override;
+    virtual void *getFieldStructValuePointer(void *object, int field, int i) const override;
+};
+
+Register_ClassDescriptor(CoordDescriptor)
+
+CoordDescriptor::CoordDescriptor() : omnetpp::cClassDescriptor(omnetpp::opp_typename(typeid(inet::Coord)), "")
+{
+    propertynames = nullptr;
+}
+
+CoordDescriptor::~CoordDescriptor()
+{
+    delete[] propertynames;
+}
+
+bool CoordDescriptor::doesSupport(omnetpp::cObject *obj) const
+{
+    return dynamic_cast<Coord *>(obj)!=nullptr;
+}
+
+const char **CoordDescriptor::getPropertyNames() const
+{
+    if (!propertynames) {
+        static const char *names[] = { "existingClass",  nullptr };
+        omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+        const char **basenames = basedesc ? basedesc->getPropertyNames() : nullptr;
+        propertynames = mergeLists(basenames, names);
+    }
+    return propertynames;
+}
+
+const char *CoordDescriptor::getProperty(const char *propertyname) const
+{
+    if (!strcmp(propertyname, "existingClass")) return "";
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? basedesc->getProperty(propertyname) : nullptr;
+}
+
+int CoordDescriptor::getFieldCount() const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? 0+basedesc->getFieldCount() : 0;
+}
+
+unsigned int CoordDescriptor::getFieldTypeFlags(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldTypeFlags(field);
+        field -= basedesc->getFieldCount();
+    }
+    return 0;
+}
+
+const char *CoordDescriptor::getFieldName(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldName(field);
+        field -= basedesc->getFieldCount();
+    }
+    return nullptr;
+}
+
+int CoordDescriptor::findField(const char *fieldName) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? basedesc->findField(fieldName) : -1;
+}
+
+const char *CoordDescriptor::getFieldTypeString(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldTypeString(field);
+        field -= basedesc->getFieldCount();
+    }
+    return nullptr;
+}
+
+const char **CoordDescriptor::getFieldPropertyNames(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldPropertyNames(field);
+        field -= basedesc->getFieldCount();
+    }
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+const char *CoordDescriptor::getFieldProperty(int field, const char *propertyname) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldProperty(field, propertyname);
+        field -= basedesc->getFieldCount();
+    }
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+int CoordDescriptor::getFieldArraySize(void *object, int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldArraySize(object, field);
+        field -= basedesc->getFieldCount();
+    }
+    Coord *pp = (Coord *)object; (void)pp;
+    switch (field) {
+        default: return 0;
+    }
+}
+
+const char *CoordDescriptor::getFieldDynamicTypeString(void *object, int field, int i) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldDynamicTypeString(object,field,i);
+        field -= basedesc->getFieldCount();
+    }
+    Coord *pp = (Coord *)object; (void)pp;
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+std::string CoordDescriptor::getFieldValueAsString(void *object, int field, int i) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldValueAsString(object,field,i);
+        field -= basedesc->getFieldCount();
+    }
+    Coord *pp = (Coord *)object; (void)pp;
+    switch (field) {
+        default: return "";
+    }
+}
+
+bool CoordDescriptor::setFieldValueAsString(void *object, int field, int i, const char *value) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->setFieldValueAsString(object,field,i,value);
+        field -= basedesc->getFieldCount();
+    }
+    Coord *pp = (Coord *)object; (void)pp;
+    switch (field) {
+        default: return false;
+    }
+}
+
+const char *CoordDescriptor::getFieldStructName(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldStructName(field);
+        field -= basedesc->getFieldCount();
+    }
+    return nullptr;
+}
+
+void *CoordDescriptor::getFieldStructValuePointer(void *object, int field, int i) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldStructValuePointer(object, field, i);
+        field -= basedesc->getFieldCount();
+    }
+    Coord *pp = (Coord *)object; (void)pp;
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+class cFigure__ColorDescriptor : public omnetpp::cClassDescriptor
+{
+  private:
+    mutable const char **propertynames;
+    enum FieldConstants {
+    };
+  public:
+    cFigure__ColorDescriptor();
+    virtual ~cFigure__ColorDescriptor();
+
+    virtual bool doesSupport(omnetpp::cObject *obj) const override;
+    virtual const char **getPropertyNames() const override;
+    virtual const char *getProperty(const char *propertyname) const override;
+    virtual int getFieldCount() const override;
+    virtual const char *getFieldName(int field) const override;
+    virtual int findField(const char *fieldName) const override;
+    virtual unsigned int getFieldTypeFlags(int field) const override;
+    virtual const char *getFieldTypeString(int field) const override;
+    virtual const char **getFieldPropertyNames(int field) const override;
+    virtual const char *getFieldProperty(int field, const char *propertyname) const override;
+    virtual int getFieldArraySize(void *object, int field) const override;
+
+    virtual const char *getFieldDynamicTypeString(void *object, int field, int i) const override;
+    virtual std::string getFieldValueAsString(void *object, int field, int i) const override;
+    virtual bool setFieldValueAsString(void *object, int field, int i, const char *value) const override;
+
+    virtual const char *getFieldStructName(int field) const override;
+    virtual void *getFieldStructValuePointer(void *object, int field, int i) const override;
+};
+
+Register_ClassDescriptor(cFigure__ColorDescriptor)
+
+cFigure__ColorDescriptor::cFigure__ColorDescriptor() : omnetpp::cClassDescriptor(omnetpp::opp_typename(typeid(inet::cFigure::Color)), "")
+{
+    propertynames = nullptr;
+}
+
+cFigure__ColorDescriptor::~cFigure__ColorDescriptor()
+{
+    delete[] propertynames;
+}
+
+bool cFigure__ColorDescriptor::doesSupport(omnetpp::cObject *obj) const
+{
+    return dynamic_cast<cFigure::Color *>(obj)!=nullptr;
+}
+
+const char **cFigure__ColorDescriptor::getPropertyNames() const
+{
+    if (!propertynames) {
+        static const char *names[] = { "existingClass",  nullptr };
+        omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+        const char **basenames = basedesc ? basedesc->getPropertyNames() : nullptr;
+        propertynames = mergeLists(basenames, names);
+    }
+    return propertynames;
+}
+
+const char *cFigure__ColorDescriptor::getProperty(const char *propertyname) const
+{
+    if (!strcmp(propertyname, "existingClass")) return "";
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? basedesc->getProperty(propertyname) : nullptr;
+}
+
+int cFigure__ColorDescriptor::getFieldCount() const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? 0+basedesc->getFieldCount() : 0;
+}
+
+unsigned int cFigure__ColorDescriptor::getFieldTypeFlags(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldTypeFlags(field);
+        field -= basedesc->getFieldCount();
+    }
+    return 0;
+}
+
+const char *cFigure__ColorDescriptor::getFieldName(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldName(field);
+        field -= basedesc->getFieldCount();
+    }
+    return nullptr;
+}
+
+int cFigure__ColorDescriptor::findField(const char *fieldName) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? basedesc->findField(fieldName) : -1;
+}
+
+const char *cFigure__ColorDescriptor::getFieldTypeString(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldTypeString(field);
+        field -= basedesc->getFieldCount();
+    }
+    return nullptr;
+}
+
+const char **cFigure__ColorDescriptor::getFieldPropertyNames(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldPropertyNames(field);
+        field -= basedesc->getFieldCount();
+    }
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+const char *cFigure__ColorDescriptor::getFieldProperty(int field, const char *propertyname) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldProperty(field, propertyname);
+        field -= basedesc->getFieldCount();
+    }
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+int cFigure__ColorDescriptor::getFieldArraySize(void *object, int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldArraySize(object, field);
+        field -= basedesc->getFieldCount();
+    }
+    cFigure::Color *pp = (cFigure::Color *)object; (void)pp;
+    switch (field) {
+        default: return 0;
+    }
+}
+
+const char *cFigure__ColorDescriptor::getFieldDynamicTypeString(void *object, int field, int i) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldDynamicTypeString(object,field,i);
+        field -= basedesc->getFieldCount();
+    }
+    cFigure::Color *pp = (cFigure::Color *)object; (void)pp;
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+std::string cFigure__ColorDescriptor::getFieldValueAsString(void *object, int field, int i) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldValueAsString(object,field,i);
+        field -= basedesc->getFieldCount();
+    }
+    cFigure::Color *pp = (cFigure::Color *)object; (void)pp;
+    switch (field) {
+        default: return "";
+    }
+}
+
+bool cFigure__ColorDescriptor::setFieldValueAsString(void *object, int field, int i, const char *value) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->setFieldValueAsString(object,field,i,value);
+        field -= basedesc->getFieldCount();
+    }
+    cFigure::Color *pp = (cFigure::Color *)object; (void)pp;
+    switch (field) {
+        default: return false;
+    }
+}
+
+const char *cFigure__ColorDescriptor::getFieldStructName(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldStructName(field);
+        field -= basedesc->getFieldCount();
+    }
+    return nullptr;
+}
+
+void *cFigure__ColorDescriptor::getFieldStructValuePointer(void *object, int field, int i) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldStructValuePointer(object, field, i);
+        field -= basedesc->getFieldCount();
+    }
+    cFigure::Color *pp = (cFigure::Color *)object; (void)pp;
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+EXECUTE_ON_STARTUP(
+    omnetpp::cEnum *e = omnetpp::cEnum::find("inet::Ocp");
+    if (!e) omnetpp::enums.getInstance()->add(e = new omnetpp::cEnum("inet::Ocp"));
+    e->insert(ETX, "ETX");
+    e->insert(HOP_COUNT, "HOP_COUNT");
+    e->insert(ENERGY, "ENERGY");
+)
+
 EXECUTE_ON_STARTUP(
     omnetpp::cEnum *e = omnetpp::cEnum::find("inet::RplPacketCode");
     if (!e) omnetpp::enums.getInstance()->add(e = new omnetpp::cEnum("inet::RplPacketCode"));
@@ -216,14 +658,7 @@ EXECUTE_ON_STARTUP(
     e->insert(DAO_ACK, "DAO_ACK");
     e->insert(PING, "PING");
     e->insert(PING_ACK, "PING_ACK");
-)
-
-EXECUTE_ON_STARTUP(
-    omnetpp::cEnum *e = omnetpp::cEnum::find("inet::Ocp");
-    if (!e) omnetpp::enums.getInstance()->add(e = new omnetpp::cEnum("inet::Ocp"));
-    e->insert(ETX, "ETX");
-    e->insert(HOP_COUNT, "HOP_COUNT");
-    e->insert(ENERGY, "ENERGY");
+    e->insert(CROSS_LAYER_CTRL, "CROSS_LAYER_CTRL");
 )
 
 Register_Class(RplHeader)
@@ -365,7 +800,7 @@ unsigned int RplHeaderDescriptor::getFieldTypeFlags(int field) const
         field -= basedesc->getFieldCount();
     }
     static unsigned int fieldTypeFlags[] = {
-        0,    // FIELD_icmpv6Code
+        FD_ISEDITABLE,    // FIELD_icmpv6Code
         0,    // FIELD_icmpv6Type
     };
     return (field >= 0 && field < 2) ? fieldTypeFlags[field] : 0;
@@ -497,6 +932,7 @@ bool RplHeaderDescriptor::setFieldValueAsString(void *object, int field, int i, 
     }
     RplHeader *pp = (RplHeader *)object; (void)pp;
     switch (field) {
+        case FIELD_icmpv6Code: pp->setIcmpv6Code((inet::RplPacketCode)string2enum(value, "inet::RplPacketCode")); return true;
         default: return false;
     }
 }
@@ -557,6 +993,7 @@ void RplPacket::copy(const RplPacket& other)
     this->srcAddress = other.srcAddress;
     this->instanceId = other.instanceId;
     this->dodagId = other.dodagId;
+    this->nodeId = other.nodeId;
 }
 
 void RplPacket::parsimPack(omnetpp::cCommBuffer *b) const
@@ -566,6 +1003,7 @@ void RplPacket::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->srcAddress);
     doParsimPacking(b,this->instanceId);
     doParsimPacking(b,this->dodagId);
+    doParsimPacking(b,this->nodeId);
 }
 
 void RplPacket::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -575,6 +1013,7 @@ void RplPacket::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->srcAddress);
     doParsimUnpacking(b,this->instanceId);
     doParsimUnpacking(b,this->dodagId);
+    doParsimUnpacking(b,this->nodeId);
 }
 
 const Ipv6Address& RplPacket::getDestAddress() const
@@ -621,6 +1060,17 @@ void RplPacket::setDodagId(const Ipv6Address& dodagId)
     this->dodagId = dodagId;
 }
 
+uint64_t RplPacket::getNodeId() const
+{
+    return this->nodeId;
+}
+
+void RplPacket::setNodeId(uint64_t nodeId)
+{
+    handleChange();
+    this->nodeId = nodeId;
+}
+
 class RplPacketDescriptor : public omnetpp::cClassDescriptor
 {
   private:
@@ -630,6 +1080,7 @@ class RplPacketDescriptor : public omnetpp::cClassDescriptor
         FIELD_srcAddress,
         FIELD_instanceId,
         FIELD_dodagId,
+        FIELD_nodeId,
     };
   public:
     RplPacketDescriptor();
@@ -692,7 +1143,7 @@ const char *RplPacketDescriptor::getProperty(const char *propertyname) const
 int RplPacketDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 4+basedesc->getFieldCount() : 4;
+    return basedesc ? 5+basedesc->getFieldCount() : 5;
 }
 
 unsigned int RplPacketDescriptor::getFieldTypeFlags(int field) const
@@ -708,8 +1159,9 @@ unsigned int RplPacketDescriptor::getFieldTypeFlags(int field) const
         0,    // FIELD_srcAddress
         FD_ISEDITABLE,    // FIELD_instanceId
         0,    // FIELD_dodagId
+        FD_ISEDITABLE,    // FIELD_nodeId
     };
-    return (field >= 0 && field < 4) ? fieldTypeFlags[field] : 0;
+    return (field >= 0 && field < 5) ? fieldTypeFlags[field] : 0;
 }
 
 const char *RplPacketDescriptor::getFieldName(int field) const
@@ -725,8 +1177,9 @@ const char *RplPacketDescriptor::getFieldName(int field) const
         "srcAddress",
         "instanceId",
         "dodagId",
+        "nodeId",
     };
-    return (field >= 0 && field < 4) ? fieldNames[field] : nullptr;
+    return (field >= 0 && field < 5) ? fieldNames[field] : nullptr;
 }
 
 int RplPacketDescriptor::findField(const char *fieldName) const
@@ -737,6 +1190,7 @@ int RplPacketDescriptor::findField(const char *fieldName) const
     if (fieldName[0] == 's' && strcmp(fieldName, "srcAddress") == 0) return base+1;
     if (fieldName[0] == 'i' && strcmp(fieldName, "instanceId") == 0) return base+2;
     if (fieldName[0] == 'd' && strcmp(fieldName, "dodagId") == 0) return base+3;
+    if (fieldName[0] == 'n' && strcmp(fieldName, "nodeId") == 0) return base+4;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -753,8 +1207,9 @@ const char *RplPacketDescriptor::getFieldTypeString(int field) const
         "inet::Ipv6Address",    // FIELD_srcAddress
         "uint8_t",    // FIELD_instanceId
         "inet::Ipv6Address",    // FIELD_dodagId
+        "uint64_t",    // FIELD_nodeId
     };
-    return (field >= 0 && field < 4) ? fieldTypeStrings[field] : nullptr;
+    return (field >= 0 && field < 5) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **RplPacketDescriptor::getFieldPropertyNames(int field) const
@@ -825,6 +1280,7 @@ std::string RplPacketDescriptor::getFieldValueAsString(void *object, int field, 
         case FIELD_srcAddress: return pp->getSrcAddress().str();
         case FIELD_instanceId: return ulong2string(pp->getInstanceId());
         case FIELD_dodagId: return pp->getDodagId().str();
+        case FIELD_nodeId: return uint642string(pp->getNodeId());
         default: return "";
     }
 }
@@ -840,6 +1296,7 @@ bool RplPacketDescriptor::setFieldValueAsString(void *object, int field, int i, 
     RplPacket *pp = (RplPacket *)object; (void)pp;
     switch (field) {
         case FIELD_instanceId: pp->setInstanceId(string2ulong(value)); return true;
+        case FIELD_nodeId: pp->setNodeId(string2uint64(value)); return true;
         default: return false;
     }
 }
@@ -909,6 +1366,9 @@ void Dio::copy(const Dio& other)
     this->dioRedundancyConst = other.dioRedundancyConst;
     this->dioNumDoublings = other.dioNumDoublings;
     this->ocp = other.ocp;
+    this->position = other.position;
+    this->color = other.color;
+    this->colorId = other.colorId;
 }
 
 void Dio::parsimPack(omnetpp::cCommBuffer *b) const
@@ -924,6 +1384,9 @@ void Dio::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->dioRedundancyConst);
     doParsimPacking(b,this->dioNumDoublings);
     doParsimPacking(b,this->ocp);
+    doParsimPacking(b,this->position);
+    doParsimPacking(b,this->color);
+    doParsimPacking(b,this->colorId);
 }
 
 void Dio::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -939,6 +1402,9 @@ void Dio::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->dioRedundancyConst);
     doParsimUnpacking(b,this->dioNumDoublings);
     doParsimUnpacking(b,this->ocp);
+    doParsimUnpacking(b,this->position);
+    doParsimUnpacking(b,this->color);
+    doParsimUnpacking(b,this->colorId);
 }
 
 uint8_t Dio::getDodagVersion() const
@@ -1051,6 +1517,39 @@ void Dio::setOcp(inet::Ocp ocp)
     this->ocp = ocp;
 }
 
+const Coord& Dio::getPosition() const
+{
+    return this->position;
+}
+
+void Dio::setPosition(const Coord& position)
+{
+    handleChange();
+    this->position = position;
+}
+
+const cFigure::Color& Dio::getColor() const
+{
+    return this->color;
+}
+
+void Dio::setColor(const cFigure::Color& color)
+{
+    handleChange();
+    this->color = color;
+}
+
+int Dio::getColorId() const
+{
+    return this->colorId;
+}
+
+void Dio::setColorId(int colorId)
+{
+    handleChange();
+    this->colorId = colorId;
+}
+
 class DioDescriptor : public omnetpp::cClassDescriptor
 {
   private:
@@ -1066,6 +1565,9 @@ class DioDescriptor : public omnetpp::cClassDescriptor
         FIELD_dioRedundancyConst,
         FIELD_dioNumDoublings,
         FIELD_ocp,
+        FIELD_position,
+        FIELD_color,
+        FIELD_colorId,
     };
   public:
     DioDescriptor();
@@ -1128,7 +1630,7 @@ const char *DioDescriptor::getProperty(const char *propertyname) const
 int DioDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 10+basedesc->getFieldCount() : 10;
+    return basedesc ? 13+basedesc->getFieldCount() : 13;
 }
 
 unsigned int DioDescriptor::getFieldTypeFlags(int field) const
@@ -1149,9 +1651,12 @@ unsigned int DioDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,    // FIELD_minInterval
         FD_ISEDITABLE,    // FIELD_dioRedundancyConst
         FD_ISEDITABLE,    // FIELD_dioNumDoublings
-        0,    // FIELD_ocp
+        FD_ISEDITABLE,    // FIELD_ocp
+        FD_ISCOMPOUND,    // FIELD_position
+        FD_ISCOMPOUND,    // FIELD_color
+        FD_ISEDITABLE,    // FIELD_colorId
     };
-    return (field >= 0 && field < 10) ? fieldTypeFlags[field] : 0;
+    return (field >= 0 && field < 13) ? fieldTypeFlags[field] : 0;
 }
 
 const char *DioDescriptor::getFieldName(int field) const
@@ -1173,8 +1678,11 @@ const char *DioDescriptor::getFieldName(int field) const
         "dioRedundancyConst",
         "dioNumDoublings",
         "ocp",
+        "position",
+        "color",
+        "colorId",
     };
-    return (field >= 0 && field < 10) ? fieldNames[field] : nullptr;
+    return (field >= 0 && field < 13) ? fieldNames[field] : nullptr;
 }
 
 int DioDescriptor::findField(const char *fieldName) const
@@ -1191,6 +1699,9 @@ int DioDescriptor::findField(const char *fieldName) const
     if (fieldName[0] == 'd' && strcmp(fieldName, "dioRedundancyConst") == 0) return base+7;
     if (fieldName[0] == 'd' && strcmp(fieldName, "dioNumDoublings") == 0) return base+8;
     if (fieldName[0] == 'o' && strcmp(fieldName, "ocp") == 0) return base+9;
+    if (fieldName[0] == 'p' && strcmp(fieldName, "position") == 0) return base+10;
+    if (fieldName[0] == 'c' && strcmp(fieldName, "color") == 0) return base+11;
+    if (fieldName[0] == 'c' && strcmp(fieldName, "colorId") == 0) return base+12;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -1213,8 +1724,11 @@ const char *DioDescriptor::getFieldTypeString(int field) const
         "int",    // FIELD_dioRedundancyConst
         "int",    // FIELD_dioNumDoublings
         "inet::Ocp",    // FIELD_ocp
+        "inet::Coord",    // FIELD_position
+        "inet::cFigure::Color",    // FIELD_color
+        "int",    // FIELD_colorId
     };
-    return (field >= 0 && field < 10) ? fieldTypeStrings[field] : nullptr;
+    return (field >= 0 && field < 13) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **DioDescriptor::getFieldPropertyNames(int field) const
@@ -1298,6 +1812,9 @@ std::string DioDescriptor::getFieldValueAsString(void *object, int field, int i)
         case FIELD_dioRedundancyConst: return long2string(pp->getDioRedundancyConst());
         case FIELD_dioNumDoublings: return long2string(pp->getDioNumDoublings());
         case FIELD_ocp: return enum2string(pp->getOcp(), "inet::Ocp");
+        case FIELD_position: {std::stringstream out; out << pp->getPosition(); return out.str();}
+        case FIELD_color: {std::stringstream out; out << pp->getColor(); return out.str();}
+        case FIELD_colorId: return long2string(pp->getColorId());
         default: return "";
     }
 }
@@ -1321,6 +1838,8 @@ bool DioDescriptor::setFieldValueAsString(void *object, int field, int i, const 
         case FIELD_minInterval: pp->setMinInterval(string2long(value)); return true;
         case FIELD_dioRedundancyConst: pp->setDioRedundancyConst(string2long(value)); return true;
         case FIELD_dioNumDoublings: pp->setDioNumDoublings(string2long(value)); return true;
+        case FIELD_ocp: pp->setOcp((inet::Ocp)string2enum(value, "inet::Ocp")); return true;
+        case FIELD_colorId: pp->setColorId(string2long(value)); return true;
         default: return false;
     }
 }
@@ -1334,6 +1853,8 @@ const char *DioDescriptor::getFieldStructName(int field) const
         field -= basedesc->getFieldCount();
     }
     switch (field) {
+        case FIELD_position: return omnetpp::opp_typename(typeid(Coord));
+        case FIELD_color: return omnetpp::opp_typename(typeid(cFigure::Color));
         default: return nullptr;
     };
 }
@@ -1348,6 +1869,8 @@ void *DioDescriptor::getFieldStructValuePointer(void *object, int field, int i) 
     }
     Dio *pp = (Dio *)object; (void)pp;
     switch (field) {
+        case FIELD_position: return toVoidPtr(&pp->getPosition()); break;
+        case FIELD_color: return toVoidPtr(&pp->getColor()); break;
         default: return nullptr;
     }
 }
@@ -1377,36 +1900,39 @@ Dao& Dao::operator=(const Dao& other)
 
 void Dao::copy(const Dao& other)
 {
-    this->daoSeqNum = other.daoSeqNum;
+    this->seqNum = other.seqNum;
     this->daoAckRequired = other.daoAckRequired;
     this->reachableDest = other.reachableDest;
+    this->chOffset = other.chOffset;
 }
 
 void Dao::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::inet::RplPacket::parsimPack(b);
-    doParsimPacking(b,this->daoSeqNum);
+    doParsimPacking(b,this->seqNum);
     doParsimPacking(b,this->daoAckRequired);
     doParsimPacking(b,this->reachableDest);
+    doParsimPacking(b,this->chOffset);
 }
 
 void Dao::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::inet::RplPacket::parsimUnpack(b);
-    doParsimUnpacking(b,this->daoSeqNum);
+    doParsimUnpacking(b,this->seqNum);
     doParsimUnpacking(b,this->daoAckRequired);
     doParsimUnpacking(b,this->reachableDest);
+    doParsimUnpacking(b,this->chOffset);
 }
 
-uint8_t Dao::getDaoSeqNum() const
+uint8_t Dao::getSeqNum() const
 {
-    return this->daoSeqNum;
+    return this->seqNum;
 }
 
-void Dao::setDaoSeqNum(uint8_t daoSeqNum)
+void Dao::setSeqNum(uint8_t seqNum)
 {
     handleChange();
-    this->daoSeqNum = daoSeqNum;
+    this->seqNum = seqNum;
 }
 
 bool Dao::getDaoAckRequired() const
@@ -1431,14 +1957,26 @@ void Dao::setReachableDest(const Ipv6Address& reachableDest)
     this->reachableDest = reachableDest;
 }
 
+uint8_t Dao::getChOffset() const
+{
+    return this->chOffset;
+}
+
+void Dao::setChOffset(uint8_t chOffset)
+{
+    handleChange();
+    this->chOffset = chOffset;
+}
+
 class DaoDescriptor : public omnetpp::cClassDescriptor
 {
   private:
     mutable const char **propertynames;
     enum FieldConstants {
-        FIELD_daoSeqNum,
+        FIELD_seqNum,
         FIELD_daoAckRequired,
         FIELD_reachableDest,
+        FIELD_chOffset,
     };
   public:
     DaoDescriptor();
@@ -1501,7 +2039,7 @@ const char *DaoDescriptor::getProperty(const char *propertyname) const
 int DaoDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 3+basedesc->getFieldCount() : 3;
+    return basedesc ? 4+basedesc->getFieldCount() : 4;
 }
 
 unsigned int DaoDescriptor::getFieldTypeFlags(int field) const
@@ -1513,11 +2051,12 @@ unsigned int DaoDescriptor::getFieldTypeFlags(int field) const
         field -= basedesc->getFieldCount();
     }
     static unsigned int fieldTypeFlags[] = {
-        FD_ISEDITABLE,    // FIELD_daoSeqNum
+        FD_ISEDITABLE,    // FIELD_seqNum
         FD_ISEDITABLE,    // FIELD_daoAckRequired
         0,    // FIELD_reachableDest
+        FD_ISEDITABLE,    // FIELD_chOffset
     };
-    return (field >= 0 && field < 3) ? fieldTypeFlags[field] : 0;
+    return (field >= 0 && field < 4) ? fieldTypeFlags[field] : 0;
 }
 
 const char *DaoDescriptor::getFieldName(int field) const
@@ -1529,20 +2068,22 @@ const char *DaoDescriptor::getFieldName(int field) const
         field -= basedesc->getFieldCount();
     }
     static const char *fieldNames[] = {
-        "daoSeqNum",
+        "seqNum",
         "daoAckRequired",
         "reachableDest",
+        "chOffset",
     };
-    return (field >= 0 && field < 3) ? fieldNames[field] : nullptr;
+    return (field >= 0 && field < 4) ? fieldNames[field] : nullptr;
 }
 
 int DaoDescriptor::findField(const char *fieldName) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
-    if (fieldName[0] == 'd' && strcmp(fieldName, "daoSeqNum") == 0) return base+0;
+    if (fieldName[0] == 's' && strcmp(fieldName, "seqNum") == 0) return base+0;
     if (fieldName[0] == 'd' && strcmp(fieldName, "daoAckRequired") == 0) return base+1;
     if (fieldName[0] == 'r' && strcmp(fieldName, "reachableDest") == 0) return base+2;
+    if (fieldName[0] == 'c' && strcmp(fieldName, "chOffset") == 0) return base+3;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -1555,11 +2096,12 @@ const char *DaoDescriptor::getFieldTypeString(int field) const
         field -= basedesc->getFieldCount();
     }
     static const char *fieldTypeStrings[] = {
-        "uint8_t",    // FIELD_daoSeqNum
+        "uint8_t",    // FIELD_seqNum
         "bool",    // FIELD_daoAckRequired
         "inet::Ipv6Address",    // FIELD_reachableDest
+        "uint8_t",    // FIELD_chOffset
     };
-    return (field >= 0 && field < 3) ? fieldTypeStrings[field] : nullptr;
+    return (field >= 0 && field < 4) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **DaoDescriptor::getFieldPropertyNames(int field) const
@@ -1626,9 +2168,10 @@ std::string DaoDescriptor::getFieldValueAsString(void *object, int field, int i)
     }
     Dao *pp = (Dao *)object; (void)pp;
     switch (field) {
-        case FIELD_daoSeqNum: return ulong2string(pp->getDaoSeqNum());
+        case FIELD_seqNum: return ulong2string(pp->getSeqNum());
         case FIELD_daoAckRequired: return bool2string(pp->getDaoAckRequired());
         case FIELD_reachableDest: return pp->getReachableDest().str();
+        case FIELD_chOffset: return ulong2string(pp->getChOffset());
         default: return "";
     }
 }
@@ -1643,8 +2186,9 @@ bool DaoDescriptor::setFieldValueAsString(void *object, int field, int i, const 
     }
     Dao *pp = (Dao *)object; (void)pp;
     switch (field) {
-        case FIELD_daoSeqNum: pp->setDaoSeqNum(string2ulong(value)); return true;
+        case FIELD_seqNum: pp->setSeqNum(string2ulong(value)); return true;
         case FIELD_daoAckRequired: pp->setDaoAckRequired(string2bool(value)); return true;
+        case FIELD_chOffset: pp->setChOffset(string2ulong(value)); return true;
         default: return false;
     }
 }

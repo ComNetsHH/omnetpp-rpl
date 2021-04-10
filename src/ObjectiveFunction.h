@@ -1,9 +1,9 @@
 /*
  * Simulation model for RPL (Routing Protocol for Low-Power and Lossy Networks)
  *
- * Copyright (C) 2020  Institute of Communication Networks (ComNets),
+ * Copyright (C) 2021  Institute of Communication Networks (ComNets),
  *                     Hamburg University of Technology (TUHH)
- *           (C) 2020  Yevhenii Shudrenko
+ *           (C) 2021  Yevhenii Shudrenko
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,18 +25,7 @@
 #include <map>
 #include <vector>
 
-#include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/INetfilter.h"
-#include "inet/networklayer/contract/IRoutingTable.h"
-#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#include "inet/networklayer/ipv6/Ipv6Route.h"
-#include "inet/routing/base/RoutingProtocolBase.h"
-#include "inet/transportlayer/udp/UdpHeader_m.h"
-#include "inet/common/INETMath.h"
-#include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/INETDefs.h"
 #include "Rpl_m.h"
 #include "RplDefs.h"
 
@@ -61,7 +50,7 @@ class ObjectiveFunction : public cObject
      * from each neighbor
      * @return best parent candidate based on the type of objective function in use
      */
-    virtual Dio* getPreferredParent(std::map<Ipv6Address, Dio *> candidateParents);
+    virtual Dio* getPreferredParent(std::map<Ipv6Address, Dio *> candidateParents, Dio* currentPreferredParent);
     /**
      * Calculate node's rank based on the chosen preferred parent [RFC 6550, 3.5].
      *
@@ -70,6 +59,8 @@ class ObjectiveFunction : public cObject
      * @return updated rank based on the minHopRankIncrease and OF
      */
     virtual uint16_t calcRank(Dio* preferredParent);
+
+    void setMinHopRankIncrease(int incr) { minHopRankIncrease = incr; }
 
 };
 

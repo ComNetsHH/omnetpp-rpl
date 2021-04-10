@@ -1,9 +1,9 @@
 /*
  * Simulation model for RPL (Routing Protocol for Low-Power and Lossy Networks)
  *
- * Copyright (C) 2020  Institute of Communication Networks (ComNets),
+ * Copyright (C) 2021  Institute of Communication Networks (ComNets),
  *                     Hamburg University of Technology (TUHH)
- *           (C) 2020  Yevhenii Shudrenko
+ *           (C) 2021  Yevhenii Shudrenko
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,30 +22,18 @@
 #ifndef _RPL_H
 #define _RPL_H
 
-#include <map>
-#include <vector>
-
-#include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/INetfilter.h"
-#include "inet/networklayer/contract/IRoutingTable.h"
-#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#include "inet/networklayer/ipv6/Ipv6.h"
-#include "inet/networklayer/icmpv6/Icmpv6.h"
-#include "inet/networklayer/ipv6/Ipv6Route.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-#include "inet/routing/base/RoutingProtocolBase.h"
-#include "inet/transportlayer/udp/UdpHeader_m.h"
-#include "inet/common/packet/chunk/Chunk.h"
+#include "TrickleTimer.h"
+#include "RplRouteData.h"
+#include "inet/applications/udpapp/UdpBasicApp.h"
+#include "inet/applications/udpapp/UdpSink.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "Rpl_m.h"
-#include "RplDefs.h"
-#include "RplRouteData.h"
-#include "TrickleTimer.h"
-#include "ObjectiveFunction.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/mobility/static/StationaryMobility.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/L3Tools.h"
 
 namespace inet {
 
@@ -56,11 +44,13 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     /** Environment */
     IInterfaceTable *interfaceTable;
     Ipv6RoutingTable *routingTable;
+    Ipv6NeighbourDiscovery *nd;
     InterfaceEntry *interfaceEntryPtr;
     INetfilter *networkProtocol;
     ObjectiveFunction *objectiveFunction;
     TrickleTimer *trickleTimer;
     cModule *host;
+    cModule *udpApp;
 
     /** RPL configuration parameters and state management */
     uint8_t dodagVersion;
@@ -68,19 +58,29 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     Ipv6Address selfAddr;
     Ipv6Address *lastTarget;
     Ipv6Address *lastTransit;
-    Packet *savedUdpDatagram;
     uint8_t instanceId;
     double daoDelay;
+    double daoAckTimeout;
+    double clKickoffTimeout; // timeout for auto-triggering phase II of CL SF
+    uint8_t daoRtxCtn;
+    uint8_t daoRtxThresh;
     bool isRoot;
     bool daoEnabled;
     bool storing;
+    bool pDaoAckEnabled;
+    bool hasStarted;
+    bool allowDodagSwitching;
     uint16_t rank;
     uint8_t dtsn;
+    uint32_t branchChOffset;
+    uint16_t branchSize;
+    int daoSeqNum;
     Dio *preferredParent;
     std::string objectiveFunctionType;
     std::map<Ipv6Address, Dio *> backupParents;
     std::map<Ipv6Address, Dio *> candidateParents;
     std::map<Ipv6Address, Ipv6Address> sourceRoutingTable;
+    std::map<Ipv6Address, std::pair<cMessage *, uint8_t>> pendingDaoAcks;
 
     /** Statistics collection */
     simsignal_t dioReceivedSignal;
@@ -88,26 +88,47 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     simsignal_t parentChangedSignal;
     simsignal_t parentUnreachableSignal;
 
+    bool pJoinAtSinkAllowed;
+    int numDaoDropped;
+
     /** Misc */
     bool floating;
     bool verbose;
+    bool pUseWarmup;
+    bool pLockParent;
+    bool isLeaf;
     uint8_t detachedTimeout; // temporary variable to suppress msg processing after just leaving the DODAG
     cMessage *detachedTimeoutEvent; // temporary msg corresponding to triggering above functionality
+    cMessage *daoAckTimeoutEvent; // temporary msg corresponding to triggering above functionality
     uint8_t prefixLength;
-
+    Coord position;
+    uint64_t selfId;    // Primary IE MAC address in decimal
+    std::vector<cFigure::Color> colorPalette;
+    int udpPacketsRecv;
+    cFigure::Color dodagColor;
 
   public:
     Rpl();
     ~Rpl();
 
+    /** Conveniently display boolean variable with custom true / false format */
     static std::string boolStr(bool cond, std::string positive, std::string negative);
     static std::string boolStr(bool cond) { return boolStr(cond, "true", "false"); }
 
+    /** Search for a submodule of @param host by its name @param sname */
+    static cModule* findSubmodule(std::string sname, cModule *host);
+
+    /** Randomly pick @param numRequested elements from a [0..@param total] array*/
+    static std::vector<int> pickRandomly(int total, int numRequested);
+
+    int numParentUpdates;
+    int numDaoForwarded;
+
   protected:
     /** module interface */
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     void initialize(int stage) override;
     void handleMessageWhenUp(cMessage *message) override;
+    virtual void refreshDisplay() const override;
 
   private:
     void processSelfMessage(cMessage *message);
@@ -142,6 +163,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      */
     void processDio(const Ptr<const Dio>& dio);
 
+    void processCrossLayerMsg(const Ptr<const Dio>& dio);
+
     /**
      * Process DAO packet advertising node's reachability,
      * update routing table if destination advertised was unknown and
@@ -150,7 +173,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param dao DAO packet object for processing
      */
     void processDao(const Ptr<const Dao>& dao);
-    void forwardDaoWithoutProcessing(Packet *dao);
+//    void retransmitDao(Dao *dao);
+    void retransmitDao(Ipv6Address advDest);
 
     /**
      * Process DAO_ACK packet if daoAckRequried flag is set
@@ -158,7 +182,6 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param daoAck decapsulated DAO_ACK packet for processing
      */
     void processDaoAck(const Ptr<const Dao>& daoAck);
-    void processDis(const Ptr<const Dis>& dis);
     void saveDaoTransitOptions(Packet *dao);
 
     /**
@@ -178,6 +201,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @return initialized DIO packet object
      */
     const Ptr<Dio> createDio();
+    B getDioSize() { return b(128); }
 
     /**
      * Create DAO packet advertising destination reachability
@@ -185,8 +209,12 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param reachableDest reachable destination, may be own address or forwarded from sub-dodag
      * @return initialized DAO packet object
      */
-    const Ptr<Dao> createDao(const Ipv6Address &reachableDest);
+    const Ptr<Dao> createDao(const Ipv6Address &reachableDest, uint8_t channelOffset);
+    const Ptr<Dao> createDao(const Ipv6Address &reachableDest, bool ackRequired);
     const Ptr<Dao> createDao() {return createDao(getSelfAddress()); };
+    const Ptr<Dao> createDao(const Ipv6Address &reachableDest) {
+        return createDao(reachableDest, (uint8_t) UNDEFINED_CH_OFFSET);
+    }
 
     /**
      * Update routing table with new route to destination reachable via next hop
@@ -194,10 +222,10 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param nextHop next hop address to reach the destination for findBestMatchingRoute()
      * @param dest discovered destination address being added to the routing table
      */
-    void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData);
-    void updateRoutingTable(Dao *dao);
-    void updateRoutingTable(const Ipv6Address &nextHop);
-    void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest);
+    void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData, bool defaultRoute);
+    void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData) { updateRoutingTable(nextHop, dest, routeData, false); };
+//    void updateRoutingTable(const Dao *dao);
+    RplRouteData* prepRouteData(const Dao *dao);
 
     void purgeDaoRoutes();
 
@@ -217,6 +245,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      */
     void deletePrefParent() { deletePrefParent(false); };
     void deletePrefParent(bool poisoned);
+    void clearParentRoutes();
 
     /**
      * Update preferred parent based on the current best candidate
@@ -267,6 +296,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     std::string printMap(const Map& map);
 
     bool selfGeneratedPkt(Packet *pkt);
+    bool isUdpSink();
+    void purgeRoutingTable();
 
     /**
      * Check if destination advertised in DAO is already stored in
@@ -300,20 +331,6 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * Check if INF_RANK is advertised in DIO and whether it comes from preferred parent
      */
     bool checkPoisonedParent(const Ptr<const Dio>& dio);
-
-    /**
-     * @deprecated
-     * Check if IPv6 address suffixes match given the prefix length
-     *
-     * @param addr1 first address for comparison
-     * @param addr2 second address for comparison
-     * @param prefixLength IPv6 prefix length, representing network + subnet id
-     * @return true on matching address' prefixes, false otherwise
-     */
-    bool matchesSuffix(const Ipv6Address &addr1, const Ipv6Address &addr2, int prefixLength);
-    bool matchesSuffix(const Ipv6Address &addr1, const Ipv6Address &addr2) {
-        return matchesSuffix(addr1, addr2, prefixLength);
-    };
 
     /**
      * Print all packet tags' classnames
@@ -363,11 +380,14 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @return predefined default byte value
      */
     B getRpiHeaderLength();
+    B getDaoLength();
 
+    // TODO: replace by dynamic calculation based on the number of addresses in source routing header
+    // + additional field specifying length of this header to allow proper decapsulation
     B getSrhSize() { return B(64); }
+
     bool isDao(Packet *pkt) { return std::string(pkt->getFullName()).find("Dao") != std::string::npos; }
     bool isUdp(Packet *datagram) { return std::string(datagram->getFullName()).find("Udp") != std::string::npos; }
-
 
     /**
      * Used by sink to collect Transit -> Target reachability information
@@ -419,6 +439,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      */
     bool checkRplRouteInfo(Packet *datagram);
 
+    bool checkDuplicateRoute(Ipv6Route *route);
+
     /**
      * Check if packet has source-routing header (SRH) present
      * @param pkt packet to check for
@@ -452,9 +474,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return checkRplHeaders(datagram); }
 
     /** Source-routing methods */
-    Ipv6Address* constructSrcRoutingHeader(const Ipv6Address& dest);
-    B getDaoLength();
-    bool checkDestReached(Packet *datagram);
+    void constructSrcRoutingHeader(std::deque<Ipv6Address> &addressList, Ipv6Address dest);
     bool destIsRoot(Packet *datagram);
 
     /**
@@ -468,6 +488,23 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
+    std::vector<uint16_t> getNodesPerHopDistance();
+    bool isRplPacket(Packet *packet);
+    void clearDaoAckTimer(Ipv6Address daoDest);
+
+    std::vector<Ipv6Address> getNearestChildren();
+    int getNumDownlinks();
+
+    /** Misc */
+    void drawConnector(Coord target, cFigure::Color col);
+    static int getNodeId(std::string nodeName);
+
+    cLineFigure *prefParentConnector;
+
+    double startDelay;
+
+    /** Pick random color for parent-child connector drawing (if node's sink) */
+    cFigure::Color pickRandomColor();
 };
 
 } // namespace inet
