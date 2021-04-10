@@ -1,9 +1,9 @@
 //
 //  Simulation model for RPL (Routing Protocol for Low-Power and Lossy Networks)
 // 
-//  Copyright (C) 2020  Institute of Communication Networks (ComNets),
+//  Copyright (C) 2021  Institute of Communication Networks (ComNets),
 //                      Hamburg University of Technology (TUHH)
-//            (C) 2020  Yevhenii Shudrenko
+//            (C) 2021  Yevhenii Shudrenko
 // 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by

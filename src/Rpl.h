@@ -1,9 +1,9 @@
 /*
  * Simulation model for RPL (Routing Protocol for Low-Power and Lossy Networks)
  *
- * Copyright (C) 2020  Institute of Communication Networks (ComNets),
+ * Copyright (C) 2021  Institute of Communication Networks (ComNets),
  *                     Hamburg University of Technology (TUHH)
- *           (C) 2020  Yevhenii Shudrenko
+ *           (C) 2021  Yevhenii Shudrenko
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@
 
 #include "TrickleTimer.h"
 #include "RplRouteData.h"
-#include "TschSfControlInfo.h"
 #include "inet/applications/udpapp/UdpBasicApp.h"
+#include "inet/applications/udpapp/UdpSink.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
@@ -90,7 +90,6 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
 
     bool pJoinAtSinkAllowed;
     int numDaoDropped;
-    int pManualParentInc;
 
     /** Misc */
     bool floating;
@@ -121,13 +120,6 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
 
     /** Randomly pick @param numRequested elements from a [0..@param total] array*/
     static std::vector<int> pickRandomly(int total, int numRequested);
-
-    friend std::ostream& operator<<(std::ostream& os, std::vector<int> const& vec)
-    {
-        for (auto val : vec)
-            os << val << ", ";
-        return os;
-    }
 
     int numParentUpdates;
     int numDaoForwarded;
@@ -304,6 +296,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     std::string printMap(const Map& map);
 
     bool selfGeneratedPkt(Packet *pkt);
+    bool isUdpSink();
+    void purgeRoutingTable();
 
     /**
      * Check if destination advertised in DAO is already stored in
@@ -337,20 +331,6 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * Check if INF_RANK is advertised in DIO and whether it comes from preferred parent
      */
     bool checkPoisonedParent(const Ptr<const Dio>& dio);
-
-    /**
-     * @deprecated
-     * Check if IPv6 address suffixes match given the prefix length
-     *
-     * @param addr1 first address for comparison
-     * @param addr2 second address for comparison
-     * @param prefixLength IPv6 prefix length, representing network + subnet id
-     * @return true on matching address' prefixes, false otherwise
-     */
-    bool matchesSuffix(const Ipv6Address &addr1, const Ipv6Address &addr2, int prefixLength);
-    bool matchesSuffix(const Ipv6Address &addr1, const Ipv6Address &addr2) {
-        return matchesSuffix(addr1, addr2, prefixLength);
-    };
 
     /**
      * Print all packet tags' classnames
@@ -400,11 +380,14 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @return predefined default byte value
      */
     B getRpiHeaderLength();
+    B getDaoLength();
 
+    // TODO: replace by dynamic calculation based on the number of addresses in source routing header
+    // + additional field specifying length of this header to allow proper decapsulation
     B getSrhSize() { return B(64); }
+
     bool isDao(Packet *pkt) { return std::string(pkt->getFullName()).find("Dao") != std::string::npos; }
     bool isUdp(Packet *datagram) { return std::string(datagram->getFullName()).find("Udp") != std::string::npos; }
-
 
     /**
      * Used by sink to collect Transit -> Target reachability information
@@ -491,11 +474,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return checkRplHeaders(datagram); }
 
     /** Source-routing methods */
-    Ipv6Address* constructSrcRoutingHeader(const Ipv6Address& dest);
-    B getDaoLength();
+    void constructSrcRoutingHeader(std::deque<Ipv6Address> &addressList, Ipv6Address dest);
     bool destIsRoot(Packet *datagram);
-
-    void collectNumParentUpdates(cModule *network);
 
     /**
      * Handle signals by implementing @see cListener interface to

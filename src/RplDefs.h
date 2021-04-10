@@ -1,9 +1,9 @@
 /*
  * Simulation model for RPL (Routing Protocol for Low-Power and Lossy Networks)
  *
- * Copyright (C) 2020  Institute of Communication Networks (ComNets),
+ * Copyright (C) 2021  Institute of Communication Networks (ComNets),
  *                     Hamburg University of Technology (TUHH)
- *           (C) 2020  Yevhenii Shudrenko
+ *           (C) 2021  Yevhenii Shudrenko
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,8 +54,6 @@ enum TRICKLE_EVENTS {
 enum RPL_SELF_MSG {
     DETACHED_TIMEOUT,
     DAO_ACK_TIMEOUT,
-    START_CROSS_LAYER_PHASE_II,
-    BRANCH_CH_ADV,
     RPL_START
 };
 
@@ -88,6 +86,22 @@ inline std::ostream& operator<<(std::ostream& os, std::list<uint8_t> &list)
         os << el << ", ";
     os << ";";
     return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, std::deque<Ipv6Address> const& srcRoutingAddresses)
+{
+    for (auto i = 0; i < srcRoutingAddresses.size() - 1; i++)
+        os << srcRoutingAddresses[i] << " => ";
+    os << srcRoutingAddresses[srcRoutingAddresses.size() - 1] << endl;
+
+    return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, std::vector<int> const& vec)
+{
+   for (auto val : vec)
+       os << val << ", ";
+   return os;
 }
 
 } // namespace inet
