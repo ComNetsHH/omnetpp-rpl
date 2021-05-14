@@ -209,12 +209,9 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param reachableDest reachable destination, may be own address or forwarded from sub-dodag
      * @return initialized DAO packet object
      */
-    const Ptr<Dao> createDao(const Ipv6Address &reachableDest, uint8_t channelOffset);
+    const Ptr<Dao> createDao(const Ipv6Address &reachableDest);
     const Ptr<Dao> createDao(const Ipv6Address &reachableDest, bool ackRequired);
     const Ptr<Dao> createDao() {return createDao(getSelfAddress()); };
-    const Ptr<Dao> createDao(const Ipv6Address &reachableDest) {
-        return createDao(reachableDest, (uint8_t) UNDEFINED_CH_OFFSET);
-    }
 
     /**
      * Update routing table with new route to destination reachable via next hop
@@ -226,6 +223,15 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData) { updateRoutingTable(nextHop, dest, routeData, false); };
 //    void updateRoutingTable(const Dao *dao);
     RplRouteData* prepRouteData(const Dao *dao);
+
+    /** Delete default routes for given interface
+     *
+     * @param interfaceID id of the interface to delete default route for
+     *
+     * NOTE: This method is taken directly from inet::Ipv6RoutingTable due to
+     * the fact it's only available with xMIPv6 enabled
+     */
+    void deleteDefaultRoutes(int interfaceID);
 
     void purgeDaoRoutes();
 

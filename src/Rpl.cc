@@ -87,6 +87,9 @@ void Rpl::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+
+        EV_DETAIL << "got interface table - " << interfaceTable << endl;
+
         networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
         nd = check_and_cast<Ipv6NeighbourDiscovery*>(getModuleByPath("^.ipv6.neighbourDiscovery"));
 
@@ -111,6 +114,7 @@ void Rpl::initialize(int stage)
         startDelay = par("startDelay").doubleValue();
 
         WATCH(numParentUpdates);
+        WATCH(selfAddr);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
@@ -199,6 +203,7 @@ void Rpl::start()
         if (strstr(ie->getInterfaceName(), "wlan") != nullptr)
         {
             interfaceEntryPtr = ie;
+            EV_DETAIL << "Interface #" << i << " set as IE pointer" << endl;
             break;
         }
     }
@@ -211,6 +216,7 @@ void Rpl::start()
 
     rank = INF_RANK - 1;
     detachedTimeoutEvent = new cMessage("", DETACHED_TIMEOUT);
+    selfAddr = getSelfAddress();
 
     if (isRoot && !par("disabled").boolValue()) {
         trickleTimer->start(pUseWarmup, par("numSkipTrickleIntervalUpdates").intValue());
@@ -480,9 +486,6 @@ void Rpl::sendRplPacket(const Ptr<RplPacket>& body, RplPacketCode code,
 void Rpl::sendRplPacket(const Ptr<RplPacket> &body, RplPacketCode code,
         const L3Address& nextHop, double delay, const Ipv6Address &target, const Ipv6Address &transit)
 {
-    if (code == CROSS_LAYER_CTRL)
-        EV_DETAIL << "Preparing to broadcast cross-layer control DIO " << endl;
-
     Packet *pkt = new Packet(std::string("inet::RplPacket::" + rplIcmpCodeToStr(code)).c_str());
     auto header = makeShared<RplHeader>();
     header->setIcmpv6Code(code);
@@ -554,13 +557,12 @@ const Ptr<Dio> Rpl::createDio()
     return dio;
 }
 
-// @p channelOffset - cross-layer specific parameter, useless in default RPL
-const Ptr<Dao> Rpl::createDao(const Ipv6Address &reachableDest, uint8_t channelOffset)
+
+const Ptr<Dao> Rpl::createDao(const Ipv6Address &reachableDest)
 {
     auto dao = makeShared<Dao>();
     dao->setInstanceId(instanceId);
     dao->setChunkLength(b(64));
-    dao->setChOffset(channelOffset);
     dao->setSrcAddress(getSelfAddress());
     dao->setReachableDest(reachableDest);
     dao->setSeqNum(daoSeqNum++);
@@ -575,7 +577,6 @@ const Ptr<Dao> Rpl::createDao(const Ipv6Address &reachableDest, bool ackRequired
     auto dao = makeShared<Dao>();
     dao->setInstanceId(instanceId);
     dao->setChunkLength(b(64));
-    dao->setChOffset(UNDEFINED_CH_OFFSET);
     dao->setSrcAddress(getSelfAddress());
     dao->setReachableDest(reachableDest);
     dao->setSeqNum(daoSeqNum++);
@@ -612,10 +613,10 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
         storing = dio->getStoring();
         dtsn = dio->getDtsn();
         lastTarget = new Ipv6Address(getSelfAddress());
-        selfAddr = getSelfAddress();
+//        selfAddr = getSelfAddress();
         dodagColor = dio->getColor();
         EV_DETAIL << "Joined DODAG with id - " << dodagId << endl;
-        purgeRoutingTable();
+//        purgeRoutingTable();
         // Start broadcasting DIOs, diffusing DODAG control data, TODO: refactor TT lifecycle
         if (trickleTimer->hasStarted())
             trickleTimer->reset();
@@ -1290,7 +1291,8 @@ void Rpl::clearParentRoutes() {
     }
 
     Ipv6Route *routeToDelete;
-    routingTable->deleteDefaultRoutes(interfaceEntryPtr->getInterfaceId());
+    deleteDefaultRoutes(interfaceEntryPtr->getInterfaceId());
+
     EV_DETAIL << "Deleted default route through preferred parent " << endl;
     auto totalRoutes = routingTable->getNumRoutes();
     for (int i = 0; i < totalRoutes; i++) {
@@ -1302,6 +1304,32 @@ void Rpl::clearParentRoutes() {
         routingTable->deleteRoute(routeToDelete);
     EV_DETAIL << "Deleted non-default route through preferred parent " << endl;
     routingTable->purgeDestCache();
+}
+
+void Rpl::deleteDefaultRoutes(int interfaceID) {
+    if (interfaceID < 0) {
+        EV_ERROR << "Invalid interface id provided" << endl;
+        return;
+    }
+
+    EV_INFO << "/// Removing default routes for interface=" << interfaceID << endl;
+
+    auto numRts = routingTable->getNumRoutes();
+    std::vector<Ipv6Route*> rtsForDeletion;
+
+    for (auto i = 0; i < numRts; i++) {
+        auto rt = routingTable->getRoute(i);
+        // default routes have prefix length 0
+        if (rt->getInterface()
+                && rt->getInterface()->getInterfaceId() == interfaceID
+                && rt->getPrefixLength() == 0)
+        {
+            rtsForDeletion.push_back(rt);
+        }
+    }
+
+    for (auto rt: rtsForDeletion)
+        routingTable->deleteRoute(rt);
 }
 
 //

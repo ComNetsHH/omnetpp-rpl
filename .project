@@ -3,7 +3,7 @@
 	<name>rpl</name>
 	<comment></comment>
 	<projects>
-		<project>inet</project>
+		<project>inet4</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

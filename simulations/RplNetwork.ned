@@ -3,6 +3,7 @@ import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 import rpl.RplRouter;
+import rpl.configurator.RplNetConfigurator;
 
 network RplNetwork
 {
@@ -17,10 +18,10 @@ network RplNetwork
         radioMedium: UnitDiskRadioMedium {
             @display("p=550,250;is=s");
         }
-//        configurator: Ipv6FlatNetworkConfigurator {
-//            @display("p=550,150;is=s");
-//        }
-
+        configurator: RplNetConfigurator {
+            @display("p=550,150;is=s");
+        }
+        
         sink: RplRouter {
             @display("i=device/pocketpc_s;p=149.112,75.864");
         }

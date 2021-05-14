@@ -21,10 +21,11 @@
 
 package rpl;
 
+import rpl.nbdiscovery.RplNeighbourDiscovery;
 import inet.routing.contract.IManetRouting;
 
 module Rpl like IManetRouting
-{
+{   
     parameters:
         // Control signals
         @signal[parentUnreachable](type=long);
