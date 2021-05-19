@@ -1,0 +1,32 @@
+#! /bin/sh
+#
+# usage: runtest [<testfile>...]
+# without args, runs all *.test files in the current directory
+#
+
+MAKE="make -j6 MODE=debug"
+
+TESTFILES=$*
+if [ "x$TESTFILES" = "x" ]; then TESTFILES='*.test'; fi
+if [ ! -d work ];  then mkdir work; fi
+rm -rf work/lib
+cp -pPR lib work/       # OSX dos not support cp -a
+PROJ_PATH=~/omnetpp-5.6.1/samples/rpl
+WORK_DIR=$PROJ_PATH/test/work
+INET_DIR=~/omnetpp-5.6.1/samples/inet
+#export NEDPATH=$NEDPATH:$PROJ_PATH/src:$INET_DIR/src
+EXTRA_INCLUDES="-I/$PROJ_PATH/src"
+#OPT="--debugger-attach-on-error=true"
+echo CFLAGS += -include $PROJ_PATH/src/inet/common/precompiled.h >work/makefrag
+echo MSGC:=$(MSGC) --msg6 >work/makefrag
+
+#$MAKE -C signalreg
+
+opp_test gen -v --args $OPT -- $TESTFILES || exit 1
+echo
+(cd work; opp_makemake -f -o work --deep -I$INET_DIR/src -lINET_dbg -lrpl_dbg  -L$PROJ_PATH/src -L$INET_DIR/src --no-deep-includes $EXTRA_INCLUDES; $MAKE) || exit 1
+echo
+opp_test run -p work_dbg -v --args $OPT -- $TESTFILES || exit 1
+echo
+echo Results can be found in ./work
+
