@@ -1,5 +1,5 @@
 import inet.common.scenario.ScenarioManager;
-import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+//import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 import rpl.RplRouter;

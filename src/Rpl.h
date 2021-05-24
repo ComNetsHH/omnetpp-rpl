@@ -82,7 +82,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     std::map<Ipv6Address, Ipv6Address> sourceRoutingTable;
     std::map<Ipv6Address, std::pair<cMessage *, uint8_t>> pendingDaoAcks;
 
-    /** Statistics collection */
+    /** Statistics and control signals */
     simsignal_t dioReceivedSignal;
     simsignal_t daoReceivedSignal;
     simsignal_t parentChangedSignal;
@@ -278,6 +278,10 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @return true if DIO sender stems from an unknown DODAG
      */
     bool checkUnknownDio(const Ptr<const Dio>& dio);
+
+    void generateLayout(cModule *net);
+    void configureTopologyLayout(Coord anchorPoint, double padX, double padY, double columnGapMultiplier,
+            cModule *network, bool branchLayout, int numBranches, int numHosts, int numSinks);
 
     /**
      * Get address of the default network interface

@@ -21,7 +21,6 @@
 
 package rpl;
 
-import rpl.nbdiscovery.RplNeighbourDiscovery;
 import inet.routing.contract.IManetRouting;
 
 module Rpl like IManetRouting
@@ -59,18 +58,27 @@ module Rpl like IManetRouting
         bool poisoning = default(false);
         bool useBackupAsPreferred = default(false);
         bool unreachabilityDetectionEnabled = default(false);
-        
-        // How much better (lower) rank should be advertised for node to consider the sender as a parent
-        int minHopRankIncrease = default(1); 
+        int minHopRankIncrease = default(1); // Preferred parent update threshold 
         double startDelay = default(0);
-        
-        // TODO: replace by enum
         string objectiveFunctionType = default("hopCount");	 // hopCount, ETX, energy, ...
         
-        // Utility params (mostly required for specific simulation scenarios)
+        
+        // Utility params (mostly required for specific simulation scenarios, not for general use)
+        
+        // Manual topology generation
+        bool layoutConfigurator = default(false);
+        bool branchesLayout = default(false);
+        bool allowJoinAtSink = default(true);  
+        int numBranches = default(3);
+        int numHops = default(1);
+        double yAnchor = default(200); // first sink location
+        double xAnchor = default(200); // 
+        double padY = default(5);
+        double padX = default(10);
+        double gridColumnsGapMultiplier = default(4); // Determines width of the central 'hallway' in aircraft
+        
         bool assignParentManual = default(false);
         bool useWarmup = default(true);
-        // allows node to switch to another DODAG if better rank is advertised
         bool allowDodagSwitching = default(false); 
         int numSkipTrickleIntervalUpdates = default(0);
 		int connectorColorId = default(0); // index of the connector line color from the color palette vector

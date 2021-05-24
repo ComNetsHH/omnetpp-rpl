@@ -110,8 +110,12 @@ void Rpl::initialize(int stage)
         dioReceivedSignal = registerSignal("dioReceived");
         daoReceivedSignal = registerSignal("daoReceived");
         parentUnreachableSignal = registerSignal("parentUnreachable");
+        parentChangedSignal = registerSignal("parentChanged");
 
         startDelay = par("startDelay").doubleValue();
+
+        if (par("layoutConfigurator").boolValue())
+            generateLayout(host->getParentModule()); // generate layout using the topmost simulation module
 
         WATCH(numParentUpdates);
         WATCH(selfAddr);
@@ -123,6 +127,122 @@ void Rpl::initialize(int stage)
         networkProtocol->registerHook(0, this);
     }
 }
+
+void Rpl::generateLayout(cModule *net) {
+    auto sink = net->getSubmodule("sink", 0);
+    auto numSinks = net->par("numSinks").intValue();
+    if (!sink)
+        throw cRuntimeError("Couldn't find sink[0] module during layout configuration");
+
+    auto sinkPos = sink->getSubmodule("mobility");
+
+    Coord *anchor = new Coord(sinkPos->par("initialX").doubleValue(), sinkPos->par("initialY").doubleValue());
+    double padX = par("padX").doubleValue();
+    double padY = par("padY").doubleValue();
+    double gap = par("gridColumnsGapMultiplier").doubleValue();
+
+    // optional
+    bool bLayout = par("branchesLayout").boolValue();
+    int numBranches = par("numBranches").intValue();
+    int numHosts = net->par("numHosts").intValue();
+
+    configureTopologyLayout(*anchor, padX, padY, gap, net, bLayout, numBranches, numHosts, numSinks);
+}
+
+
+void Rpl::configureTopologyLayout(Coord anchorPoint, double padX, double padY, double columnGapMultiplier,
+        cModule *network, bool branchLayout, int numBranches, int numHosts, int numSinks)
+{
+    EV_DETAIL << "Configuring topology for " << boolStr(branchLayout, "branch", "seatbelt") << " layout" << endl;
+
+    int i = 1;
+    int k = 1;
+    int l = 0;
+    int m = 0;
+    int hopCtn = 0;
+    int middleBranchId = (int) floor(numBranches / 2);
+    int nodesPerBranch = branchLayout ? (int) ceil(numHosts / numBranches) : 0;
+
+    double skew = numBranches % 2 == 0 ? 1.5 : 1.2;
+    int numHops = par("numHops").intValue();
+
+    double currentX = anchorPoint.x - (branchLayout ? (numBranches * skew) : columnGapMultiplier) * padX;
+    double defaultY = branchLayout ? (anchorPoint.y + padY) : anchorPoint.y;
+    double currentY = defaultY;
+
+    // Shift starting location if we have an even number of sinks
+    double bias = (!branchLayout && numSinks % 2 == 0) ? padY * numHosts / 16 : 0;
+
+    for (cModule::SubmoduleIterator it(network); !it.end(); ++it) {
+        cModule *subm = *it;
+        std::string sname(subm->getFullName());
+        auto nodeId = getNodeId(sname);
+        auto subMobility = subm->getSubmodule("mobility");
+
+        if (branchLayout) {
+            if (nodeId <= 0)
+                continue;
+
+            subMobility->par("initialX") = currentX;
+            subMobility->par("initialY") = currentY;
+
+            if (currentY == defaultY) {
+                // allow branch roots join the sink directly, since they are closest to it
+                subm->getSubmodule("rpl")->par("allowJoinAtSink") = true;
+                hopCtn = 1;
+                if (m != (int) ceil(numBranches / 2)) {
+                    auto drift = ((m < middleBranchId ? padX : -padX) * pow((m - middleBranchId + 0.0001) / 1.3, 2));
+                    subMobility->par("initialX") = currentX + drift;
+                } else
+                    k = numBranches % 2;
+                m++;
+            } else {
+                subm->getSubmodule("rpl")->par("allowJoinAtSink") = false;
+                subm->getSubmodule("rpl")->par("assignParentManual") = true;
+            }
+
+            currentX += pow(-1, k++);
+            // switching to next branch
+            if (nodeId % nodesPerBranch == 0) {
+                currentX += padX * columnGapMultiplier;
+                EV_DETAIL << "Switching to next branch, updated currentX to " << currentX << endl;
+                currentY = defaultY;
+            } else
+                currentY += padY;
+
+            if (numHops > 0) {
+                subm->par("numApps") = hopCtn == numHops ? 1 : 0;
+                hopCtn++;
+            }
+
+        } else {
+            if (sname.find("sink") != std::string::npos) {
+                double initialY = anchorPoint.y + pow(-1, k++) * padY * l * numHosts / (numSinks * 2.5) - bias;
+                if (l == 0 || k % 2 == 0)
+                    l++;
+                subMobility->par("initialY") = initialY;
+                subMobility->par("initialX") = anchorPoint.x;
+            } else {
+                if (nodeId <= 0)
+                    continue;
+
+                subMobility->par("initialX") = currentX;
+                subMobility->par("initialY") = currentY;
+                // switching to next row
+                if (nodeId % 6 == 0) {
+                    currentX = anchorPoint.x - columnGapMultiplier * padX;
+                    currentY = anchorPoint.y + pow(-1, i) * padY * i;
+                    i++;
+                    // 'jumping' over the aircraft central hallway
+                } else if (nodeId % 3 == 0)
+                    currentX += columnGapMultiplier * padX;
+                else
+                    currentX += padX;
+            }
+        }
+    }
+}
+
 
 int Rpl::getNodeId(std::string nodeName) {
     const std::regex base_regex("host\\[([0-9]+)\\]");
@@ -785,7 +905,7 @@ void Rpl::updatePreferredParent()
             << boolStr(candidateParents.empty() && par("useBackupAsPreferred").boolValue(),
                     "backup", "candidate") << " parent set" << endl;
     /**
-     * Choose parent from candidate neighbor set. If it's empty, leave DODAG.
+     * Choose parent from candidate neighbour set. If it's empty, leave DODAG.
      */
     if (candidateParents.empty())
         if (par("useBackupAsPreferred").boolValue())
@@ -810,6 +930,9 @@ void Rpl::updatePreferredParent()
         dodagId = newPrefParentDodagId;
         if (udpApp && !isUdpSink() && udpApp->par("destAddresses").str().empty())
             udpApp->par("destAddresses") = newPrefParentDodagId.str();
+
+        /** Notify 6TiSCH Scheduling Function about parent change */
+        emit(parentChangedSignal, (long) newPrefParent->getNodeId());
 
         daoSeqNum = 0;
         clearParentRoutes();
@@ -1286,23 +1409,28 @@ void Rpl::deletePrefParent(bool poisoned)
 
 void Rpl::clearParentRoutes() {
     if (!preferredParent) {
-        EV_WARN << "Pref. parent not set, cannot delete associate routes from routing table " << endl;
+        EV_WARN << "Pref. parent not set, cannot delete associated routes from routing table " << endl;
         return;
     }
 
-    Ipv6Route *routeToDelete;
+    // Delete routes with prefix length 0 (default routes)
     deleteDefaultRoutes(interfaceEntryPtr->getInterfaceId());
 
-    EV_DETAIL << "Deleted default route through preferred parent " << endl;
+    std::vector<Ipv6Route*> routesToDelete;
     auto totalRoutes = routingTable->getNumRoutes();
+
+    // Collect any remaining routes with preferred parent as the next hop
     for (int i = 0; i < totalRoutes; i++) {
         auto ri = routingTable->getRoute(i);
         if (ri->getNextHop() == preferredParent->getSrcAddress())
-            routeToDelete = ri;
+            routesToDelete.push_back(ri);
     }
-    if (routeToDelete)
-        routingTable->deleteRoute(routeToDelete);
-    EV_DETAIL << "Deleted non-default route through preferred parent " << endl;
+
+    // And delete them too
+    for (auto rt : routesToDelete)
+        routingTable->deleteRoute(rt);
+
+    EV_DETAIL << "Deleted " << routesToDelete.size() << " routes through preferred parent " << endl;
     routingTable->purgeDestCache();
 }
 
