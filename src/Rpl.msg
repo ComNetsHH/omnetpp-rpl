@@ -51,7 +51,6 @@ enum RplPacketCode {
     DAO_ACK = 3;
     PING = 4;
     PING_ACK = 5;
-    CROSS_LAYER_CTRL = 6;
 };
 
 
@@ -83,7 +82,6 @@ class Dio extends RplPacket {
     // Destination Advertisement Trigger Sequence Number, 
     // may be incremented to trigger downward routes update
     uint8_t dtsn;
-    uint8_t dioId;  // temporary field for debugging purposes   
    
 	// Trickle timer parameters (DAG Configuration Option)
     int minInterval;           
@@ -103,8 +101,6 @@ class Dao extends RplPacket {
     uint8_t seqNum;				// ID for each unique DAO sent by a node
     bool daoAckRequired;		// indicates whether DAO-ACK is expected by the sender 
     Ipv6Address reachableDest;	// advertised reachable destination		
-    uint8_t chOffset;			// advertised channel offset (unique per branch)
-    						    // as part of cross-layer scheduling 
 }
 
 cplusplus (Dao) {{
@@ -137,7 +133,6 @@ class RplTransitInfo extends RplPacket {
     Ipv6Address transit;
     // tbd fields
 }
-
 
 
 class SourceRoutingHeader extends FieldsChunk {	

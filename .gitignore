@@ -57,6 +57,8 @@ precompiled_*.h.*
 .buildlog*
 
 # ignore binary files
+omnetpp-rpl
+omnetpp-rpl_dbg
 rpl
 rpl_dbg
 run
@@ -89,4 +91,4 @@ backups
 *~
 xxx
 /tmp/
-
+**/.DS_STORE

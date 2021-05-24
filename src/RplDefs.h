@@ -41,8 +41,6 @@ namespace inet {
 
 /** Misc */
 #define DEFAULT_PARENT_LIFETIME 5000
-#define UNDEFINED_CH_OFFSET 127
-#define SCHEDULE_PHASE_II_TIMEOUT 15
 const Ipv6Address LL_RPL_MULTICAST("FF02:0:0:0:0:0:0:1A");
 
 enum TRICKLE_EVENTS {
