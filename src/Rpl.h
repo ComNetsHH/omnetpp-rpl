@@ -70,6 +70,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     bool pDaoAckEnabled;
     bool hasStarted;
     bool allowDodagSwitching;
+    bool pUnreachabilityDetectionEnabled;
     uint16_t rank;
     uint8_t dtsn;
     uint32_t branchChOffset;
@@ -86,6 +87,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     simsignal_t dioReceivedSignal;
     simsignal_t daoReceivedSignal;
     simsignal_t parentChangedSignal;
+    simsignal_t rankUpdatedSignal;
     simsignal_t parentUnreachableSignal;
 
     bool pJoinAtSinkAllowed;
@@ -110,6 +112,14 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
   public:
     Rpl();
     ~Rpl();
+
+    friend std::ostream& operator<<(std::ostream& os, const std::map<Ipv6Address, Dio *> &parentSet)
+    {
+        os << "Address   Rank" << endl;
+        for (auto const &entry : parentSet)
+            os << entry.first << ": " << entry.second->getRank() << std::endl;
+        return os;
+    }
 
     /** Conveniently display boolean variable with custom true / false format */
     static std::string boolStr(bool cond, std::string positive, std::string negative);

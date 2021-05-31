@@ -61,7 +61,7 @@ module Rpl like IManetRouting
         int minHopRankIncrease = default(1); // Preferred parent update threshold 
         double startDelay = default(0);
         string objectiveFunctionType = default("hopCount");	 // hopCount, ETX, energy, ...
-        
+        bool allowDodagSwitching = default(false);
         
         // Utility params (mostly required for specific simulation scenarios, not for general use)
         
@@ -77,9 +77,7 @@ module Rpl like IManetRouting
         double padX = default(10);
         double gridColumnsGapMultiplier = default(4); // Determines width of the central 'hallway' in aircraft
         
-        bool assignParentManual = default(false);
         bool useWarmup = default(true);
-        bool allowDodagSwitching = default(false); 
         int numSkipTrickleIntervalUpdates = default(0);
 		int connectorColorId = default(0); // index of the connector line color from the color palette vector
 		bool drawConnectors = default(true);

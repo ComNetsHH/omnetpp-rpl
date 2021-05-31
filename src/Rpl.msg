@@ -96,6 +96,14 @@ class Dio extends RplPacket {
     
 }
 
+cplusplus (Dio) {{
+    friend std::ostream& operator<<(std::ostream& os, Dio* dio)
+    {
+        os << "rank: " << dio->getRank();
+        return os;
+    }
+}}
+
 // Destination Advertisement Object [RFC 6550, 6.4] 
 class Dao extends RplPacket {
     uint8_t seqNum;				// ID for each unique DAO sent by a node

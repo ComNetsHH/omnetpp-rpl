@@ -65,6 +65,7 @@ Rpl::Rpl() :
     preferredParent(nullptr),
     objectiveFunctionType("hopCount"),
     dodagColor(cFigure::BLACK),
+    pUnreachabilityDetectionEnabled(false),
     floating(false),
     prefParentConnector(nullptr),
     numDaoDropped(0),
@@ -105,12 +106,14 @@ void Rpl::initialize(int stage)
         allowDodagSwitching = par("allowDodagSwitching").boolValue();
         pDaoAckEnabled = par("daoAckEnabled").boolValue();
         pUseWarmup = par("useWarmup").boolValue();
+        pUnreachabilityDetectionEnabled = par("unreachabilityDetectionEnabled").boolValue();
 
         // statistic signals
         dioReceivedSignal = registerSignal("dioReceived");
         daoReceivedSignal = registerSignal("daoReceived");
         parentUnreachableSignal = registerSignal("parentUnreachable");
         parentChangedSignal = registerSignal("parentChanged");
+        rankUpdatedSignal = registerSignal("rankUpdated");
 
         startDelay = par("startDelay").doubleValue();
 
@@ -118,6 +121,9 @@ void Rpl::initialize(int stage)
             generateLayout(host->getParentModule()); // generate layout using the topmost simulation module
 
         WATCH(numParentUpdates);
+        WATCH_MAP(candidateParents);
+        WATCH_MAP(backupParents);
+        WATCH(rank);
         WATCH(selfAddr);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
@@ -329,7 +335,7 @@ void Rpl::start()
     }
 
     selfId = interfaceTable->getInterface(1)->getMacAddress().getInt();
-    auto mobility = check_and_cast<StationaryMobility*> (getParentModule()->getSubmodule("mobility"));
+    auto mobility = check_and_cast<IMobility*> (getParentModule()->getSubmodule("mobility"));
     position = mobility->getCurrentPosition();
 
     udpApp = host->getSubmodule("app", 0); // TODO: handle more apps
@@ -435,7 +441,6 @@ void Rpl::detachFromDodag() {
      * with a DODAG and should suppress previous RPL state info by
      * clearing dodagId, neighbor sets and setting it's rank to INFINITE_RANK [RFC6560, 8.2.2.1]
      */
-    EV_DETAIL << "Candidate parent list empty, leaving DODAG" << endl;
     backupParents.erase(backupParents.begin(), backupParents.end());
     EV_DETAIL << "Backup parents list erased" << endl;
     /** Delete all routes associated with DAO destinations of the former DODAG */
@@ -903,17 +908,23 @@ void Rpl::updatePreferredParent()
     Dio *newPrefParent;
     EV_DETAIL << "Choosing preferred parent from "
             << boolStr(candidateParents.empty() && par("useBackupAsPreferred").boolValue(),
-                    "backup", "candidate") << " parent set" << endl;
+                    "backup", "candidate") << " parent set:" << endl;
     /**
-     * Choose parent from candidate neighbour set. If it's empty, leave DODAG.
+     * Choose parent from candidate neighbour set. If it's empty, leave the DODAG.
      */
     if (candidateParents.empty())
-        if (par("useBackupAsPreferred").boolValue())
+    {
+        EV_DETAIL << "Candidate parent list empty" << endl;
+        if (par("useBackupAsPreferred").boolValue()) {
+            EV_DETAIL << "Selecting preferred parent from backup parents:" << endl;
             newPrefParent = objectiveFunction->getPreferredParent(backupParents, preferredParent);
+        }
         else {
+            EV_DETAIL << "Leaving DODAG" << endl;
             detachFromDodag();
             return;
         }
+    }
     else
         newPrefParent = objectiveFunction->getPreferredParent(candidateParents, preferredParent);
 
@@ -966,8 +977,12 @@ void Rpl::updatePreferredParent()
     preferredParent = newPrefParent->dup();
 
     /** Recalculate rank based on the objective function */
-    rank = objectiveFunction->calcRank(preferredParent);
-    EV_DETAIL << "Rank - " << rank << endl;
+    auto newRank = objectiveFunction->calcRank(preferredParent);
+    if (newRank != rank) {
+        rank = newRank;
+        EV_DETAIL << "Updated rank - " << rank << endl;
+        emit(rankUpdatedSignal, (long) rank);
+    }
 }
 
 bool Rpl::checkPrefParentChanged(const Ipv6Address &newPrefParentAddr)
@@ -1399,7 +1414,7 @@ void Rpl::deletePrefParent(bool poisoned)
 
     auto prefParentAddr = preferredParent->getSrcAddress();
     EV_DETAIL << "Preferred parent " << prefParentAddr
-            << boolStr(poisoned, " detachment", " unreachability") << "detected" << endl;
+            << boolStr(poisoned, " detachment from DODAG", " unreachability") << " detected" << endl;
     emit(parentUnreachableSignal, preferredParent);
     clearParentRoutes();
     candidateParents.erase(prefParentAddr);
@@ -1574,8 +1589,9 @@ void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
         const auto& networkHeader = findNetworkProtocolHeader(datagram);
         if (networkHeader != nullptr) {
             const Ipv6Address& destination = networkHeader->getDestinationAddress().toIpv6();
-            EV_DETAIL << "Connection with destination " << destination << " broken?" << endl;
-
+            auto nextHop = routingTable->getNextHopForDestination(destination);
+            EV_DETAIL << "Connection with destination " << destination << " reachable via "
+                    << nextHop << " broken?" << endl;
             /**
              * If preferred parent unreachability detected, remove route with it as a
              * next hop from the routing table and select new preferred parent from the
@@ -1584,11 +1600,13 @@ void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
              * If candidate parent set is empty, leave current DODAG
              * (becoming either floating DODAG or poison child routes altogether)
              */
-            if (preferredParent && destination == preferredParent->getSrcAddress()
-                    && par("unreachabilityDetectionEnabled").boolValue())
+            if (preferredParent && nextHop == preferredParent->getSrcAddress()
+                    && pUnreachabilityDetectionEnabled)
             {
                 deletePrefParent();
+                // TODO: Redirect all packets already enqueued for previous pref. parent to the new one
                 updatePreferredParent();
+                pUnreachabilityDetectionEnabled = false; // FIXME: remove this after calibrating lossy scenario
             }
         }
     }
