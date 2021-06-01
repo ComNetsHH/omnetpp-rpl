@@ -55,6 +55,7 @@ enum RPL_SELF_MSG {
     RPL_START
 };
 
+/** Purely for cross-layer SF */
 struct SlotframeChunk
 {
     uint16_t end;

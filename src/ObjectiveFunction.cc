@@ -42,30 +42,33 @@ ObjectiveFunction::~ObjectiveFunction() {
 
 }
 
-Dio* ObjectiveFunction::getPreferredParent(std::map<Ipv6Address, Dio *> candidateParents, Dio* currentPreferredParent) {
-    // determine parent with lowest rank
+Dio* ObjectiveFunction::getPreferredParent(std::map<Ipv6Address, Dio *> candidateParents, Dio* currentPreferredParent)
+{
     if (candidateParents.empty()) {
         EV_WARN << "Couldn't determine preferred parent, provided set is empty" << endl;
         return nullptr;
     }
 
+    EV_DETAIL << "Address - Rank" << endl;
     for (auto cp : candidateParents)
-        EV_DETAIL << cp.first << " - " << cp.second << endl;
+        EV_DETAIL << cp.first << " - " << cp.second->getRank() << endl;
 
+    // Select the first entry as initial preferred parent
     Dio *newPrefParent = candidateParents.begin()->second;
     uint16_t currentMinRank = newPrefParent->getRank();
+    // Iterate through candidate parent set and select the one with lowest rank
     for (std::pair<Ipv6Address, Dio *> candidate : candidateParents) {
         uint16_t candidateParentRank = candidate.second->getRank();
         if (candidateParentRank < currentMinRank) {
             currentMinRank = candidateParentRank;
             newPrefParent = candidate.second;
-//            break;
         }
     }
 
     if (!currentPreferredParent)
         return newPrefParent;
 
+    // Only update the parent if the rank improvement is worth it
     if (currentPreferredParent->getRank() - newPrefParent->getRank() >= minHopRankIncrease)
         return newPrefParent;
     else
