@@ -103,6 +103,19 @@ inline std::ostream& operator<<(std::ostream& os, std::vector<int> const& vec)
    return os;
 }
 
+class RplGenericControlInfo : cObject {
+    private:
+        uint64_t nodeId;
+
+    public:
+        RplGenericControlInfo() {}
+        RplGenericControlInfo(uint64_t nodeId) { this->nodeId = nodeId; }
+
+        uint64_t getNodeId() { return this->nodeId; }
+        void setNodeId(uint64_t nodeId) { this->nodeId = nodeId; }
+};
+
+
 } // namespace inet
 
 #endif

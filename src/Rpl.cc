@@ -125,6 +125,7 @@ void Rpl::initialize(int stage)
         WATCH_MAP(backupParents);
         WATCH(rank);
         WATCH(selfAddr);
+        WATCH(selfId);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
@@ -660,6 +661,9 @@ void Rpl::sendRplPacket(const Ptr<RplPacket> &body, RplPacketCode code,
 
 const Ptr<Dio> Rpl::createDio()
 {
+    auto ourMacAddr = interfaceTable->getInterface(1)->getMacAddress();
+    selfId = interfaceTable->getInterface(1)->getMacAddress().getInt();
+    EV_DETAIL << "Our MAC address - " << ourMacAddr << ", toInt() = " << selfId << endl;
     auto dio = makeShared<Dio>();
     dio->setInstanceId(instanceId);
     dio->setChunkLength(getDioSize());
@@ -943,7 +947,8 @@ void Rpl::updatePreferredParent()
             udpApp->par("destAddresses") = newPrefParentDodagId.str();
 
         /** Notify 6TiSCH Scheduling Function about parent change */
-        emit(parentChangedSignal, (long) newPrefParent->getNodeId());
+        auto rplCtrlInfo = new RplGenericControlInfo(newPrefParent->getNodeId());
+        emit(parentChangedSignal, 0, (cObject*) rplCtrlInfo);
 
         daoSeqNum = 0;
         clearParentRoutes();
