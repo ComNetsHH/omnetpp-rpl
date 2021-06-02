@@ -81,6 +81,7 @@ module Rpl like IManetRouting
         int numSkipTrickleIntervalUpdates = default(0);
 		int connectorColorId = default(0); // index of the connector line color from the color palette vector
 		bool drawConnectors = default(true);
+		bool showBackupParents = default(false);
 
     gates:
         input ipIn;

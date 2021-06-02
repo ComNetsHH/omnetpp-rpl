@@ -99,7 +99,7 @@ class Dio extends RplPacket {
 cplusplus (Dio) {{
     friend std::ostream& operator<<(std::ostream& os, Dio* dio)
     {
-        os << "rank: " << dio->getRank();
+        os << "rank: " << (int) dio->getRank();
         return os;
     }
 }}

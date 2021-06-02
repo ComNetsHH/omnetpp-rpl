@@ -35,6 +35,8 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 
+using namespace std;
+
 namespace inet {
 
 class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::HookBase
@@ -71,6 +73,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     bool hasStarted;
     bool allowDodagSwitching;
     bool pUnreachabilityDetectionEnabled;
+    bool pShowBackupParents;
     uint16_t rank;
     uint8_t dtsn;
     uint32_t branchChOffset;
@@ -516,10 +519,24 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     int getNumDownlinks();
 
     /** Misc */
-    void drawConnector(Coord target, cFigure::Color col);
+    void drawConnector(Coord target, cFigure::Color col, Ipv6Address backupParent) const;
+    void drawConnector(Coord target, cFigure::Color col) const
+    {
+        drawConnector(target, col, Ipv6Address::UNSPECIFIED_ADDRESS);
+    }
+
+    void setLineProperties(cLineFigure *connector, Coord target, cFigure::Color col, bool dashed) const;
+    void setLineProperties(cLineFigure *connector, Coord target, cFigure::Color col) const
+    {
+        setLineProperties(connector, target, col, false);
+    }
+
     static int getNodeId(std::string nodeName);
 
-    cLineFigure *prefParentConnector;
+    mutable cLineFigure *prefParentConnector;
+
+    // map of pointers to the dashed connector line between a node and its backup parents
+    mutable map<Ipv6Address, cLineFigure*> backupConnectors;
 
     double startDelay;
 

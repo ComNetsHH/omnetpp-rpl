@@ -107,6 +107,7 @@ void Rpl::initialize(int stage)
         pDaoAckEnabled = par("daoAckEnabled").boolValue();
         pUseWarmup = par("useWarmup").boolValue();
         pUnreachabilityDetectionEnabled = par("unreachabilityDetectionEnabled").boolValue();
+        pShowBackupParents = par("showBackupParents").boolValue();
 
         // statistic signals
         dioReceivedSignal = registerSignal("dioReceived");
@@ -363,6 +364,10 @@ void Rpl::refreshDisplay() const {
         host->getDisplayString().setTagArg("t", 0, std::string(" num rcvd: " + std::to_string(udpPacketsRecv)).c_str());
         host->getDisplayString().setTagArg("t", 1, "l"); // set display text position to 'left'
     }
+    // Draw dashed lines to visualize backup parents
+//    if (pShowBackupParents)
+//        for (auto bp : backupParents)
+//            drawConnector(bp.second->getPosition(), bp.second->getColor(), bp.first);
 }
 
 void Rpl::stop()
@@ -442,7 +447,16 @@ void Rpl::detachFromDodag() {
      * with a DODAG and should suppress previous RPL state info by
      * clearing dodagId, neighbor sets and setting it's rank to INFINITE_RANK [RFC6560, 8.2.2.1]
      */
+
+    // First clear any drawn connector lines
+    cCanvas *canvas = getParentModule()->getParentModule()->getCanvas();
+    for (auto entry : backupConnectors)
+        canvas->removeFigure(entry.second);
+
+    backupConnectors.erase(backupConnectors.begin(), backupConnectors.end());
+
     backupParents.erase(backupParents.begin(), backupParents.end());
+
     EV_DETAIL << "Backup parents list erased" << endl;
     /** Delete all routes associated with DAO destinations of the former DODAG */
     purgeDaoRoutes();
@@ -555,6 +569,7 @@ void Rpl::processPacket(Packet *packet)
     // in non-storing mode check for RPL Target, Transit Information options
     if (!storing && dodagId != Ipv6Address::UNSPECIFIED_ADDRESS)
         extractSourceRoutingData(packet);
+
     auto rplBody = packet->peekData<RplPacket>();
     switch (rplHeader->getIcmpv6Code()) {
         case DIO: {
@@ -730,7 +745,8 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
 {
     if (isRoot)
         return;
-    EV_DETAIL << "Processing DIO from " << dio->getSrcAddress() << endl;
+    EV_DETAIL << "Processing DIO from " << dio->getSrcAddress()
+            << ", advertised rank - " << dio->getRank() << endl;
     emit(dioReceivedSignal, dio->dup());
 
     // If node's not a part of any DODAG, join the first one advertised
@@ -884,26 +900,52 @@ void Rpl::processDaoAck(const Ptr<const Dao>& daoAck) {
 
 }
 
-void Rpl::drawConnector(Coord target, cFigure::Color col) {
+
+void Rpl::setLineProperties(cLineFigure *connector, Coord target, cFigure::Color col, bool dashed) const
+{
+    EV_DETAIL << "Setting line propeties, X = "  << target.x << ", Y = " << target.y << endl;
+    EV_DETAIL << "our coords X = "  << position.x << ", Y = " << position.y << endl;
+    connector->setStart(cFigure::Point(position.x, position.y));
+    connector->setEnd(cFigure::Point(target.x, target.y));
+    connector->setLineWidth(2);
+    connector->setLineColor(col);
+    connector->setLineOpacity(dashed ? 0.5 : 1);
+    if (dashed)
+        connector->setLineStyle(cFigure::LineStyle::LINE_DASHED);
+    connector->setEndArrowhead(cFigure::ARROW_BARBED);
+    connector->setVisible(true);
+}
+
+
+void Rpl::drawConnector(Coord target, cFigure::Color col, Ipv6Address backupParent) const {
     // (0, 0) corresponds to default Coord constructor, meaning no target position was provided
     if ((!target.x && !target.y) || !par("drawConnectors").boolValue())
         return;
 
     cCanvas *canvas = getParentModule()->getParentModule()->getCanvas();
+
+    // If a valid pointer to backup parent address is provided
+    // And there's no line drawn to it, create a new one
+    if (backupParent != Ipv6Address::UNSPECIFIED_ADDRESS) {
+        if (backupConnectors.find(backupParent) == backupConnectors.end()) {
+            backupConnectors[backupParent] = new cLineFigure("backupParentConnector");
+            setLineProperties(backupConnectors[backupParent], target, col, true);
+            canvas->addFigure(backupConnectors[backupParent]);
+        }
+        return;
+    }
+
+
+    // If an arrow to preferred parent is already present, we only need to update its properties
     if (prefParentConnector) {
         prefParentConnector->setLineColor(col);
         prefParentConnector->setEnd(cFigure::Point(target.x, target.y));
         return;
     }
 
+    // Otherwise create a new line and add it to canvas
     prefParentConnector = new cLineFigure("preferredParentConnector");
-    prefParentConnector->setStart(cFigure::Point(position.x, position.y));
-    prefParentConnector->setEnd(cFigure::Point(target.x, target.y));
-    prefParentConnector->setLineWidth(2);
-    prefParentConnector->setLineColor(col);
-    prefParentConnector->setLineOpacity(0.6);
-    prefParentConnector->setEndArrowhead(cFigure::ARROW_BARBED);
-    prefParentConnector->setVisible(true);
+    setLineProperties(prefParentConnector, target, col);
     canvas->addFigure(prefParentConnector);
 }
 
@@ -986,6 +1028,27 @@ void Rpl::updatePreferredParent()
     if (newRank != rank) {
         rank = newRank;
         EV_DETAIL << "Updated rank - " << rank << endl;
+
+        // TODO: refactor into separate function
+        cCanvas *canvas = getParentModule()->getParentModule()->getCanvas();
+
+        vector<Ipv6Address> parentsToDelete;
+
+        for (auto bp : backupParents) {
+            if (bp.second->getRank() > rank) {
+                auto bkConnector = backupConnectors.find(bp.second->getSrcAddress());
+
+                if (bkConnector != backupConnectors.end()) {
+                    canvas->removeFigure((*bkConnector).second);
+                    backupConnectors.erase(bkConnector);
+                }
+                parentsToDelete.push_back(bp.second->getSrcAddress());
+            }
+        }
+
+        for (auto addr: parentsToDelete)
+            backupParents.erase(backupParents.find(addr));
+
         emit(rankUpdatedSignal, (long) rank);
     }
 }
@@ -1553,18 +1616,31 @@ void Rpl::addNeighbour(const Ptr<const Dio>& dio)
     /** If DIO sender has equal rank, consider this node as a backup parent */
     if (dio->getRank() == rank) {
         if (backupParents.find(dioSender) != backupParents.end())
-            EV_DETAIL << "Backup parent entry updated - " << dioSender << endl;
+            EV_DETAIL << "Backup parent entry updated - " << dioSender;
         else
-            EV_DETAIL << "New backup parent added - " << dioSender << endl;
+            EV_DETAIL << "New backup parent added - " << dioSender;
         backupParents[dioSender] = dioCopy;
     }
     /** If DIO sender has lower rank, consider this node as a candidate parent */
     if (dio->getRank() < rank) {
         if (candidateParents.find(dioSender) != candidateParents.end())
-            EV_DETAIL << "Candidate parent entry updated - " << dioSender << endl;
+            EV_DETAIL << "Candidate parent entry updated - " << dioSender;
         else
-            EV_DETAIL << "New candidate parent added - " << dioSender << endl;
+            EV_DETAIL << "New candidate parent added - " << dioSender;
         candidateParents[dioSender] = dioCopy;
+    }
+    EV_DETAIL << " (rank " << dio->getRank() << ")" << endl;
+
+    // Draw dashed connector line to candidate or backup parents
+    cCanvas *canvas = getParentModule()->getParentModule()->getCanvas();
+    EV_DETAIL << "Canvas - " << canvas << endl;
+    if (backupConnectors.find(dioSender) == backupConnectors.end()) {
+        EV_DETAIL << "No connector yet found for this neighbor" << endl;
+        auto connector = new cLineFigure("backupParentConnector");
+        setLineProperties(connector, dio->getPosition(), dio->getColor(), true);
+        canvas->addFigure(connector);
+        EV_DETAIL << "Connector added - " << connector << endl;
+        backupConnectors[dioSender] = connector;
     }
 }
 
