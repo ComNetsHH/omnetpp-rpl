@@ -678,7 +678,6 @@ const Ptr<Dio> Rpl::createDio()
 {
     auto ourMacAddr = interfaceTable->getInterface(1)->getMacAddress();
     selfId = interfaceTable->getInterface(1)->getMacAddress().getInt();
-    EV_DETAIL << "Our MAC address - " << ourMacAddr << ", toInt() = " << selfId << endl;
     auto dio = makeShared<Dio>();
     dio->setInstanceId(instanceId);
     dio->setChunkLength(getDioSize());
@@ -985,13 +984,14 @@ void Rpl::updatePreferredParent()
 
         /** Silently join new DODAG and update dest address for application, TODO: Check with RFC */
         dodagId = newPrefParentDodagId;
+        // TODO: Adapt to multiple apps
         if (udpApp && !isUdpSink() && udpApp->par("destAddresses").str().empty())
             udpApp->par("destAddresses") = newPrefParentDodagId.str();
 
         /** Notify 6TiSCH Scheduling Function about parent change */
         auto rplCtrlInfo = new RplGenericControlInfo(newPrefParent->getNodeId());
+        EV_DETAIL << "Emitting signal with my new parent's MAC addr - " << MacAddress(newPrefParent->getNodeId()) << endl;
         emit(parentChangedSignal, 0, (cObject*) rplCtrlInfo);
-
         daoSeqNum = 0;
         clearParentRoutes();
         drawConnector(newPrefParent->getPosition(), newPrefParent->getColor());
@@ -1630,6 +1630,9 @@ void Rpl::addNeighbour(const Ptr<const Dio>& dio)
         candidateParents[dioSender] = dioCopy;
     }
     EV_DETAIL << " (rank " << dio->getRank() << ")" << endl;
+
+    if (!pShowBackupParents)
+        return;
 
     // Draw dashed connector line to candidate or backup parents
     cCanvas *canvas = getParentModule()->getParentModule()->getCanvas();
