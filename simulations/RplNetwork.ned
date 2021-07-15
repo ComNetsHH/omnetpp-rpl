@@ -14,6 +14,7 @@ network RplNetwork
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             @display("p=550,50");
+            networkRouteVisualizer.displayRoutes = true;
         }
         radioMedium: UnitDiskRadioMedium {
             @display("p=550,250;is=s");
