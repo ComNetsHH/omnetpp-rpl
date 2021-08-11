@@ -53,6 +53,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     TrickleTimer *trickleTimer;
     cModule *host;
     cModule *udpApp;
+    vector<cModule*> apps;
 
     /** RPL configuration parameters and state management */
     uint8_t dodagVersion;
@@ -136,6 +137,8 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
 
     int numParentUpdates;
     int numDaoForwarded;
+
+    virtual void finish() override;
 
   protected:
     /** module interface */

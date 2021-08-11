@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <regex>
 #include <math.h>
-
+//#include "../../tsch-master/src/common/VirtualLinkTag_m.h"
 #include "Rpl.h"
 
 namespace inet {
@@ -72,7 +72,8 @@ Rpl::Rpl() :
     udpPacketsRecv(0),
     isLeaf(false),
     numParentUpdates(0),
-    numDaoForwarded(0)
+    numDaoForwarded(0),
+    apps({})
 {}
 
 Rpl::~Rpl()
@@ -134,6 +135,10 @@ void Rpl::initialize(int stage)
         host->subscribe(linkBrokenSignal, this);
         networkProtocol->registerHook(0, this);
     }
+}
+
+void Rpl::finish() {
+    recordScalar("rank", rank);
 }
 
 void Rpl::generateLayout(cModule *net) {
@@ -271,7 +276,12 @@ int Rpl::getNodeId(std::string nodeName) {
 cFigure::Color Rpl::pickRandomColor() {
     auto palette = selfId % 2 == 0 ? cFigure::GOOD_DARK_COLORS : cFigure::GOOD_LIGHT_COLORS;
     auto numColors = selfId % 2 == 0 ? cFigure::NUM_GOOD_DARK_COLORS : cFigure::NUM_GOOD_LIGHT_COLORS;
-    return host->getParentModule()->par("numSinks").intValue() == 1 ?  cFigure::BLACK : palette[intrand(numColors, 0) - 1];
+
+    try {
+        return host->getParentModule()->par("numSinks").intValue() == 1 ? cFigure::BLACK : palette[intrand(numColors, 0) - 1];
+    } catch (...) {
+        return cFigure::BLACK;
+    }
 }
 
 cModule* Rpl::findSubmodule(std::string sname, cModule *host) {
@@ -340,7 +350,13 @@ void Rpl::start()
     auto mobility = check_and_cast<IMobility*> (getParentModule()->getSubmodule("mobility"));
     position = mobility->getCurrentPosition();
 
-    udpApp = host->getSubmodule("app", 0); // TODO: handle more apps
+    auto numApps = host->par("numApps").intValue();
+    EV_DETAIL << "Detected " << numApps << " apps" << endl;
+
+    for (auto i = 0; i < numApps; i++)
+        apps.push_back(host->getSubmodule("app", i));
+
+//    udpApp = host->getSubmodule("app", 0); // TODO: handle more apps
 
     rank = INF_RANK - 1;
     detachedTimeoutEvent = new cMessage("", DETACHED_TIMEOUT);
@@ -354,8 +370,8 @@ void Rpl::start()
         instanceId = RPL_DEFAULT_INSTANCE;
         dtsn = 0;
         storing = par("storing").boolValue();
-        if (udpApp)
-            udpApp->subscribe("packetReceived", this);
+        for (auto app : apps)
+            app->subscribe("packetReceived", this);
     }
 }
 
@@ -766,8 +782,9 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
             trickleTimer->reset();
         else
             trickleTimer->start(false, par("numSkipTrickleIntervalUpdates").intValue());
-        if (udpApp && !isUdpSink() && udpApp->par("destAddresses").str().empty())
-            udpApp->par("destAddresses") = dio->getDodagId().str();
+
+        for (auto app : apps)
+            app->par("destAddresses") = dio->getDodagId().str();
     }
     else {
         if (!allowDodagSwitching && dio->getDodagId() != dodagId) {
@@ -985,8 +1002,12 @@ void Rpl::updatePreferredParent()
         /** Silently join new DODAG and update dest address for application, TODO: Check with RFC */
         dodagId = newPrefParentDodagId;
         // TODO: Adapt to multiple apps
-        if (udpApp && !isUdpSink() && udpApp->par("destAddresses").str().empty())
-            udpApp->par("destAddresses") = newPrefParentDodagId.str();
+
+        for (auto app : apps)
+            app->par("destAddresses") = newPrefParentDodagId.str();
+
+//        if (udpApp && !isUdpSink() && udpApp->par("destAddresses").str().empty())
+//            udpApp->par("destAddresses") = newPrefParentDodagId.str();
 
         /** Notify 6TiSCH Scheduling Function about parent change */
         auto rplCtrlInfo = new RplGenericControlInfo(newPrefParent->getNodeId());
@@ -1302,9 +1323,6 @@ INetfilter::IHook::Result Rpl::checkRplHeaders(Packet *datagram) {
                 return ACCEPT;
             }
         }
-
-        // check for loops
-//        return checkRplRouteInfo(datagram) ? ACCEPT : DROP;
     }
 
     return ACCEPT;
