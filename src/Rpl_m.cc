@@ -207,6 +207,440 @@ inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
     return out;
 }
 
+class SlotframeChunkDescriptor : public omnetpp::cClassDescriptor
+{
+  private:
+    mutable const char **propertynames;
+    enum FieldConstants {
+    };
+  public:
+    SlotframeChunkDescriptor();
+    virtual ~SlotframeChunkDescriptor();
+
+    virtual bool doesSupport(omnetpp::cObject *obj) const override;
+    virtual const char **getPropertyNames() const override;
+    virtual const char *getProperty(const char *propertyname) const override;
+    virtual int getFieldCount() const override;
+    virtual const char *getFieldName(int field) const override;
+    virtual int findField(const char *fieldName) const override;
+    virtual unsigned int getFieldTypeFlags(int field) const override;
+    virtual const char *getFieldTypeString(int field) const override;
+    virtual const char **getFieldPropertyNames(int field) const override;
+    virtual const char *getFieldProperty(int field, const char *propertyname) const override;
+    virtual int getFieldArraySize(void *object, int field) const override;
+
+    virtual const char *getFieldDynamicTypeString(void *object, int field, int i) const override;
+    virtual std::string getFieldValueAsString(void *object, int field, int i) const override;
+    virtual bool setFieldValueAsString(void *object, int field, int i, const char *value) const override;
+
+    virtual const char *getFieldStructName(int field) const override;
+    virtual void *getFieldStructValuePointer(void *object, int field, int i) const override;
+};
+
+Register_ClassDescriptor(SlotframeChunkDescriptor)
+
+SlotframeChunkDescriptor::SlotframeChunkDescriptor() : omnetpp::cClassDescriptor(omnetpp::opp_typename(typeid(inet::SlotframeChunk)), "")
+{
+    propertynames = nullptr;
+}
+
+SlotframeChunkDescriptor::~SlotframeChunkDescriptor()
+{
+    delete[] propertynames;
+}
+
+bool SlotframeChunkDescriptor::doesSupport(omnetpp::cObject *obj) const
+{
+    return dynamic_cast<SlotframeChunk *>(obj)!=nullptr;
+}
+
+const char **SlotframeChunkDescriptor::getPropertyNames() const
+{
+    if (!propertynames) {
+        static const char *names[] = { "existingClass",  nullptr };
+        omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+        const char **basenames = basedesc ? basedesc->getPropertyNames() : nullptr;
+        propertynames = mergeLists(basenames, names);
+    }
+    return propertynames;
+}
+
+const char *SlotframeChunkDescriptor::getProperty(const char *propertyname) const
+{
+    if (!strcmp(propertyname, "existingClass")) return "";
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? basedesc->getProperty(propertyname) : nullptr;
+}
+
+int SlotframeChunkDescriptor::getFieldCount() const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? 0+basedesc->getFieldCount() : 0;
+}
+
+unsigned int SlotframeChunkDescriptor::getFieldTypeFlags(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldTypeFlags(field);
+        field -= basedesc->getFieldCount();
+    }
+    return 0;
+}
+
+const char *SlotframeChunkDescriptor::getFieldName(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldName(field);
+        field -= basedesc->getFieldCount();
+    }
+    return nullptr;
+}
+
+int SlotframeChunkDescriptor::findField(const char *fieldName) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? basedesc->findField(fieldName) : -1;
+}
+
+const char *SlotframeChunkDescriptor::getFieldTypeString(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldTypeString(field);
+        field -= basedesc->getFieldCount();
+    }
+    return nullptr;
+}
+
+const char **SlotframeChunkDescriptor::getFieldPropertyNames(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldPropertyNames(field);
+        field -= basedesc->getFieldCount();
+    }
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+const char *SlotframeChunkDescriptor::getFieldProperty(int field, const char *propertyname) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldProperty(field, propertyname);
+        field -= basedesc->getFieldCount();
+    }
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+int SlotframeChunkDescriptor::getFieldArraySize(void *object, int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldArraySize(object, field);
+        field -= basedesc->getFieldCount();
+    }
+    SlotframeChunk *pp = (SlotframeChunk *)object; (void)pp;
+    switch (field) {
+        default: return 0;
+    }
+}
+
+const char *SlotframeChunkDescriptor::getFieldDynamicTypeString(void *object, int field, int i) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldDynamicTypeString(object,field,i);
+        field -= basedesc->getFieldCount();
+    }
+    SlotframeChunk *pp = (SlotframeChunk *)object; (void)pp;
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+std::string SlotframeChunkDescriptor::getFieldValueAsString(void *object, int field, int i) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldValueAsString(object,field,i);
+        field -= basedesc->getFieldCount();
+    }
+    SlotframeChunk *pp = (SlotframeChunk *)object; (void)pp;
+    switch (field) {
+        default: return "";
+    }
+}
+
+bool SlotframeChunkDescriptor::setFieldValueAsString(void *object, int field, int i, const char *value) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->setFieldValueAsString(object,field,i,value);
+        field -= basedesc->getFieldCount();
+    }
+    SlotframeChunk *pp = (SlotframeChunk *)object; (void)pp;
+    switch (field) {
+        default: return false;
+    }
+}
+
+const char *SlotframeChunkDescriptor::getFieldStructName(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldStructName(field);
+        field -= basedesc->getFieldCount();
+    }
+    return nullptr;
+}
+
+void *SlotframeChunkDescriptor::getFieldStructValuePointer(void *object, int field, int i) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldStructValuePointer(object, field, i);
+        field -= basedesc->getFieldCount();
+    }
+    SlotframeChunk *pp = (SlotframeChunk *)object; (void)pp;
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+class SlotframeChunkListDescriptor : public omnetpp::cClassDescriptor
+{
+  private:
+    mutable const char **propertynames;
+    enum FieldConstants {
+    };
+  public:
+    SlotframeChunkListDescriptor();
+    virtual ~SlotframeChunkListDescriptor();
+
+    virtual bool doesSupport(omnetpp::cObject *obj) const override;
+    virtual const char **getPropertyNames() const override;
+    virtual const char *getProperty(const char *propertyname) const override;
+    virtual int getFieldCount() const override;
+    virtual const char *getFieldName(int field) const override;
+    virtual int findField(const char *fieldName) const override;
+    virtual unsigned int getFieldTypeFlags(int field) const override;
+    virtual const char *getFieldTypeString(int field) const override;
+    virtual const char **getFieldPropertyNames(int field) const override;
+    virtual const char *getFieldProperty(int field, const char *propertyname) const override;
+    virtual int getFieldArraySize(void *object, int field) const override;
+
+    virtual const char *getFieldDynamicTypeString(void *object, int field, int i) const override;
+    virtual std::string getFieldValueAsString(void *object, int field, int i) const override;
+    virtual bool setFieldValueAsString(void *object, int field, int i, const char *value) const override;
+
+    virtual const char *getFieldStructName(int field) const override;
+    virtual void *getFieldStructValuePointer(void *object, int field, int i) const override;
+};
+
+Register_ClassDescriptor(SlotframeChunkListDescriptor)
+
+SlotframeChunkListDescriptor::SlotframeChunkListDescriptor() : omnetpp::cClassDescriptor(omnetpp::opp_typename(typeid(inet::SlotframeChunkList)), "")
+{
+    propertynames = nullptr;
+}
+
+SlotframeChunkListDescriptor::~SlotframeChunkListDescriptor()
+{
+    delete[] propertynames;
+}
+
+bool SlotframeChunkListDescriptor::doesSupport(omnetpp::cObject *obj) const
+{
+    return dynamic_cast<SlotframeChunkList *>(obj)!=nullptr;
+}
+
+const char **SlotframeChunkListDescriptor::getPropertyNames() const
+{
+    if (!propertynames) {
+        static const char *names[] = { "existingClass",  nullptr };
+        omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+        const char **basenames = basedesc ? basedesc->getPropertyNames() : nullptr;
+        propertynames = mergeLists(basenames, names);
+    }
+    return propertynames;
+}
+
+const char *SlotframeChunkListDescriptor::getProperty(const char *propertyname) const
+{
+    if (!strcmp(propertyname, "existingClass")) return "";
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? basedesc->getProperty(propertyname) : nullptr;
+}
+
+int SlotframeChunkListDescriptor::getFieldCount() const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? 0+basedesc->getFieldCount() : 0;
+}
+
+unsigned int SlotframeChunkListDescriptor::getFieldTypeFlags(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldTypeFlags(field);
+        field -= basedesc->getFieldCount();
+    }
+    return 0;
+}
+
+const char *SlotframeChunkListDescriptor::getFieldName(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldName(field);
+        field -= basedesc->getFieldCount();
+    }
+    return nullptr;
+}
+
+int SlotframeChunkListDescriptor::findField(const char *fieldName) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? basedesc->findField(fieldName) : -1;
+}
+
+const char *SlotframeChunkListDescriptor::getFieldTypeString(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldTypeString(field);
+        field -= basedesc->getFieldCount();
+    }
+    return nullptr;
+}
+
+const char **SlotframeChunkListDescriptor::getFieldPropertyNames(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldPropertyNames(field);
+        field -= basedesc->getFieldCount();
+    }
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+const char *SlotframeChunkListDescriptor::getFieldProperty(int field, const char *propertyname) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldProperty(field, propertyname);
+        field -= basedesc->getFieldCount();
+    }
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+int SlotframeChunkListDescriptor::getFieldArraySize(void *object, int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldArraySize(object, field);
+        field -= basedesc->getFieldCount();
+    }
+    SlotframeChunkList *pp = (SlotframeChunkList *)object; (void)pp;
+    switch (field) {
+        default: return 0;
+    }
+}
+
+const char *SlotframeChunkListDescriptor::getFieldDynamicTypeString(void *object, int field, int i) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldDynamicTypeString(object,field,i);
+        field -= basedesc->getFieldCount();
+    }
+    SlotframeChunkList *pp = (SlotframeChunkList *)object; (void)pp;
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
+std::string SlotframeChunkListDescriptor::getFieldValueAsString(void *object, int field, int i) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldValueAsString(object,field,i);
+        field -= basedesc->getFieldCount();
+    }
+    SlotframeChunkList *pp = (SlotframeChunkList *)object; (void)pp;
+    switch (field) {
+        default: return "";
+    }
+}
+
+bool SlotframeChunkListDescriptor::setFieldValueAsString(void *object, int field, int i, const char *value) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->setFieldValueAsString(object,field,i,value);
+        field -= basedesc->getFieldCount();
+    }
+    SlotframeChunkList *pp = (SlotframeChunkList *)object; (void)pp;
+    switch (field) {
+        default: return false;
+    }
+}
+
+const char *SlotframeChunkListDescriptor::getFieldStructName(int field) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldStructName(field);
+        field -= basedesc->getFieldCount();
+    }
+    return nullptr;
+}
+
+void *SlotframeChunkListDescriptor::getFieldStructValuePointer(void *object, int field, int i) const
+{
+    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount())
+            return basedesc->getFieldStructValuePointer(object, field, i);
+        field -= basedesc->getFieldCount();
+    }
+    SlotframeChunkList *pp = (SlotframeChunkList *)object; (void)pp;
+    switch (field) {
+        default: return nullptr;
+    }
+}
+
 class CoordDescriptor : public omnetpp::cClassDescriptor
 {
   private:
@@ -658,7 +1092,6 @@ EXECUTE_ON_STARTUP(
     e->insert(DAO_ACK, "DAO_ACK");
     e->insert(PING, "PING");
     e->insert(PING_ACK, "PING_ACK");
-    e->insert(CROSS_LAYER_CTRL, "CROSS_LAYER_CTRL");
 )
 
 Register_Class(RplHeader)
@@ -1361,7 +1794,6 @@ void Dio::copy(const Dio& other)
     this->storing = other.storing;
     this->grounded = other.grounded;
     this->dtsn = other.dtsn;
-    this->dioId = other.dioId;
     this->minInterval = other.minInterval;
     this->dioRedundancyConst = other.dioRedundancyConst;
     this->dioNumDoublings = other.dioNumDoublings;
@@ -1369,6 +1801,12 @@ void Dio::copy(const Dio& other)
     this->position = other.position;
     this->color = other.color;
     this->colorId = other.colorId;
+    this->slotframeChunks = other.slotframeChunks;
+    this->advSlotOffsets = other.advSlotOffsets;
+    this->slotframeLength = other.slotframeLength;
+    this->branchSize = other.branchSize;
+    this->advChOffset = other.advChOffset;
+    this->hasClInfo = other.hasClInfo;
 }
 
 void Dio::parsimPack(omnetpp::cCommBuffer *b) const
@@ -1379,7 +1817,6 @@ void Dio::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->storing);
     doParsimPacking(b,this->grounded);
     doParsimPacking(b,this->dtsn);
-    doParsimPacking(b,this->dioId);
     doParsimPacking(b,this->minInterval);
     doParsimPacking(b,this->dioRedundancyConst);
     doParsimPacking(b,this->dioNumDoublings);
@@ -1387,6 +1824,12 @@ void Dio::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->position);
     doParsimPacking(b,this->color);
     doParsimPacking(b,this->colorId);
+    doParsimPacking(b,this->slotframeChunks);
+    doParsimPacking(b,this->advSlotOffsets);
+    doParsimPacking(b,this->slotframeLength);
+    doParsimPacking(b,this->branchSize);
+    doParsimPacking(b,this->advChOffset);
+    doParsimPacking(b,this->hasClInfo);
 }
 
 void Dio::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -1397,7 +1840,6 @@ void Dio::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->storing);
     doParsimUnpacking(b,this->grounded);
     doParsimUnpacking(b,this->dtsn);
-    doParsimUnpacking(b,this->dioId);
     doParsimUnpacking(b,this->minInterval);
     doParsimUnpacking(b,this->dioRedundancyConst);
     doParsimUnpacking(b,this->dioNumDoublings);
@@ -1405,6 +1847,12 @@ void Dio::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->position);
     doParsimUnpacking(b,this->color);
     doParsimUnpacking(b,this->colorId);
+    doParsimUnpacking(b,this->slotframeChunks);
+    doParsimUnpacking(b,this->advSlotOffsets);
+    doParsimUnpacking(b,this->slotframeLength);
+    doParsimUnpacking(b,this->branchSize);
+    doParsimUnpacking(b,this->advChOffset);
+    doParsimUnpacking(b,this->hasClInfo);
 }
 
 uint8_t Dio::getDodagVersion() const
@@ -1460,17 +1908,6 @@ void Dio::setDtsn(uint8_t dtsn)
 {
     handleChange();
     this->dtsn = dtsn;
-}
-
-uint8_t Dio::getDioId() const
-{
-    return this->dioId;
-}
-
-void Dio::setDioId(uint8_t dioId)
-{
-    handleChange();
-    this->dioId = dioId;
 }
 
 int Dio::getMinInterval() const
@@ -1550,6 +1987,72 @@ void Dio::setColorId(int colorId)
     this->colorId = colorId;
 }
 
+const SlotframeChunkList& Dio::getSlotframeChunks() const
+{
+    return this->slotframeChunks;
+}
+
+void Dio::setSlotframeChunks(const SlotframeChunkList& slotframeChunks)
+{
+    handleChange();
+    this->slotframeChunks = slotframeChunks;
+}
+
+const SlotframeChunk& Dio::getAdvSlotOffsets() const
+{
+    return this->advSlotOffsets;
+}
+
+void Dio::setAdvSlotOffsets(const SlotframeChunk& advSlotOffsets)
+{
+    handleChange();
+    this->advSlotOffsets = advSlotOffsets;
+}
+
+uint16_t Dio::getSlotframeLength() const
+{
+    return this->slotframeLength;
+}
+
+void Dio::setSlotframeLength(uint16_t slotframeLength)
+{
+    handleChange();
+    this->slotframeLength = slotframeLength;
+}
+
+uint16_t Dio::getBranchSize() const
+{
+    return this->branchSize;
+}
+
+void Dio::setBranchSize(uint16_t branchSize)
+{
+    handleChange();
+    this->branchSize = branchSize;
+}
+
+int Dio::getAdvChOffset() const
+{
+    return this->advChOffset;
+}
+
+void Dio::setAdvChOffset(int advChOffset)
+{
+    handleChange();
+    this->advChOffset = advChOffset;
+}
+
+bool Dio::getHasClInfo() const
+{
+    return this->hasClInfo;
+}
+
+void Dio::setHasClInfo(bool hasClInfo)
+{
+    handleChange();
+    this->hasClInfo = hasClInfo;
+}
+
 class DioDescriptor : public omnetpp::cClassDescriptor
 {
   private:
@@ -1560,7 +2063,6 @@ class DioDescriptor : public omnetpp::cClassDescriptor
         FIELD_storing,
         FIELD_grounded,
         FIELD_dtsn,
-        FIELD_dioId,
         FIELD_minInterval,
         FIELD_dioRedundancyConst,
         FIELD_dioNumDoublings,
@@ -1568,6 +2070,12 @@ class DioDescriptor : public omnetpp::cClassDescriptor
         FIELD_position,
         FIELD_color,
         FIELD_colorId,
+        FIELD_slotframeChunks,
+        FIELD_advSlotOffsets,
+        FIELD_slotframeLength,
+        FIELD_branchSize,
+        FIELD_advChOffset,
+        FIELD_hasClInfo,
     };
   public:
     DioDescriptor();
@@ -1630,7 +2138,7 @@ const char *DioDescriptor::getProperty(const char *propertyname) const
 int DioDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 13+basedesc->getFieldCount() : 13;
+    return basedesc ? 18+basedesc->getFieldCount() : 18;
 }
 
 unsigned int DioDescriptor::getFieldTypeFlags(int field) const
@@ -1647,7 +2155,6 @@ unsigned int DioDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,    // FIELD_storing
         FD_ISEDITABLE,    // FIELD_grounded
         FD_ISEDITABLE,    // FIELD_dtsn
-        FD_ISEDITABLE,    // FIELD_dioId
         FD_ISEDITABLE,    // FIELD_minInterval
         FD_ISEDITABLE,    // FIELD_dioRedundancyConst
         FD_ISEDITABLE,    // FIELD_dioNumDoublings
@@ -1655,8 +2162,14 @@ unsigned int DioDescriptor::getFieldTypeFlags(int field) const
         FD_ISCOMPOUND,    // FIELD_position
         FD_ISCOMPOUND,    // FIELD_color
         FD_ISEDITABLE,    // FIELD_colorId
+        FD_ISCOMPOUND,    // FIELD_slotframeChunks
+        FD_ISCOMPOUND,    // FIELD_advSlotOffsets
+        FD_ISEDITABLE,    // FIELD_slotframeLength
+        FD_ISEDITABLE,    // FIELD_branchSize
+        FD_ISEDITABLE,    // FIELD_advChOffset
+        FD_ISEDITABLE,    // FIELD_hasClInfo
     };
-    return (field >= 0 && field < 13) ? fieldTypeFlags[field] : 0;
+    return (field >= 0 && field < 18) ? fieldTypeFlags[field] : 0;
 }
 
 const char *DioDescriptor::getFieldName(int field) const
@@ -1673,7 +2186,6 @@ const char *DioDescriptor::getFieldName(int field) const
         "storing",
         "grounded",
         "dtsn",
-        "dioId",
         "minInterval",
         "dioRedundancyConst",
         "dioNumDoublings",
@@ -1681,8 +2193,14 @@ const char *DioDescriptor::getFieldName(int field) const
         "position",
         "color",
         "colorId",
+        "slotframeChunks",
+        "advSlotOffsets",
+        "slotframeLength",
+        "branchSize",
+        "advChOffset",
+        "hasClInfo",
     };
-    return (field >= 0 && field < 13) ? fieldNames[field] : nullptr;
+    return (field >= 0 && field < 18) ? fieldNames[field] : nullptr;
 }
 
 int DioDescriptor::findField(const char *fieldName) const
@@ -1694,14 +2212,19 @@ int DioDescriptor::findField(const char *fieldName) const
     if (fieldName[0] == 's' && strcmp(fieldName, "storing") == 0) return base+2;
     if (fieldName[0] == 'g' && strcmp(fieldName, "grounded") == 0) return base+3;
     if (fieldName[0] == 'd' && strcmp(fieldName, "dtsn") == 0) return base+4;
-    if (fieldName[0] == 'd' && strcmp(fieldName, "dioId") == 0) return base+5;
-    if (fieldName[0] == 'm' && strcmp(fieldName, "minInterval") == 0) return base+6;
-    if (fieldName[0] == 'd' && strcmp(fieldName, "dioRedundancyConst") == 0) return base+7;
-    if (fieldName[0] == 'd' && strcmp(fieldName, "dioNumDoublings") == 0) return base+8;
-    if (fieldName[0] == 'o' && strcmp(fieldName, "ocp") == 0) return base+9;
-    if (fieldName[0] == 'p' && strcmp(fieldName, "position") == 0) return base+10;
-    if (fieldName[0] == 'c' && strcmp(fieldName, "color") == 0) return base+11;
-    if (fieldName[0] == 'c' && strcmp(fieldName, "colorId") == 0) return base+12;
+    if (fieldName[0] == 'm' && strcmp(fieldName, "minInterval") == 0) return base+5;
+    if (fieldName[0] == 'd' && strcmp(fieldName, "dioRedundancyConst") == 0) return base+6;
+    if (fieldName[0] == 'd' && strcmp(fieldName, "dioNumDoublings") == 0) return base+7;
+    if (fieldName[0] == 'o' && strcmp(fieldName, "ocp") == 0) return base+8;
+    if (fieldName[0] == 'p' && strcmp(fieldName, "position") == 0) return base+9;
+    if (fieldName[0] == 'c' && strcmp(fieldName, "color") == 0) return base+10;
+    if (fieldName[0] == 'c' && strcmp(fieldName, "colorId") == 0) return base+11;
+    if (fieldName[0] == 's' && strcmp(fieldName, "slotframeChunks") == 0) return base+12;
+    if (fieldName[0] == 'a' && strcmp(fieldName, "advSlotOffsets") == 0) return base+13;
+    if (fieldName[0] == 's' && strcmp(fieldName, "slotframeLength") == 0) return base+14;
+    if (fieldName[0] == 'b' && strcmp(fieldName, "branchSize") == 0) return base+15;
+    if (fieldName[0] == 'a' && strcmp(fieldName, "advChOffset") == 0) return base+16;
+    if (fieldName[0] == 'h' && strcmp(fieldName, "hasClInfo") == 0) return base+17;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -1719,7 +2242,6 @@ const char *DioDescriptor::getFieldTypeString(int field) const
         "bool",    // FIELD_storing
         "bool",    // FIELD_grounded
         "uint8_t",    // FIELD_dtsn
-        "uint8_t",    // FIELD_dioId
         "int",    // FIELD_minInterval
         "int",    // FIELD_dioRedundancyConst
         "int",    // FIELD_dioNumDoublings
@@ -1727,8 +2249,14 @@ const char *DioDescriptor::getFieldTypeString(int field) const
         "inet::Coord",    // FIELD_position
         "inet::cFigure::Color",    // FIELD_color
         "int",    // FIELD_colorId
+        "inet::SlotframeChunkList",    // FIELD_slotframeChunks
+        "inet::SlotframeChunk",    // FIELD_advSlotOffsets
+        "uint16_t",    // FIELD_slotframeLength
+        "uint16_t",    // FIELD_branchSize
+        "int",    // FIELD_advChOffset
+        "bool",    // FIELD_hasClInfo
     };
-    return (field >= 0 && field < 13) ? fieldTypeStrings[field] : nullptr;
+    return (field >= 0 && field < 18) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **DioDescriptor::getFieldPropertyNames(int field) const
@@ -1807,7 +2335,6 @@ std::string DioDescriptor::getFieldValueAsString(void *object, int field, int i)
         case FIELD_storing: return bool2string(pp->getStoring());
         case FIELD_grounded: return bool2string(pp->getGrounded());
         case FIELD_dtsn: return ulong2string(pp->getDtsn());
-        case FIELD_dioId: return ulong2string(pp->getDioId());
         case FIELD_minInterval: return long2string(pp->getMinInterval());
         case FIELD_dioRedundancyConst: return long2string(pp->getDioRedundancyConst());
         case FIELD_dioNumDoublings: return long2string(pp->getDioNumDoublings());
@@ -1815,6 +2342,12 @@ std::string DioDescriptor::getFieldValueAsString(void *object, int field, int i)
         case FIELD_position: {std::stringstream out; out << pp->getPosition(); return out.str();}
         case FIELD_color: {std::stringstream out; out << pp->getColor(); return out.str();}
         case FIELD_colorId: return long2string(pp->getColorId());
+        case FIELD_slotframeChunks: {std::stringstream out; out << pp->getSlotframeChunks(); return out.str();}
+        case FIELD_advSlotOffsets: {std::stringstream out; out << pp->getAdvSlotOffsets(); return out.str();}
+        case FIELD_slotframeLength: return ulong2string(pp->getSlotframeLength());
+        case FIELD_branchSize: return ulong2string(pp->getBranchSize());
+        case FIELD_advChOffset: return long2string(pp->getAdvChOffset());
+        case FIELD_hasClInfo: return bool2string(pp->getHasClInfo());
         default: return "";
     }
 }
@@ -1834,12 +2367,15 @@ bool DioDescriptor::setFieldValueAsString(void *object, int field, int i, const 
         case FIELD_storing: pp->setStoring(string2bool(value)); return true;
         case FIELD_grounded: pp->setGrounded(string2bool(value)); return true;
         case FIELD_dtsn: pp->setDtsn(string2ulong(value)); return true;
-        case FIELD_dioId: pp->setDioId(string2ulong(value)); return true;
         case FIELD_minInterval: pp->setMinInterval(string2long(value)); return true;
         case FIELD_dioRedundancyConst: pp->setDioRedundancyConst(string2long(value)); return true;
         case FIELD_dioNumDoublings: pp->setDioNumDoublings(string2long(value)); return true;
         case FIELD_ocp: pp->setOcp((inet::Ocp)string2enum(value, "inet::Ocp")); return true;
         case FIELD_colorId: pp->setColorId(string2long(value)); return true;
+        case FIELD_slotframeLength: pp->setSlotframeLength(string2ulong(value)); return true;
+        case FIELD_branchSize: pp->setBranchSize(string2ulong(value)); return true;
+        case FIELD_advChOffset: pp->setAdvChOffset(string2long(value)); return true;
+        case FIELD_hasClInfo: pp->setHasClInfo(string2bool(value)); return true;
         default: return false;
     }
 }
@@ -1855,6 +2391,8 @@ const char *DioDescriptor::getFieldStructName(int field) const
     switch (field) {
         case FIELD_position: return omnetpp::opp_typename(typeid(Coord));
         case FIELD_color: return omnetpp::opp_typename(typeid(cFigure::Color));
+        case FIELD_slotframeChunks: return omnetpp::opp_typename(typeid(SlotframeChunkList));
+        case FIELD_advSlotOffsets: return omnetpp::opp_typename(typeid(SlotframeChunk));
         default: return nullptr;
     };
 }
@@ -1871,6 +2409,8 @@ void *DioDescriptor::getFieldStructValuePointer(void *object, int field, int i) 
     switch (field) {
         case FIELD_position: return toVoidPtr(&pp->getPosition()); break;
         case FIELD_color: return toVoidPtr(&pp->getColor()); break;
+        case FIELD_slotframeChunks: return toVoidPtr(&pp->getSlotframeChunks()); break;
+        case FIELD_advSlotOffsets: return toVoidPtr(&pp->getAdvSlotOffsets()); break;
         default: return nullptr;
     }
 }
@@ -1957,12 +2497,12 @@ void Dao::setReachableDest(const Ipv6Address& reachableDest)
     this->reachableDest = reachableDest;
 }
 
-uint8_t Dao::getChOffset() const
+int Dao::getChOffset() const
 {
     return this->chOffset;
 }
 
-void Dao::setChOffset(uint8_t chOffset)
+void Dao::setChOffset(int chOffset)
 {
     handleChange();
     this->chOffset = chOffset;
@@ -2099,7 +2639,7 @@ const char *DaoDescriptor::getFieldTypeString(int field) const
         "uint8_t",    // FIELD_seqNum
         "bool",    // FIELD_daoAckRequired
         "inet::Ipv6Address",    // FIELD_reachableDest
-        "uint8_t",    // FIELD_chOffset
+        "int",    // FIELD_chOffset
     };
     return (field >= 0 && field < 4) ? fieldTypeStrings[field] : nullptr;
 }
@@ -2171,7 +2711,7 @@ std::string DaoDescriptor::getFieldValueAsString(void *object, int field, int i)
         case FIELD_seqNum: return ulong2string(pp->getSeqNum());
         case FIELD_daoAckRequired: return bool2string(pp->getDaoAckRequired());
         case FIELD_reachableDest: return pp->getReachableDest().str();
-        case FIELD_chOffset: return ulong2string(pp->getChOffset());
+        case FIELD_chOffset: return long2string(pp->getChOffset());
         default: return "";
     }
 }
@@ -2188,7 +2728,7 @@ bool DaoDescriptor::setFieldValueAsString(void *object, int field, int i, const 
     switch (field) {
         case FIELD_seqNum: pp->setSeqNum(string2ulong(value)); return true;
         case FIELD_daoAckRequired: pp->setDaoAckRequired(string2bool(value)); return true;
-        case FIELD_chOffset: pp->setChOffset(string2ulong(value)); return true;
+        case FIELD_chOffset: pp->setChOffset(string2long(value)); return true;
         default: return false;
     }
 }

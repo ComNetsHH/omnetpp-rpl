@@ -1,8 +1,8 @@
 #
-# OMNeT++/OMNEST Makefile for rpl
+# OMNeT++/OMNEST Makefile for omnetpp-rpl
 #
 # This file was generated with the command:
-#  opp_makemake --nolink -f --deep -O out -KINET_PROJ=../inet -DINET_IMPORT -I. -I$$\(INET_PROJ\)/src -L$$\(INET_PROJ\)/src -lINET$$\(D\) -d src -X.
+#  opp_makemake --nolink -f --deep -O out -KINET_PROJ=../inet -DINET_IMPORT -I. -I$$\(INET_PROJ\)/src -L$$\(INET_PROJ\)/src -Lout/$$\(CONFIGNAME\)/src -lINET$$\(D\) -d src -X.
 #
 
 # Output directory

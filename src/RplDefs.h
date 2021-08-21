@@ -42,7 +42,6 @@ namespace inet {
 /** Misc */
 #define DEFAULT_PARENT_LIFETIME 5000
 #define UNDEFINED_CH_OFFSET 127
-#define SCHEDULE_PHASE_II_TIMEOUT 15
 const Ipv6Address LL_RPL_MULTICAST("FF02:0:0:0:0:0:0:1A");
 
 enum TRICKLE_EVENTS {
@@ -54,13 +53,16 @@ enum TRICKLE_EVENTS {
 enum RPL_SELF_MSG {
     DETACHED_TIMEOUT,
     DAO_ACK_TIMEOUT,
+    START_CROSS_LAYER_PHASE_II,
+    BRANCH_CH_ADV,
     RPL_START
 };
 
+/** Purely for cross-layer SF */
 struct SlotframeChunk
 {
-    uint16_t end;
-    uint16_t start;
+    int end;
+    int start;
     friend std::ostream& operator << (std::ostream &os, const SlotframeChunk &s) {
         return os << "(" << s.start << ":" << s.end << ")";
     }
@@ -103,6 +105,28 @@ inline std::ostream& operator<<(std::ostream& os, std::vector<int> const& vec)
        os << val << ", ";
    return os;
 }
+
+class RplGenericControlInfo : public cObject {
+    private:
+        uint64_t nodeId;
+        Ipv6Address nodeAddr;
+
+    public:
+        RplGenericControlInfo() {}
+        RplGenericControlInfo(uint64_t nodeId) { this->nodeId = nodeId; }
+
+        uint64_t getNodeId() { return this->nodeId; }
+        void setNodeId(uint64_t nodeId) { this->nodeId = nodeId; }
+
+        Ipv6Address& getNodeAddr() {
+            return nodeAddr;
+        }
+
+        void setNodeAddr(const Ipv6Address &nodeAddr) {
+            this->nodeAddr = nodeAddr;
+        }
+};
+
 
 } // namespace inet
 

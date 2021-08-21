@@ -24,6 +24,7 @@
 
 #include "TrickleTimer.h"
 #include "RplRouteData.h"
+#include "TschSfControlInfo.h"
 #include "inet/applications/udpapp/UdpBasicApp.h"
 #include "inet/applications/udpapp/UdpSink.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
@@ -34,6 +35,8 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
+
+using namespace std;
 
 namespace inet {
 
@@ -70,10 +73,12 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     bool pDaoAckEnabled;
     bool hasStarted;
     bool allowDodagSwitching;
+    bool pUnreachabilityDetectionEnabled;
+    bool pShowBackupParents;
     uint16_t rank;
     uint8_t dtsn;
-    uint32_t branchChOffset;
-    uint16_t branchSize;
+    int branchChOffset;
+    int branchSize;
     int daoSeqNum;
     Dio *preferredParent;
     std::string objectiveFunctionType;
@@ -81,12 +86,6 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     std::map<Ipv6Address, Dio *> candidateParents;
     std::map<Ipv6Address, Ipv6Address> sourceRoutingTable;
     std::map<Ipv6Address, std::pair<cMessage *, uint8_t>> pendingDaoAcks;
-
-    /** Statistics collection */
-    simsignal_t dioReceivedSignal;
-    simsignal_t daoReceivedSignal;
-    simsignal_t parentChangedSignal;
-    simsignal_t parentUnreachableSignal;
 
     bool pJoinAtSinkAllowed;
     int numDaoDropped;
@@ -111,6 +110,21 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     Rpl();
     ~Rpl();
 
+    /** Statistics and control signals */
+    simsignal_t dioReceivedSignal;
+    simsignal_t daoReceivedSignal;
+    simsignal_t parentChangedSignal;
+    simsignal_t rankUpdatedSignal;
+    simsignal_t parentUnreachableSignal;
+
+    friend std::ostream& operator<<(std::ostream& os, const std::map<Ipv6Address, Dio *> &parentSet)
+    {
+        os << "Address   Rank" << endl;
+        for (auto const &entry : parentSet)
+            os << entry.first << ": " << entry.second->getRank() << std::endl;
+        return os;
+    }
+
     /** Conveniently display boolean variable with custom true / false format */
     static std::string boolStr(bool cond, std::string positive, std::string negative);
     static std::string boolStr(bool cond) { return boolStr(cond, "true", "false"); }
@@ -131,6 +145,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     virtual void refreshDisplay() const override;
 
   private:
+
     void processSelfMessage(cMessage *message);
     void processMessage(cMessage *message);
 
@@ -163,7 +178,6 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      */
     void processDio(const Ptr<const Dio>& dio);
 
-    void processCrossLayerMsg(const Ptr<const Dio>& dio);
 
     /**
      * Process DAO packet advertising node's reachability,
@@ -209,12 +223,9 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param reachableDest reachable destination, may be own address or forwarded from sub-dodag
      * @return initialized DAO packet object
      */
-    const Ptr<Dao> createDao(const Ipv6Address &reachableDest, uint8_t channelOffset);
+    const Ptr<Dao> createDao(const Ipv6Address &reachableDest);
     const Ptr<Dao> createDao(const Ipv6Address &reachableDest, bool ackRequired);
     const Ptr<Dao> createDao() {return createDao(getSelfAddress()); };
-    const Ptr<Dao> createDao(const Ipv6Address &reachableDest) {
-        return createDao(reachableDest, (uint8_t) UNDEFINED_CH_OFFSET);
-    }
 
     /**
      * Update routing table with new route to destination reachable via next hop
@@ -226,6 +237,15 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData) { updateRoutingTable(nextHop, dest, routeData, false); };
 //    void updateRoutingTable(const Dao *dao);
     RplRouteData* prepRouteData(const Dao *dao);
+
+    /** Delete default routes for given interface
+     *
+     * @param interfaceID id of the interface to delete default route for
+     *
+     * NOTE: This method is taken directly from inet::Ipv6RoutingTable due to
+     * the fact it's only available with xMIPv6 enabled
+     */
+    void deleteDefaultRoutes(int interfaceID);
 
     void purgeDaoRoutes();
 
@@ -272,6 +292,10 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @return true if DIO sender stems from an unknown DODAG
      */
     bool checkUnknownDio(const Ptr<const Dio>& dio);
+
+    void generateLayout(cModule *net);
+    void configureTopologyLayout(Coord anchorPoint, double padX, double padY, double columnGapMultiplier,
+            cModule *network, bool branchLayout, int numBranches, int numHosts, int numSinks);
 
     /**
      * Get address of the default network interface
@@ -492,19 +516,63 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     bool isRplPacket(Packet *packet);
     void clearDaoAckTimer(Ipv6Address daoDest);
 
-    std::vector<Ipv6Address> getNearestChildren();
     int getNumDownlinks();
 
     /** Misc */
-    void drawConnector(Coord target, cFigure::Color col);
+    void drawConnector(Coord target, cFigure::Color col, Ipv6Address backupParent) const;
+    void drawConnector(Coord target, cFigure::Color col) const
+    {
+        drawConnector(target, col, Ipv6Address::UNSPECIFIED_ADDRESS);
+    }
+
+    void setLineProperties(cLineFigure *connector, Coord target, cFigure::Color col, bool dashed) const;
+    void setLineProperties(cLineFigure *connector, Coord target, cFigure::Color col) const
+    {
+        setLineProperties(connector, target, col, false);
+    }
+
     static int getNodeId(std::string nodeName);
 
-    cLineFigure *prefParentConnector;
+    mutable cLineFigure *prefParentConnector;
+
+    // map of pointers to the dashed connector line between a node and its backup parents
+    mutable map<Ipv6Address, cLineFigure*> backupConnectors;
 
     double startDelay;
 
     /** Pick random color for parent-child connector drawing (if node's sink) */
     cFigure::Color pickRandomColor();
+
+    simsignal_t joinedDodag;
+    simsignal_t reschedule;
+    simsignal_t setChOffset;
+    simsignal_t setRplRank;
+    simsignal_t oneHopChildJoined;
+
+    std::vector<int> channelOffsets;
+
+
+    bool pCrossLayerEnabled;
+    int pTschNumChannels;
+    int pTschSlotframeLength;
+    bool hasClInfo;
+    SlotframeChunk clSlotframeChunk;
+    int pTschChOffStart; // starting channel offset to advertise to sub-trees (branches)
+    int pTschChOffEnd; // ending channel offset to advertise to sub-trees (branches)
+
+    map<Ipv6Address, int> nbrChOffsetsMap;
+
+    void allocateSinkChOffsets(int numTschChannels, cModule *network);
+    void processCrossLayerMsg(const Ptr<const Dio>& clDio);
+    SlotframeChunk calcAdvSlotframeChunk();
+    void advertiseChOffset(Ipv6Address child, double delay);
+    void startSecondSchedulingPhase();
+    vector<Ipv6Address> getNearestChildren();
+    int getTschSlotframeLength();
+    int getNumTschChannels();
+    void initChOffsetList(int minChOffset, int maxChOffset);
+    bool isValidSlotframeChunk(SlotframeChunk chunk);
+    int allocateChOffset(Ipv6Address nbr);
 };
 
 } // namespace inet

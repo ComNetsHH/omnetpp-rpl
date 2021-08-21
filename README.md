@@ -2,26 +2,14 @@
 
 RPL (Routing Protocol for Low-Power and Lossy Networks) OMNeT++ simulation model
 
-# Compatibility
+# Verified Compatibility
+OMNeT++ 5.6.2, INET 4.2.5
 
-This model is developed and tested with the following libraries versions:
-
-- OMNeT++ 5.6.2
-- INET 4.2.2
-
-# Configuration
-
-1. Set up new OMNeT++ project from existing files. 
-2. Reference INET project in the Properties->Project References.
-3. Disable xMIPv6 in INET project features
-4. Set additional build options via Properties->OMNeT++->Makemake:
-    - Select 'src' folder in the project view and click 'Options' under 'Makemake'. 
-    - In the 'Compile' tab set the 'Add include paths exported from referenced projects' flag.
-    - In the 'Custom' tab add the following snippet 'MSGC:=$(MSGC) --msg6' (to use newer message compiler) and click OK.
-
-5. Replace INET src files with the modified versions to avoid hanging simulations and to make ICMPv6 unreachability detection less aggressive
-
-# Known Issues
-- Runtest batch script is not portable, needs adjustements to run test suite per machine/OS.
-
-
+# Installation Instructions:
+1. Replace INET src files with the ones included in this repo **following the folder structure**
+2. In INET project `Properties` -> `OMNeT++` -> `Project Features` disable "Mobile IPv6 Protocol (xMIPv6)"
+3. In RPL project `Properties` -> `OMNeT++` -> `Makemake` -> `src` -> `Options` -> `Custom` add the following line:  
+`MSGC:=$(MSGC) --msg6`
+4. Add INET to RPL project references, by navigating RPL project `Properties` -> `Project References` 
+4. Compile and test included sample scenarios in the .ini file.
+5. [Optional] To use RPL in other projects, e.g. as a part of 6TiSCH,  compile it as a shared library: project `Properties` -> `OMNeT++` -> `Makemake` -> `src` -> `Options` -> `Target`. And also select "Export this shared/static library for other projects".

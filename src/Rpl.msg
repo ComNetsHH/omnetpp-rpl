@@ -34,6 +34,8 @@ cplusplus {{
 	
 namespace inet;
 
+class SlotframeChunk { @existingClass;}
+class SlotframeChunkList { @existingClass;}
 class Coord { @existingClass;}
 class cFigure::Color { @existingClass;}
 
@@ -51,7 +53,6 @@ enum RplPacketCode {
     DAO_ACK = 3;
     PING = 4;
     PING_ACK = 5;
-    CROSS_LAYER_CTRL = 6;
 };
 
 
@@ -83,7 +84,6 @@ class Dio extends RplPacket {
     // Destination Advertisement Trigger Sequence Number, 
     // may be incremented to trigger downward routes update
     uint8_t dtsn;
-    uint8_t dioId;  // temporary field for debugging purposes   
    
 	// Trickle timer parameters (DAG Configuration Option)
     int minInterval;           
@@ -95,16 +95,37 @@ class Dio extends RplPacket {
     Coord position; // DIO sender node location to draw directed parent-child connectors on canvas
     cFigure::Color color; // Color of the parent-child connector line, per DODAG
 	int colorId; // DODAG color id (from static palette) for multi-GW scenario
+	
+	// Cross-layer info for phase 2 scheduling
+    SlotframeChunkList slotframeChunks;
+    SlotframeChunk advSlotOffsets;
+    uint16_t slotframeLength;
+    uint16_t branchSize;   
+    int advChOffset;
+    bool hasClInfo;
     
 }
+
+cplusplus (Dio) {{
+    std::vector<uint16_t> advChOffsets; 
+	
+	std::vector<uint16_t> getadvChOffsets() { return this->advChOffsets; }
+	void setadvChOffsets(std::vector<uint16_t> advChOffsets) { handleChange(); this->advChOffsets = advChOffsets; }
+    
+    friend std::ostream& operator<<(std::ostream& os, Dio* dio)
+    {
+        os << "rank: " << (int) dio->getRank();
+        return os;
+    }
+}}
 
 // Destination Advertisement Object [RFC 6550, 6.4] 
 class Dao extends RplPacket {
     uint8_t seqNum;				// ID for each unique DAO sent by a node
     bool daoAckRequired;		// indicates whether DAO-ACK is expected by the sender 
     Ipv6Address reachableDest;	// advertised reachable destination		
-    uint8_t chOffset;			// advertised channel offset (unique per branch)
-    						    // as part of cross-layer scheduling 
+    int chOffset;			// advertised channel offset (unique per branch)
+    						    // as part of cross-layer scheduling
 }
 
 cplusplus (Dao) {{
@@ -137,7 +158,6 @@ class RplTransitInfo extends RplPacket {
     Ipv6Address transit;
     // tbd fields
 }
-
 
 
 class SourceRoutingHeader extends FieldsChunk {	
