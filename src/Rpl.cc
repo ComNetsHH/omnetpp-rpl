@@ -210,8 +210,10 @@ void Rpl::configureTopologyLayout(Coord anchorPoint, double padX, double padY, d
                     k = numBranches % 2;
                 m++;
             } else {
-                subm->getSubmodule("rpl")->par("allowJoinAtSink") = false;
-                subm->getSubmodule("rpl")->par("assignParentManual") = true;
+                try {
+                    subm->getSubmodule("rpl")->par("allowJoinAtSink") = false;
+                    subm->getSubmodule("rpl")->par("assignParentManual") = true;
+                } catch (...) {}
             }
 
             currentX += pow(-1, k++);
