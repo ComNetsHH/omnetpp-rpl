@@ -48,6 +48,7 @@ class ObjectiveFunction : public cObject
      *
      * @param candidateParents map of node's neighborhood in form of latest DIO packets
      * from each neighbor
+     * @param currentPreferredParent current preferred parent of the node, might be nullptr indicating there's none
      * @return best parent candidate based on the type of objective function in use
      */
     virtual Dio* getPreferredParent(std::map<Ipv6Address, Dio *> candidateParents, Dio* currentPreferredParent);
