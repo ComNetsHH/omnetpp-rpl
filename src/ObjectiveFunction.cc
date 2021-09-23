@@ -53,10 +53,9 @@ Dio* ObjectiveFunction::getPreferredParent(std::map<Ipv6Address, Dio *> candidat
     for (auto cp : candidateParents)
         EV_DETAIL << cp.first << " - " << cp.second->getRank() << endl;
 
-    // Select the first entry as initial preferred parent
+    // Select the node with lowest rank from the candidate parent list
     Dio *newPrefParent = candidateParents.begin()->second;
     uint16_t currentMinRank = newPrefParent->getRank();
-    // Iterate through candidate parent set and select the one with lowest rank
     for (std::pair<Ipv6Address, Dio *> candidate : candidateParents) {
         uint16_t candidateParentRank = candidate.second->getRank();
         if (candidateParentRank < currentMinRank) {
@@ -65,10 +64,12 @@ Dio* ObjectiveFunction::getPreferredParent(std::map<Ipv6Address, Dio *> candidat
         }
     }
 
+    // If the node doesn't have a preferred parent yet, choose the one selected in previous step 
     if (!currentPreferredParent)
         return newPrefParent;
 
-    // Only update the parent if the rank improvement is worth it
+    // Otherwise check if the rank difference between suggested new parent and 
+    // the current one is larger than the minHopRankIncrease threshold (to avoid oscillation)
     if (currentPreferredParent->getRank() - newPrefParent->getRank() >= minHopRankIncrease)
         return newPrefParent;
     else
