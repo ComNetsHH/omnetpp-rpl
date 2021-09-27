@@ -853,7 +853,8 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
             trickleTimer->reset();
         else
             trickleTimer->start(false, par("numSkipTrickleIntervalUpdates").intValue());
-        if (udpApp && !isUdpSink())
+        // Avoid overriding destination address set in the .ini file
+        if (udpApp && !isUdpSink() && udpApp->par("destAddresses").stdstringValue().empty())
             udpApp->par("destAddresses") = dio->getDodagId().str();
     }
     else {
@@ -1111,8 +1112,12 @@ void Rpl::updatePreferredParent()
         /** Silently join new DODAG and update dest address for application, TODO: Check with RFC */
         dodagId = newPrefParentDodagId;
         // TODO: Adapt to multiple apps
-        if (udpApp && !isUdpSink())
+        if (udpApp && !isUdpSink()
+                // avoid overwriting dest address manually set for UDP app in the .ini file, but allow updating it if node has changed DODAGs
+                 && (!preferredParent && udpApp->par("destAddresses").stdstringValue().empty()))
+        {
             udpApp->par("destAddresses") = newPrefParentDodagId.str();
+        }
 
         /** Notify 6TiSCH Scheduling Function about parent change */
         auto rplCtrlInfo = new RplGenericControlInfo(newPrefParent->getNodeId());
