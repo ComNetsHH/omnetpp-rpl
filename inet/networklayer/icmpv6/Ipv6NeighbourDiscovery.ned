@@ -17,6 +17,8 @@
 
 package inet.networklayer.icmpv6;
 
+import inet.networklayer.contract.IIpv6NeighbourDiscovery;
+
 //
 // Implements IPv6 Neighbour Discovery.
 //
@@ -25,7 +27,7 @@ package inet.networklayer.icmpv6;
 //
 // @see ~Ipv6, ~Ipv6RoutingTable, ~Icmpv6
 //
-simple Ipv6NeighbourDiscovery
+simple Ipv6NeighbourDiscovery like IIpv6NeighbourDiscovery
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

@@ -243,7 +243,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
      *  msg with the control info.
      */
     virtual void sendPacketToIpv6Module(Packet *msg, const Ipv6Address& destAddr,
-            const Ipv6Address& srcAddr, int interfaceId);
+            const Ipv6Address& srcAddr, int interfaceId, double delay = 0);
 
     /**
      *  Send off any queued packets within the Neighbour Discovery module

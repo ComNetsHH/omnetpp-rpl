@@ -771,7 +771,7 @@ void Ipv6NeighbourDiscovery::dropQueuedPacketsAwaitingAr(Neighbour *nce)
 }
 
 void Ipv6NeighbourDiscovery::sendPacketToIpv6Module(Packet *msg, const Ipv6Address& destAddr,
-        const Ipv6Address& srcAddr, int interfaceId)
+        const Ipv6Address& srcAddr, int interfaceId, double delay)
 {
     delete msg->removeTagIfPresent<DispatchProtocolReq>();
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
@@ -781,7 +781,11 @@ void Ipv6NeighbourDiscovery::sendPacketToIpv6Module(Packet *msg, const Ipv6Addre
     addressReq->setDestAddress(destAddr);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
 
-    send(msg, "ipv6Out");
+    // CUSTOM PART TO PREVENT repeated TSCH collisions on broadcast cells
+    if (delay)
+        sendDelayed(msg, delay, "ipv6Out");
+    else
+        send(msg, "ipv6Out");
 }
 
 /**Not used yet-unsure if we really need it. --DELETED, Andras*/
@@ -1877,8 +1881,11 @@ void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAd
     auto packet = new Packet("NSpacket");
     Icmpv6::insertCrc(crcMode, ns, packet);
     packet->insertAtFront(ns);
-    sendPacketToIpv6Module(packet, dgDestAddr, dgSrcAddr, ie->getInterfaceId());
 
+    if (par("addRandomDelays").boolValue())
+        sendPacketToIpv6Module(packet, dgDestAddr, dgSrcAddr, ie->getInterfaceId(), uniform(0, 1));
+    else
+        sendPacketToIpv6Module(packet, dgDestAddr, dgSrcAddr, ie->getInterfaceId());
 }
 
 void Ipv6NeighbourDiscovery::processNsPacket(Packet *packet, const Ipv6NeighbourSolicitation *ns)
