@@ -68,16 +68,9 @@ simple Ipv6
         string icmpv6Module;
         string ipv6TunnelingModule;
         double procDelay @unit(s) = default(0s);
-        bool allowLinkLocalFwd = default(false); // custom param to allow forwarding UDP datagrams with link-local addresses
-        bool enableTargetExclusiveNAs = default(false); // custom param, to be removed
-        bool disableDestCache = default(false); // custom param, always do longest prefix match instead of utilizing dest. cache
-        string allowedTarget = default("fe80::8aa:ff:fe00:1") // custom 6TiSCH cross-layer param, to be removed 
         @display("i=block/network2");
         @signal[packetDropped](type=cPacket);
-        @signal[packetSentToUpper](type=cPacket);
-        @signal[packetReceivedFromUpper](type=cPacket);
-        @signal[packetSentToLower](type=cPacket);
-        @signal[packetReceivedFromLower](type=cPacket);
+        @signal[packetSentToUpper](type=inet::Packet);
     gates:
         input transportIn @labels(Ipv6ControlInfo/down,TcpHeader,UdpHeader);
         output transportOut @labels(Ipv6ControlInfo/up,TcpHeader,UdpHeader);

@@ -81,12 +81,6 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
 
     Ipv6Tunneling *tunneling = nullptr;
 
-    Ipv6Address *allowedTarget; // custom field to facilitate proper evaluation of cross-layer scheduling, TODO: remove this
-    Ipv6Address selfAddr; // custom field to facilitate proper evaluation of cross-layer scheduling, TODO: remove this
-
-    bool matchesAllowedTarget(Ipv6Address dest); // custom method to facilitate proper evaluation of cross-layer scheduling, TODO: remove this
-    bool pOverrideDestCache;
-
     // working vars
     unsigned int curFragmentId = -1;    // counter, used to assign unique fragmentIds to datagrams
     Ipv6FragBuf fragbuf;    // fragmentation reassembly buffer

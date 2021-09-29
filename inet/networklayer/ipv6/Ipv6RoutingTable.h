@@ -331,11 +331,6 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual Ipv6Route *getRoute(int i) const override;
     //@}
 
-    /**
-     * Deletes the current default routes for the given interface.
-     */
-    void deleteDefaultRoutes(int interfaceID);
-
 #ifdef WITH_xMIPv6
     //================Added by Zarrar Yousaf ===================================
 
@@ -348,6 +343,11 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * Check whether provided address is a HoA
      */
     bool isHomeAddress(const Ipv6Address& addr);
+
+    /**
+     * Deletes the current default routes for the given interface.
+     */
+    void deleteDefaultRoutes(int interfaceID);
 
     /**
      * Deletes all routes from the routing table.

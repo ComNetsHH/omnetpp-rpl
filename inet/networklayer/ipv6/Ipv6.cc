@@ -88,11 +88,6 @@ void Ipv6::initialize(int stage)
         icmp = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
         tunneling = getModuleFromPar<Ipv6Tunneling>(par("ipv6TunnelingModule"), this);
 
-        allowedTarget = new Ipv6Address(par("allowedTarget").stringValue());
-        pOverrideDestCache = par("disableDestCache").boolValue();
-
-        EV_DETAIL << "Initialized allowedTarget to " << allowedTarget << endl;
-
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;
         fragbuf.init(icmp);
@@ -113,21 +108,6 @@ void Ipv6::initialize(int stage)
         WATCH(numForwarded);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-
-        // custom part for cross-layer scheduling evaluation only, remove this
-        for (int i = 0; i < ift->getNumInterfaces(); i++)
-        {
-            auto ie = ift->getInterface(i);
-            if (strstr(ie->getInterfaceName(), "wlan") != nullptr)
-            {
-                selfAddr = ie->getNetworkAddress().toIpv6();
-                EV_DETAIL << "set self addr to " << selfAddr << endl;
-                break;
-            }
-        }
-        // custom part end
-
-
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -274,8 +254,6 @@ void Ipv6::handleMessage(cMessage *msg)
             delete ctrl;
             resolveMACAddressAndSendPacket(packet, interfaceId, nextHop, fromHL);
         }
-        else
-            emit(packetReceivedFromLowerSignal, msg);
 
         // Do not handle header biterrors, because
         // 1. Ipv6 header does not contain checksum for the header fields, each field is
@@ -379,7 +357,6 @@ void Ipv6::handleMessageFromHL(Packet *msg)
             destIE = ift->findFirstLoopbackInterface();
         ASSERT(destIE);
     }
-    emit(packetReceivedFromUpperSignal, msg);
     L3Address nextHopAddr(Ipv6Address::UNSPECIFIED_ADDRESS);
     if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
         datagramLocalOut(packet, destIE, nextHopAddr.toIpv6());
@@ -397,34 +374,13 @@ void Ipv6::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, Ipv6Ad
         routeMulticastPacket(packet, destIE, nullptr, true);
 }
 
-bool Ipv6::matchesAllowedTarget(Ipv6Address dest) {
-    auto ourId = std::to_string(selfAddr.str().back());
-    auto destId = std::to_string(dest.str().back());
-    EV_DETAIL << "Checking if " << dest << " is a valid destination: "
-            << "our id = " << ourId << ", dest id = " << destId
-            << "\n allowedTarget = " << *allowedTarget << endl;
-    return std::stoi(ourId) - 1 == std::stoi(destId)
-        || std::stoi(ourId) - 1 == std::stoi(destId)
-        || dest == *allowedTarget
-        || dest == selfAddr
-        || selfAddr == *allowedTarget;
-}
-
 void Ipv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, Ipv6Address requestedNextHopAddress, bool fromHL)
 {
     auto ipv6Header = packet->peekAtFront<Ipv6Header>();
     // TBD add option handling code here
     Ipv6Address destAddress = ipv6Header->getDestAddress();
-    std::string pktName(packet->getFullName());
 
-    EV_INFO << "Routing datagram `" << ipv6Header->getName() << pktName << "' with dest=" << destAddress << ", requested nexthop is " << requestedNextHopAddress << " on " << (destIE ? destIE->getFullName() : "unspec") << " interface: \n";
-
-    if (par("enableTargetExclusiveNAs").boolValue() && !matchesAllowedTarget(destAddress)) {
-        EV_DETAIL << "Datagram destination is not an allowed target, skipping" << endl;
-        delete packet;
-        return;
-    }
-
+    EV_INFO << "Routing datagram `" << ipv6Header->getName() << "' with dest=" << destAddress << ", requested nexthop is " << requestedNextHopAddress << " on " << (destIE ? destIE->getFullName() : "unspec") << " interface: \n";
 
     // local delivery of unicast packets
     if (rt->isLocalAddress(destAddress)) {
@@ -450,10 +406,8 @@ void Ipv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
             return;
         }
 
-        // don't forward link-local addresses or weaker (modified to allow UDP through)
-        if ((destAddress.isLinkLocal() || destAddress.isLoopback())
-                && !(par("allowLinkLocalFwd").boolValue() && pktName.find(std::string("Udp")) != std::string::npos))
-        {
+        // don't forward link-local addresses or weaker
+        if (destAddress.isLinkLocal() || destAddress.isLoopback()) {
             EV_INFO << "dest address is link-local (or weaker) scope, doesn't get forwarded\n";
             delete packet;
             return;
@@ -775,7 +729,6 @@ void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
     }
     else if (upperProtocols.find(protocol) != upperProtocols.end()) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
-        emit(packetSentToUpperSignal, packet);
         send(packet, "transportOut");
     }
     else if (!hasSocket) {
@@ -1025,7 +978,7 @@ bool Ipv6::determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address&
     // try destination cache
     nextHop = rt->lookupDestCache(destAddress, interfaceId);
 
-    if (interfaceId == -1 || pOverrideDestCache) {
+    if (interfaceId == -1) {
         // address not in destination cache: do longest prefix match in routing table
         EV_INFO << "do longest prefix match in routing table" << endl;
         const Ipv6Route *route = rt->doLongestPrefixMatch(destAddress);

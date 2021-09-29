@@ -481,12 +481,6 @@ const Ipv6Route *Ipv6RoutingTable::doLongestPrefixMatch(const Ipv6Address& dest)
     // we'll just stop at the first match, because the table is sorted
     // by prefix lengths and metric (see addRoute())
 
-    EV_DETAIL << "Doing longest prefix match for dest " << dest
-            << ", current rt: " << endl;
-    for (auto rt: routeList)
-        EV_DETAIL << rt->getDestinationAsGeneric().toIpv6() << " via " << rt->getNextHopAsGeneric().toIpv6() << endl;
-
-
     auto it = routeList.begin();
     while (it != routeList.end()) {
         if (dest.matches((*it)->getDestPrefix(), (*it)->getPrefixLength())) {
@@ -766,23 +760,6 @@ Ipv6Route *Ipv6RoutingTable::getRoute(int i) const
     return routeList[i];
 }
 
-// Added by CB
-void Ipv6RoutingTable::deleteDefaultRoutes(int interfaceID)
-{
-    ASSERT(interfaceID >= 0);
-
-    EV_INFO << "/// Removing default route for interface=" << interfaceID << endl;
-
-    for (auto it = routeList.begin(); it != routeList.end(); ) {
-        // default routes have prefix length 0
-        if ((*it)->getInterface() && (*it)->getInterface()->getInterfaceId() == interfaceID &&
-            (*it)->getPrefixLength() == 0)
-            it = internalDeleteRoute(it);
-        else
-            ++it;
-    }
-}
-
 #ifdef WITH_xMIPv6
 //#####Added by Zarrar Yousaf##################################################################
 
@@ -809,6 +786,23 @@ bool Ipv6RoutingTable::isHomeAddress(const Ipv6Address& addr)
     }
 
     return false;
+}
+
+// Added by CB
+void Ipv6RoutingTable::deleteDefaultRoutes(int interfaceID)
+{
+    ASSERT(interfaceID >= 0);
+
+    EV_INFO << "/// Removing default route for interface=" << interfaceID << endl;
+
+    for (auto it = routeList.begin(); it != routeList.end(); ) {
+        // default routes have prefix length 0
+        if ((*it)->getInterface() && (*it)->getInterface()->getInterfaceId() == interfaceID &&
+            (*it)->getPrefixLength() == 0)
+            it = internalDeleteRoute(it);
+        else
+            ++it;
+    }
 }
 
 // Added by CB
