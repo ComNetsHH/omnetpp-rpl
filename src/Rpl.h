@@ -41,6 +41,69 @@ namespace inet {
 
 class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::HookBase
 {
+public:
+
+    class DodagInfo : public cObject {
+
+        public:
+            Ipv6Address dagId;
+            Ipv6Address prefParent;
+            uint16_t prefParentRank;
+            uint8_t rplInstanceId;
+
+            DodagInfo() {
+                this->dagId = Ipv6Address::UNSPECIFIED_ADDRESS;
+                this->prefParent = Ipv6Address::UNSPECIFIED_ADDRESS;
+                this->prefParentRank = INF_RANK;
+                this->rplInstanceId = 0xFF; // TODO: check/define the default value
+            }
+
+            DodagInfo(Ipv6Address dagId, Ipv6Address prefParent, int prefParentRank, int rplInstanceId)
+            {
+                this->dagId = dagId;
+                this->prefParent = prefParent;
+                this->prefParentRank = prefParentRank;
+                this->rplInstanceId = rplInstanceId;
+            }
+
+            const Ipv6Address& getDagId() const {
+                return dagId;
+            }
+            void setDagId(const Ipv6Address &dagId) {
+                this->dagId = dagId;
+            }
+
+            const Ipv6Address& getPrefParent() const {
+                return prefParent;
+            }
+            void setPrefParent(const Ipv6Address &prefParent) {
+                this->prefParent = prefParent;
+            }
+
+            uint16_t getPrefParentRank() const {
+                return prefParentRank;
+            }
+            void setPrefParentRank(uint16_t prefParentRank) {
+                this->prefParentRank = prefParentRank;
+            }
+
+            uint8_t getRplInstanceId() const {
+                return rplInstanceId;
+            }
+            void setRplInstanceId(uint8_t rplInstanceId) {
+                this->rplInstanceId = rplInstanceId;
+            }
+
+            void update(Dio *dio) {
+                this->dagId = dio->getDodagId();
+                this->prefParent = dio->getSrcAddress();
+                this->prefParentRank = dio->getRank();
+                this->rplInstanceId = dio->getInstanceId();
+            }
+    };
+
+
+
   private:
 
     /** Environment */
@@ -56,6 +119,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
     vector<cModule*> apps;
 
     /** RPL configuration parameters and state management */
+    DodagInfo dagInfo; // for display/tracking purposes only, since WATCH_PTR on preferredParent DIO crashes
     uint8_t dodagVersion;
     Ipv6Address dodagId;
     Ipv6Address selfAddr;
@@ -178,6 +242,14 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param dio DIO packet object for processing
      */
     void processDio(const Ptr<const Dio>& dio);
+
+    /**
+     * Checks whether DIO is valid in terms of advertised rank
+     *
+     * @param dio pointer to the DIO object
+     * @return true if the node should process the DIO, false otherwise
+     */
+    bool isInvalidDio(const Dio* dio);
 
     void processCrossLayerMsg(const Ptr<const Dio>& dio);
 
@@ -323,6 +395,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
 
     bool selfGeneratedPkt(Packet *pkt);
     bool isUdpSink();
+    bool isUdpSinkApp(cModule* app);
     void purgeRoutingTable();
 
     /**
@@ -429,7 +502,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param datagram UDP packet to check for
      * @return true if packet travels down, false otherwise
      */
-    bool packetTravelsDown(Packet *datagram);
+    bool isDownlinkPacket(Packet *datagram);
 
     /**
      * Append RPL Packet Information header to outgoing packet,
@@ -472,7 +545,7 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
      * @param pkt packet to check for
      * @return true on SRH presence, false otherwise
      */
-    bool sourceRouted(Packet *pkt);
+    bool isSourceRouted(Packet *pkt);
     B getDaoFrontOffset();
     std::string rplIcmpCodeToStr(RplPacketCode code);
 
@@ -540,6 +613,9 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
 
     // map of pointers to the dashed connector line between a node and its backup parents
     mutable map<Ipv6Address, cLineFigure*> backupConnectors;
+
+    virtual void eraseBackupParentList(map <Ipv6Address, Dio*> &backupParents);
+    virtual void clearObsoleteBackupParents(map <Ipv6Address, Dio*> &backupParents);
 
     double startDelay;
 

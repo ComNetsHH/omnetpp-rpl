@@ -120,11 +120,16 @@ void Rpl::initialize(int stage)
         startDelay = par("startDelay").doubleValue();
 
         if (par("layoutConfigurator").boolValue())
-            generateLayout(host->getParentModule()); // generate layout using the topmost simulation module
+            generateLayout(host->getParentModule()); // generate layout using the topmost simulation module, TODO: refactor into mobility extension module
+
+        dagInfo = *(new DodagInfo());
 
         WATCH(numParentUpdates);
         WATCH_MAP(candidateParents);
         WATCH_MAP(backupParents);
+//        WATCH_OBJ(dagInfo); TODO: figure out why this doesn't work! the object IS shown in the GUI, but without any fields
+        WATCH(dagInfo.prefParent);
+        WATCH(dagInfo.prefParentRank);
         WATCH(rank);
         WATCH(selfAddr);
         WATCH(selfId);
@@ -358,9 +363,7 @@ void Rpl::start()
     for (auto i = 0; i < numApps; i++)
         apps.push_back(host->getSubmodule("app", i));
 
-//    udpApp = host->getSubmodule("app", 0); // TODO: handle more apps
-
-    rank = INF_RANK - 1;
+    rank = INF_RANK; // TODO: was INF_RANK - 1, why?
     detachedTimeoutEvent = new cMessage("", DETACHED_TIMEOUT);
     selfAddr = getSelfAddress();
 
@@ -382,10 +385,6 @@ void Rpl::refreshDisplay() const {
         host->getDisplayString().setTagArg("t", 0, std::string(" num rcvd: " + std::to_string(udpPacketsRecv)).c_str());
         host->getDisplayString().setTagArg("t", 1, "l"); // set display text position to 'left'
     }
-    // Draw dashed lines to visualize backup parents
-//    if (pShowBackupParents)
-//        for (auto bp : backupParents)
-//            drawConnector(bp.second->getPosition(), bp.second->getColor(), bp.first);
 }
 
 void Rpl::stop()
@@ -465,21 +464,12 @@ void Rpl::detachFromDodag() {
      * with a DODAG and should suppress previous RPL state info by
      * clearing dodagId, neighbor sets and setting it's rank to INFINITE_RANK [RFC6560, 8.2.2.1]
      */
+    eraseBackupParentList(backupParents);
 
-    // First clear any drawn connector lines
-    cCanvas *canvas = getParentModule()->getParentModule()->getCanvas();
-    for (auto entry : backupConnectors)
-        canvas->removeFigure(entry.second);
-
-    backupConnectors.erase(backupConnectors.begin(), backupConnectors.end());
-
-    backupParents.erase(backupParents.begin(), backupParents.end());
-
-    EV_DETAIL << "Backup parents list erased" << endl;
     /** Delete all routes associated with DAO destinations of the former DODAG */
     purgeDaoRoutes();
     rank = INF_RANK;
-    trickleTimer->suspend();
+    trickleTimer->suspend(); // TODO: re-think this part of TT lifecycle, possibly replace with stop
     if (par("poisoning").boolValue())
         poisonSubDodag();
     dodagId = Ipv6Address::UNSPECIFIED_ADDRESS;
@@ -489,6 +479,21 @@ void Rpl::detachFromDodag() {
     cancelEvent(detachedTimeoutEvent);
     drawConnector(position, cFigure::BLACK);
     scheduleAt(simTime() + detachedTimeout, detachedTimeoutEvent);
+}
+
+void Rpl::eraseBackupParentList(map <Ipv6Address, Dio*> &backupParents) {
+
+    if (!backupParents.size())
+        return;
+
+    // First clear any drawn connector lines
+    cCanvas *canvas = getParentModule()->getParentModule()->getCanvas();
+    for (auto entry : backupConnectors)
+        canvas->removeFigure(entry.second);
+
+    backupConnectors.erase(backupConnectors.begin(), backupConnectors.end());
+    backupParents.erase(backupParents.begin(), backupParents.end());
+    EV_DETAIL << "Backup parents list erased" << endl;
 }
 
 void Rpl::purgeDaoRoutes() {
@@ -758,12 +763,33 @@ bool Rpl::isUdpSink() {
     return false;
 }
 
+bool Rpl::isUdpSinkApp(cModule* app) {
+    if (!app)
+        return false;
+
+    try {
+        auto udpSink = check_and_cast<UdpSink*> (app);
+        return true;
+    }
+    catch (...) {}
+
+    return false;
+}
+
+bool Rpl::isInvalidDio(const Dio* dio) {
+    // If INFINITE_RANK is advertised not from the preferred parent (poisoning), discard the packet
+    return preferredParent
+            && preferredParent->getSrcAddress() != dio->getSrcAddress()
+            && dio->getRank() == INF_RANK;
+}
+
 void Rpl::processDio(const Ptr<const Dio>& dio)
 {
-    if (isRoot)
+    if (isRoot || isInvalidDio(dio.get()))
         return;
+
     EV_DETAIL << "Processing DIO from " << dio->getSrcAddress()
-            << ", advertised rank - " << dio->getRank() << endl;
+                << ", advertised rank - " << dio->getRank() << endl;
     emit(dioReceivedSignal, dio->dup());
 
     // If node's not a part of any DODAG, join the first one advertised
@@ -786,7 +812,8 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
             trickleTimer->start(false, par("numSkipTrickleIntervalUpdates").intValue());
 
         for (auto app : apps)
-            app->par("destAddresses") = dio->getDodagId().str();
+            if (!isUdpSinkApp(app))
+                app->par("destAddresses") = dio->getDodagId().str();
     }
     else {
         if (!allowDodagSwitching && dio->getDodagId() != dodagId) {
@@ -1000,13 +1027,15 @@ void Rpl::updatePreferredParent()
     if (checkPrefParentChanged(newPrefParentAddr)) {
 
         auto newPrefParentDodagId = newPrefParent->getDodagId();
+        dagInfo.update(newPrefParent);
 
         /** Silently join new DODAG and update dest address for application, TODO: Check with RFC */
         dodagId = newPrefParentDodagId;
         // TODO: Adapt to multiple apps
 
         for (auto app : apps)
-            app->par("destAddresses") = newPrefParentDodagId.str();
+            if (!isUdpSinkApp(app))
+                app->par("destAddresses") = newPrefParentDodagId.str();
 
 //        if (udpApp && !isUdpSink() && udpApp->par("destAddresses").str().empty())
 //            udpApp->par("destAddresses") = newPrefParentDodagId.str();
@@ -1051,29 +1080,35 @@ void Rpl::updatePreferredParent()
     if (newRank != rank) {
         rank = newRank;
         EV_DETAIL << "Updated rank - " << rank << endl;
-
-        // TODO: refactor into separate function
-        cCanvas *canvas = getParentModule()->getParentModule()->getCanvas();
-
-        vector<Ipv6Address> parentsToDelete;
-
-        for (auto bp : backupParents) {
-            if (bp.second->getRank() > rank) {
-                auto bkConnector = backupConnectors.find(bp.second->getSrcAddress());
-
-                if (bkConnector != backupConnectors.end()) {
-                    canvas->removeFigure((*bkConnector).second);
-                    backupConnectors.erase(bkConnector);
-                }
-                parentsToDelete.push_back(bp.second->getSrcAddress());
-            }
-        }
-
-        for (auto addr: parentsToDelete)
-            backupParents.erase(backupParents.find(addr));
+        clearObsoleteBackupParents(backupParents);
 
         emit(rankUpdatedSignal, (long) rank);
     }
+}
+
+void Rpl::clearObsoleteBackupParents(map <Ipv6Address, Dio*> &backupParents) {
+    cCanvas *canvas = getParentModule()->getParentModule()->getCanvas();
+
+    vector<Ipv6Address> parentsToDelete;
+
+    for (auto bp : backupParents) {
+        if (bp.second->getRank() > rank) {
+            auto bkConnector = backupConnectors.find(bp.second->getSrcAddress());
+
+            if (bkConnector != backupConnectors.end()) {
+                canvas->removeFigure((*bkConnector).second);
+                backupConnectors.erase(bkConnector);
+            }
+            parentsToDelete.push_back(bp.second->getSrcAddress());
+        }
+    }
+
+    EV_DETAIL << "Erased obsolete (higher rank) backup parents:" << endl;
+    for (auto addr: parentsToDelete) {
+        backupParents.erase(backupParents.find(addr));
+        EV_DETAIL << addr << ", ";
+    }
+    EV_DETAIL << endl;
 }
 
 bool Rpl::checkPrefParentChanged(const Ipv6Address &newPrefParentAddr)
@@ -1138,7 +1173,7 @@ bool Rpl::checkDuplicateRoute(Ipv6Route *route) {
 void Rpl::appendRplPacketInfo(Packet *datagram) {
     auto rpi = makeShared<RplPacketInfo>();
     rpi->setChunkLength(B(4));
-    rpi->setDown(isRoot || packetTravelsDown(datagram));
+    rpi->setDown(isRoot || isDownlinkPacket(datagram));
     rpi->setRankError(false);
     rpi->setFwdError(false);
     rpi->setInstanceId(instanceId);
@@ -1148,7 +1183,7 @@ void Rpl::appendRplPacketInfo(Packet *datagram) {
             << "\n to UDP datagram: " << datagram << endl;
 }
 
-bool Rpl::packetTravelsDown(Packet *datagram) {
+bool Rpl::isDownlinkPacket(Packet *datagram) {
     auto networkProtocolHeader = findNetworkProtocolHeader(datagram);
     auto dest = networkProtocolHeader->getDestinationAddress().toIpv6();
     EV_DETAIL << "Determining packet forwarding direction:\n destination - " << dest << endl;
@@ -1160,14 +1195,14 @@ bool Rpl::packetTravelsDown(Packet *datagram) {
     }
 
     EV_DETAIL << " next hop - " << ri->getNextHop() << endl;
-    bool res = sourceRouted(datagram)
+    bool res = isSourceRouted(datagram)
             || !(ri->getNextHop().matches(preferredParent->getSrcAddress(), prefixLength));
     EV_DETAIL << " Packet travels " << boolStr(res, "downwards", "upwards");
     return res;
 }
 
 
-bool Rpl::sourceRouted(Packet *pkt) {
+bool Rpl::isSourceRouted(Packet *pkt) {
     EV_DETAIL << "Checking if packet is source-routed" << endl;;
     try {
         auto srh = pkt->popAtBack<SourceRoutingHeader>(B(64));
@@ -1179,10 +1214,11 @@ bool Rpl::sourceRouted(Packet *pkt) {
     return false;
 }
 
+
+// TODO: update to realistic value or calculate dynamically?
 B Rpl::getDaoLength() {
     return B(8);
 }
-
 
 void Rpl::appendDaoTransitOptions(Packet *pkt) {
     appendDaoTransitOptions(pkt, getSelfAddress(), preferredParent->getSrcAddress());
@@ -1255,7 +1291,7 @@ bool Rpl::checkRplRouteInfo(Packet *datagram) {
     // e.g. if unicast P2P packet reaches sub-dodag root with 'O' flag cleared,
     // and this root can route packet downwards to destination, 'O' flag has to be set.
     if (storing)
-        rpi->setDown(isRoot || packetTravelsDown(datagram));
+        rpi->setDown(isRoot || isDownlinkPacket(datagram));
     // try make new shared ptr chunk RPI, to be refactored into reusing existing RPI object
     auto rpiCopy = makeShared<RplPacketInfo>();
     rpiCopy->setChunkLength(getRpiHeaderLength());
@@ -1633,7 +1669,7 @@ void Rpl::addNeighbour(const Ptr<const Dio>& dio)
      */
     auto dioCopy = dio->dup();
     auto dioSender = dio->getSrcAddress();
-    /** If DIO sender has equal rank, consider this node as a backup parent */
+    /** If DIO sender has an equal rank, consider it a backup parent */
     if (dio->getRank() == rank) {
         if (backupParents.find(dioSender) != backupParents.end())
             EV_DETAIL << "Backup parent entry updated - " << dioSender;
@@ -1641,7 +1677,7 @@ void Rpl::addNeighbour(const Ptr<const Dio>& dio)
             EV_DETAIL << "New backup parent added - " << dioSender;
         backupParents[dioSender] = dioCopy;
     }
-    /** If DIO sender has lower rank, consider this node as a candidate parent */
+    /** If DIO sender has a lower rank, consider it a candidate parent */
     if (dio->getRank() < rank) {
         if (candidateParents.find(dioSender) != candidateParents.end())
             EV_DETAIL << "Candidate parent entry updated - " << dioSender;
