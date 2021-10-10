@@ -3,7 +3,7 @@
 RPL (Routing Protocol for Low-Power and Lossy Networks) OMNeT++ simulation model
 
 # Verified Compatibility
-*  OMNeT++ [5.6.X](https://omnetpp.org/download/)
+*  OMNeT++ [5.6.2](https://omnetpp.org/download/old)
 *  INET [4.2.X](https://github.com/inet-framework/inet/releases/download/v4.2.5/inet-4.2.5-src.tgz)
 
 # Installation Instructions:
