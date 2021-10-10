@@ -809,8 +809,9 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
         else
             trickleTimer->start(false, par("numSkipTrickleIntervalUpdates").intValue());
 
+        // Avoid overwriting manually set dest address
         for (auto app : apps)
-            if (!isUdpSinkApp(app))
+            if (!isUdpSinkApp(app) && app->par("destAddresses").stdstringValue().empty())
                 app->par("destAddresses") = dio->getDodagId().str();
     }
     else {
@@ -1029,16 +1030,13 @@ void Rpl::updatePreferredParent()
 
         /** Silently join new DODAG and update dest address for application, TODO: Check with RFC */
         dodagId = newPrefParentDodagId;
-        // TODO: Adapt to multiple apps
 
+        // Avoid overwriting manually set dest addresses
         for (auto app : apps)
-            if (!isUdpSinkApp(app))
+            if (!isUdpSinkApp(app) && app->par("destAddresses").stdstringValue().empty())
                 app->par("destAddresses") = newPrefParentDodagId.str();
 
-//        if (udpApp && !isUdpSink() && udpApp->par("destAddresses").str().empty())
-//            udpApp->par("destAddresses") = newPrefParentDodagId.str();
-
-        /** Notify 6TiSCH Scheduling Function about parent change */
+        /** Notify 6TiSCH Scheduling Function (if present) about parent change */
         auto rplCtrlInfo = new RplGenericControlInfo(newPrefParent->getNodeId());
         EV_DETAIL << "Emitting signal with my new parent's MAC addr - " << MacAddress(newPrefParent->getNodeId()) << endl;
         emit(parentChangedSignal, 0, (cObject*) rplCtrlInfo);
