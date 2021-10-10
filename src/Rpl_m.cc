@@ -1233,7 +1233,7 @@ unsigned int RplHeaderDescriptor::getFieldTypeFlags(int field) const
         field -= basedesc->getFieldCount();
     }
     static unsigned int fieldTypeFlags[] = {
-        FD_ISEDITABLE,    // FIELD_icmpv6Code
+        0,    // FIELD_icmpv6Code
         0,    // FIELD_icmpv6Type
     };
     return (field >= 0 && field < 2) ? fieldTypeFlags[field] : 0;
@@ -1365,7 +1365,6 @@ bool RplHeaderDescriptor::setFieldValueAsString(void *object, int field, int i, 
     }
     RplHeader *pp = (RplHeader *)object; (void)pp;
     switch (field) {
-        case FIELD_icmpv6Code: pp->setIcmpv6Code((inet::RplPacketCode)string2enum(value, "inet::RplPacketCode")); return true;
         default: return false;
     }
 }
@@ -2158,7 +2157,7 @@ unsigned int DioDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,    // FIELD_minInterval
         FD_ISEDITABLE,    // FIELD_dioRedundancyConst
         FD_ISEDITABLE,    // FIELD_dioNumDoublings
-        FD_ISEDITABLE,    // FIELD_ocp
+        0,    // FIELD_ocp
         FD_ISCOMPOUND,    // FIELD_position
         FD_ISCOMPOUND,    // FIELD_color
         FD_ISEDITABLE,    // FIELD_colorId
@@ -2370,7 +2369,6 @@ bool DioDescriptor::setFieldValueAsString(void *object, int field, int i, const 
         case FIELD_minInterval: pp->setMinInterval(string2long(value)); return true;
         case FIELD_dioRedundancyConst: pp->setDioRedundancyConst(string2long(value)); return true;
         case FIELD_dioNumDoublings: pp->setDioNumDoublings(string2long(value)); return true;
-        case FIELD_ocp: pp->setOcp((inet::Ocp)string2enum(value, "inet::Ocp")); return true;
         case FIELD_colorId: pp->setColorId(string2long(value)); return true;
         case FIELD_slotframeLength: pp->setSlotframeLength(string2ulong(value)); return true;
         case FIELD_branchSize: pp->setBranchSize(string2ulong(value)); return true;

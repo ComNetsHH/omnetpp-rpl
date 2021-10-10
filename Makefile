@@ -1,8 +1,8 @@
 #
-# OMNeT++/OMNEST Makefile for omnetpp-rpl
+# OMNeT++/OMNEST Makefile for rpl-github
 #
 # This file was generated with the command:
-#  opp_makemake --nolink -f --deep -O out -KINET_PROJ=../inet -DINET_IMPORT -I. -I$$\(INET_PROJ\)/src -L$$\(INET_PROJ\)/src -Lout/$$\(CONFIGNAME\)/src -lINET$$\(D\) -d src -X.
+#  opp_makemake --nolink -f --deep -O out -KINET4_PROJ=../inet4 -DINET_IMPORT -I. -I$$\(INET4_PROJ\)/src -L$$\(INET4_PROJ\)/src -Lout/$$\(CONFIGNAME\)/src -lINET$$\(D\) -d src -X.
 #
 
 # Output directory
@@ -11,7 +11,7 @@ PROJECTRELATIVE_PATH =
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Other makefile variables (-K)
-INET_PROJ=../inet
+INET4_PROJ=../inet4
 
 #------------------------------------------------------------------------------
 
