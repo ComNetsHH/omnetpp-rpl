@@ -26,7 +26,6 @@
 #include <algorithm>
 #include <regex>
 #include <math.h>
-//#include "../../tsch-master/src/common/VirtualLinkTag_m.h"
 #include "Rpl.h"
 
 namespace inet {
@@ -49,7 +48,6 @@ std::ostream& operator<<(std::ostream& os, std::map<Ipv6Address, std::pair<cMess
     return os;
 }
 
-// TODO: Store DODAG-related info in a separate object
 // TODO: Refactor utility functions out
 
 Rpl::Rpl() :
