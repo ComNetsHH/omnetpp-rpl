@@ -49,6 +49,7 @@ simple Ipv6NeighbourDiscoveryWireless extends Ipv6NeighbourDiscovery like IIpv6N
         // note there's no expiry time for a NS packet, so this shouldn't cause any issues with validation,
         // but helps spread out in time NS packets from multiple neighbors
         double nsForwardingDelay @unit("s") = default(0);
+        bool addRandomDelays = default(true); // Add microseconds delay to each packet transmission to remedy infinite loop bug
         double nceExpiryOverride @unit("s") = default(90000s); // override default lifetime duration of Neighbor Cache Entry
 }
 

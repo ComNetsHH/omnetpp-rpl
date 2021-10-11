@@ -22,6 +22,7 @@
 #include "Ipv6NeighbourDiscoveryWireless.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
+#include "inet/networklayer/icmpv6/Ipv6NeighbourCache.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
@@ -74,11 +75,6 @@ void Ipv6NeighbourDiscoveryWireless::createAndSendRaPacket(const Ipv6Address& de
 void Ipv6NeighbourDiscoveryWireless::handleMessage(cMessage *msg) {
     if (msg->isSelfMessage() && msg->getKind() == WIND_SEND_DELAYED) {
         auto controlInfo = check_and_cast<Ipv6NdPacketInfo*> (msg->getControlInfo());
-
-        EV_DETAIL << "Sending NS delayed"
-                << "dest: " << controlInfo->getDestAddr() << endl
-                << "src: " << controlInfo->getSrcAddr() <<  endl
-                << "ie id: " << controlInfo->getInterfaceId() << endl;
 
         Ipv6NeighbourDiscovery::sendPacketToIpv6Module(
             controlInfo->getMsgPtr(), controlInfo->getDestAddr(), controlInfo->getSrcAddr(), controlInfo->getInterfaceId());

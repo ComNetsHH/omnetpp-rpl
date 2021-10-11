@@ -35,9 +35,19 @@ simple Ipv6NeighbourDiscovery like IIpv6NeighbourDiscovery
         string icmpv6Module;
         string xmipv6Module;
         string routingTableModule;
-        bool addRandomDelays = default(false);
-    	bool showNUDs = default(false); // display number of Neighbor Unreachability Detection timeouts above node's pictogram
-        double nceReachabilityOverride @unis(s) = default(0); // overriding Ipv6InterfaceData IPv6_REACHABLE_TIME constant to reduce amount of ND traffic
+        
+        // CUSTOM WiND PARAMS
+        bool raEnabled = default(true); // Router Advertisements partially overlap with DIOs and can generally be disabled
+        bool addRandomDelays = default(false); // Add microseconds delay to each packet transmission to remedy infinite loop bug
+        bool skipDad = default(false); // Make link-local address permanent immediately, without launching DAD
+        
+        // UPPER BOUND for the delay between NS packet generation and passing it to the IP layer,
+        // note there's no expiry time for a NS packet, so this shouldn't cause any issues with validation,
+        // but helps spread out in time NS packets from multiple neighbors
+        double nsForwardingDelay @unit("s") = default(0s);
+        double nceExpiryOverride @unit("s") = default(90000s); // override default lifetime duration of Neighbor Cache Entry
+        // END CUSTOM PARAMS
+        
         double minIntervalBetweenRAs @unit(s) = default(30ms); //minRtrAdvInterval:  0.03 sec for MIPv6 , declared as parameter to facilitate testing without recompiling (Zarrar 15.07.07)
         double maxIntervalBetweenRAs @unit(s) = default(70ms);  //MaxrtrAdvInterval: 0.07 sec for MIPv6, declared as parameter to facilitate testing without recompiling (Zarrar 15.07.07)
         @display("i=block/network");
