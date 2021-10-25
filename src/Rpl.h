@@ -167,6 +167,7 @@ public:
     bool pUseWarmup;
     bool pLockParent;
     bool isLeaf;
+    bool isMobile;
     uint8_t detachedTimeout; // temporary variable to suppress msg processing after just leaving the DODAG
     cMessage *detachedTimeoutEvent; // temporary msg corresponding to triggering above functionality
     cMessage *daoAckTimeoutEvent; // temporary msg corresponding to triggering above functionality

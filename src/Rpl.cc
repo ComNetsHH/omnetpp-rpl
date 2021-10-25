@@ -69,6 +69,7 @@ Rpl::Rpl() :
     numDaoDropped(0),
     udpPacketsRecv(0),
     isLeaf(false),
+    isMobile(false),
     numParentUpdates(0),
     numDaoForwarded(0),
     apps({})
@@ -131,6 +132,7 @@ void Rpl::initialize(int stage)
         WATCH(rank);
         WATCH(selfAddr);
         WATCH(selfId);
+        WATCH(isMobile);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
@@ -353,6 +355,7 @@ void Rpl::start()
 
     selfId = interfaceTable->getInterface(1)->getMacAddress().getInt();
     auto mobility = check_and_cast<IMobility*> (getParentModule()->getSubmodule("mobility"));
+    isMobile = mobility->getMaxSpeed() > 0;
     position = mobility->getCurrentPosition();
 
     auto numApps = host->par("numApps").intValue();
