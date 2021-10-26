@@ -797,7 +797,8 @@ void Ipv6NeighbourDiscovery::dropQueuedPacketsAwaitingAr(Neighbour *nce)
 
 void Ipv6NeighbourDiscovery::sendPacketToIpv6Module(Packet *msg, const Ipv6Address& destAddr, const Ipv6Address& srcAddr, int interfaceId, double delay)
 {
-    if (!delay)
+
+    if (delay <= 0)
         sendPacketToIpv6Module(msg, destAddr, srcAddr, interfaceId);
     else
     {
@@ -806,7 +807,7 @@ void Ipv6NeighbourDiscovery::sendPacketToIpv6Module(Packet *msg, const Ipv6Addre
         selfmsg->setControlInfo(controlInfo);
         selfmsg->setKind(WIND_SEND_DELAYED);
 
-        scheduleAt(simTime() + SimTime(delay, SIMTIME_S), selfmsg);
+        scheduleAt(simTime() + delay, selfmsg);
     }
 }
 
@@ -859,17 +860,29 @@ void Ipv6NeighbourDiscovery::assignLinkLocalAddress(cMessage *timerMsg)
             EV_DETAIL << "Formed link local address - " << linkLocalAddr << endl;
             ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, SIMTIME_ZERO, SIMTIME_ZERO);
             // CUSTOM WiND PART
-            if (par("skipDad").boolValue())
+            if (par("skipDad").boolValue()) {
                 makeTentativeAddressPermanent(linkLocalAddr, ie);
+                EV_DETAIL << "and assigned permanent" << endl;
+            }
+
             // END CUSTOM PART
         }
 
         //Before we can use this address, we MUST initiate DAD first.
         if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(linkLocalAddr)) {
-            if (ie->getProtocolData<Ipv6InterfaceData>()->getDupAddrDetectTransmits() > 0)
-                initiateDad(linkLocalAddr, ie);
-            else
+
+            // CUSTOM WiND PART
+            if (par("skipDad").boolValue())
                 makeTentativeAddressPermanent(linkLocalAddr, ie);
+            // END CUSTOM PART
+            else
+            {
+                if (ie->getProtocolData<Ipv6InterfaceData>()->getDupAddrDetectTransmits() > 0)
+                    initiateDad(linkLocalAddr, ie);
+                else
+                    makeTentativeAddressPermanent(linkLocalAddr, ie);
+            }
+
         }
     }
     delete timerMsg;
@@ -1928,10 +1941,12 @@ void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAd
     auto packet = new Packet("NSpacket");
     Icmpv6::insertCrc(crcMode, ns, packet);
     packet->insertAtFront(ns);
-//    sendPacketToIpv6Module(packet, dgDestAddr, dgSrcAddr, ie->getInterfaceId()); ORIGINAL
+//    ORIGINAL
+//    sendPacketToIpv6Module(packet, dgDestAddr, dgSrcAddr, ie->getInterfaceId());
 
     // CUSTOM WiND PART
-    sendPacketToIpv6Module(packet, dgDestAddr, dgSrcAddr, ie->getInterfaceId(), nsFwdDelay ? uniform(0, nsFwdDelay) : 0);
+    auto timeoutValue = nsFwdDelay > 0 ? uniform(0, nsFwdDelay, myMacAddr.getInt() % 10) : 0; // FIXME: how to get num RNGs?
+    sendPacketToIpv6Module(packet, dgDestAddr, dgSrcAddr, ie->getInterfaceId(), timeoutValue);
 }
 
 void Ipv6NeighbourDiscovery::processNsPacket(Packet *packet, const Ipv6NeighbourSolicitation *ns)
