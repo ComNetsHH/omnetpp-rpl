@@ -377,7 +377,7 @@ void Ipv6::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, Ipv6Ad
 bool Ipv6::isAppPacket(Packet *packet) {
     std::string packetName(packet->getFullName());
 
-    return packetName.find("APP") != std::string::npos;
+    return packetName.find("App") != std::string::npos;
 }
 
 void Ipv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, Ipv6Address requestedNextHopAddress, bool fromHL)
