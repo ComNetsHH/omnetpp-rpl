@@ -477,7 +477,10 @@ void Rpl::detachFromDodag() {
     floating = true;
     EV_DETAIL << "Detached state enabled, no RPL packets will be processed for "
             << (int)detachedTimeout << "s" << endl;
-    cancelEvent(detachedTimeoutEvent);
+    if (detachedTimeoutEvent)
+        cancelEvent(detachedTimeoutEvent);
+    else
+        detachedTimeoutEvent = new cMessage("Detachment from DODAG timeout", DETACHED_TIMEOUT);
     drawConnector(position, cFigure::BLACK);
     scheduleAt(simTime() + detachedTimeout, detachedTimeoutEvent);
 }
@@ -498,6 +501,11 @@ void Rpl::eraseBackupParentList(map <Ipv6Address, Dio*> &backupParents) {
 }
 
 void Rpl::purgeDaoRoutes() {
+    if (!routingTable) {
+        EV_WARN << "No routing table module found, can't purge routes learned from DAOs" << endl;
+        return;
+    }
+
     std::list<Ipv6Route *> purgedRoutes;
     EV_DETAIL << "Purging DAO routes from the routing table: " << endl;
     auto numRoutes = routingTable->getNumRoutes();
@@ -1021,6 +1029,11 @@ void Rpl::updatePreferredParent()
     else
         newPrefParent = objectiveFunction->getPreferredParent(candidateParents, preferredParent);
 
+    if (!newPrefParent) {
+        EV_WARN << "Objective function couldn't select preferred parent" << endl;
+        return;
+    }
+
     auto newPrefParentAddr = newPrefParent->getSrcAddress();
     /**
      * If a better preferred parent is discovered (based on the objective function metric),
@@ -1531,7 +1544,7 @@ std::string Rpl::printHeader(RplPacketInfo *rpi) {
 void Rpl::deletePrefParent(bool poisoned)
 {
     if (!preferredParent) {
-        EV_WARN << "Cannot delete preferred parent, it's nullptr" << endl;
+        EV_WARN << "No preferred parent to delete" << endl;
         return;
     }
 
@@ -1552,6 +1565,16 @@ void Rpl::clearParentRoutes() {
     }
 
     // Delete routes with prefix length 0 (default routes)
+    if (!interfaceEntryPtr) {
+        EV_WARN << "No interface entry found, can't clear routes associated with preferred parent" << endl;
+        return;
+    }
+
+    if (!routingTable) {
+        EV_WARN << "No routing table module found, can't clear routes associated with preferred parent" << endl;
+        return;
+    }
+
     deleteDefaultRoutes(interfaceEntryPtr->getInterfaceId());
 
     std::vector<Ipv6Route*> routesToDelete;
@@ -1576,6 +1599,11 @@ void Rpl::deleteDefaultRoutes(int interfaceID) {
     if (interfaceID < 0) {
         EV_ERROR << "Invalid interface id provided" << endl;
         return;
+    }
+
+    if (!routingTable) {
+         EV_WARN << "No routing table info found, cannot clear default routes" << endl;
+         return;
     }
 
     EV_INFO << "/// Removing default routes for interface=" << interfaceID << endl;
@@ -1744,8 +1772,8 @@ void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
             {
                 deletePrefParent();
                 // TODO: Redirect all packets already enqueued for previous pref. parent to the new one
+                // or flush the queue completely
                 updatePreferredParent();
-                pUnreachabilityDetectionEnabled = false; // FIXME: remove this after calibrating lossy scenario
             }
         }
     }
