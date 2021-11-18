@@ -1,8 +1,10 @@
 import inet.common.scenario.ScenarioManager;
 import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
+import inet.physicallayer.contract.packetlevel.IRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 import rpl.RplRouter;
 import rpl.configurator.RplNetConfigurator;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 
 network RplNetwork
 {
@@ -15,10 +17,10 @@ network RplNetwork
             @display("p=550,50");
             networkRouteVisualizer.displayRoutes = true;
         }
-        radioMedium: UnitDiskRadioMedium {
+        radioMedium: <> like IRadioMedium {
             @display("p=550,250;is=s");
         }
-        configurator: RplNetConfigurator {
+        configurator: Ipv6FlatNetworkConfigurator {
             @display("p=550,150;is=s");
         }
         

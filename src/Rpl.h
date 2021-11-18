@@ -591,6 +591,7 @@ public:
     std::vector<uint16_t> getNodesPerHopDistance();
     bool isRplPacket(Packet *packet);
     void clearDaoAckTimer(Ipv6Address daoDest);
+    void clearAllDaoAckTimers();
 
     std::vector<Ipv6Address> getNearestChildren();
     int getNumDownlinks();
@@ -601,6 +602,7 @@ public:
     {
         drawConnector(target, col, Ipv6Address::UNSPECIFIED_ADDRESS);
     }
+    void drawConnector(Ipv6Address neighborAddr, Coord pos, cFigure::Color col);
 
     void setLineProperties(cLineFigure *connector, Coord target, cFigure::Color col, bool dashed) const;
     void setLineProperties(cLineFigure *connector, Coord target, cFigure::Color col) const
@@ -622,6 +624,9 @@ public:
 
     /** Pick random color for parent-child connector drawing (if node's sink) */
     cFigure::Color pickRandomColor();
+
+    /** Clears from routing table weird destination prefixes, which disrupt next hop selection */
+    virtual void deleteManualRoutes();
 };
 
 } // namespace inet

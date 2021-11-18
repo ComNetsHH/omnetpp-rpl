@@ -61,10 +61,8 @@ void TrickleTimer::start(bool warmupDelay, int skipIntervalDoublings) {
     maxInterval = minInterval * (pow(2, numDoublings));
     ctrlMsgReceivedCtn = 0;
 
-    intervalTriggerEvent = new cMessage("Trickle timer current interval ended",
-                    TRICKLE_INTERVAL_UPDATE_EVENT);
-    trickleTriggerEvent = new cMessage("Trickle timer trigger self-msg",
-                TRICKLE_TRIGGER_EVENT);
+    intervalTriggerEvent = new cMessage("TT interval update", TRICKLE_INTERVAL_UPDATE_EVENT);
+    trickleTriggerEvent = new cMessage("TT triggered", TRICKLE_TRIGGER_EVENT);
 
     scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
     scheduleNext();
@@ -99,6 +97,13 @@ void TrickleTimer::processSelfMessage(cMessage *message)
             }
 
             ctrlMsgReceivedCtn = 0;
+
+            if (!intervalTriggerEvent)
+                intervalTriggerEvent = new cMessage("TT interval update", TRICKLE_INTERVAL_UPDATE_EVENT);
+
+            if (intervalTriggerEvent->isScheduled())
+                cancelEvent(intervalTriggerEvent);
+
             scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
             scheduleNext();
 
@@ -119,6 +124,12 @@ void TrickleTimer::scheduleNext() {
     // TODO: Make delay float to allow more diverse transmission intervals
     unsigned long delay = currentInterval/2 + intrand(currentInterval/2);
     try {
+        if (!trickleTriggerEvent)
+            trickleTriggerEvent = new cMessage("TT triggered", TRICKLE_TRIGGER_EVENT);
+
+        if (trickleTriggerEvent->isScheduled())
+            cancelEvent(trickleTriggerEvent);
+
         scheduleAt(simTime() + delay, trickleTriggerEvent);
         EV_DETAIL << "DIO broadcast scheduled with delay - " << delay << endl;
     } catch (std::exception &e) {
@@ -142,8 +153,14 @@ void TrickleTimer::reset() {
     currentInterval = minInterval;
     intervalUpdatesCtn = 0;
     try {
-        cancelEvent(intervalTriggerEvent);
-        cancelEvent(trickleTriggerEvent);
+        if (intervalTriggerEvent)
+            cancelEvent(intervalTriggerEvent);
+        else
+            intervalTriggerEvent = new cMessage("TT interval update", TRICKLE_INTERVAL_UPDATE_EVENT);
+
+        if (trickleTriggerEvent)
+            cancelEvent(trickleTriggerEvent);
+
         scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
         EV_DETAIL << "Trickle timer reset" << endl;
     }
@@ -157,8 +174,10 @@ void TrickleTimer::reset() {
 
 void TrickleTimer::suspend() {
     Enter_Method_Silent("TrickleTimer::suspend()");
-    cancelEvent(intervalTriggerEvent);
-    cancelEvent(trickleTriggerEvent);
+    if (intervalTriggerEvent)
+        cancelEvent(intervalTriggerEvent);
+    if (trickleTriggerEvent)
+        cancelEvent(trickleTriggerEvent);
     EV_DETAIL << "Trickle timer suspended " << endl;
 }
 

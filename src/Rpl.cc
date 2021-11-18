@@ -27,6 +27,7 @@
 #include <regex>
 #include <math.h>
 #include "Rpl.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
 
@@ -167,6 +168,21 @@ void Rpl::generateLayout(cModule *net) {
     configureTopologyLayout(*anchor, padX, padY, gap, net, bLayout, numBranches, numHosts, numSinks);
 }
 
+void Rpl::deleteManualRoutes() {
+    auto numRoutes = routingTable->getNumRoutes();
+    vector<Ipv6Route*> deleteableRts;
+
+    for (int i = 0; i < numRoutes; i++) {
+        auto ri = routingTable->getRoute(i);
+        string routeTypeAbbr(ri->getSourceTypeAbbreviation());
+
+        if (ri->getSourceType() == Ipv6Route::MANUAL || routeTypeAbbr.find("???") != string::npos)
+            deleteableRts.push_back(ri);
+    }
+
+    for (auto rt: deleteableRts)
+        routingTable->deleteRoute(rt);
+}
 
 void Rpl::configureTopologyLayout(Coord anchorPoint, double padX, double padY, double columnGapMultiplier,
         cModule *network, bool branchLayout, int numBranches, int numHosts, int numSinks)
@@ -368,6 +384,8 @@ void Rpl::start()
     detachedTimeoutEvent = new cMessage("", DETACHED_TIMEOUT);
     selfAddr = getSelfAddress();
 
+    deleteManualRoutes();
+
     if (isRoot && !par("disabled").boolValue()) {
         trickleTimer->start(pUseWarmup, par("numSkipTrickleIntervalUpdates").intValue());
         dodagColor = pickRandomColor();
@@ -435,6 +453,14 @@ void Rpl::clearDaoAckTimer(Ipv6Address daoDest) {
     pendingDaoAcks.erase(daoDest);
 }
 
+void Rpl::clearAllDaoAckTimers() {
+    for (auto t: pendingDaoAcks)
+        if (t.second.first && t.second.first->isSelfMessage())
+            cancelEvent(t.second.first);
+
+    pendingDaoAcks.erase(pendingDaoAcks.begin(), pendingDaoAcks.end());
+}
+
 void Rpl::retransmitDao(Ipv6Address advDest) {
     EV_DETAIL << "DAO_ACK for " << advDest << " timed out, attempting retransmit" << endl;
 
@@ -469,6 +495,7 @@ void Rpl::detachFromDodag() {
 
     /** Delete all routes associated with DAO destinations of the former DODAG */
     purgeDaoRoutes();
+    clearAllDaoAckTimers();
     rank = INF_RANK;
     trickleTimer->suspend(); // TODO: re-think this part of TT lifecycle, possibly replace with stop
     if (par("poisoning").boolValue())
@@ -787,9 +814,12 @@ bool Rpl::isUdpSinkApp(cModule* app) {
 
 bool Rpl::isInvalidDio(const Dio* dio) {
     // If INFINITE_RANK is advertised not from the preferred parent (poisoning), discard the packet
-    return preferredParent
-            && preferredParent->getSrcAddress() != dio->getSrcAddress()
-            && dio->getRank() == INF_RANK;
+
+    // 1st clause: if the node is detached from the DODAG and the advertised rank is INFINITE_RANK, discard the packet
+    // 2nd clause: if the node has preferred parent but the DIO advertising INFINITE_RANK is NOT coming from the preferred parent,
+    // discard the packet
+    return (!preferredParent && dio->getRank() == INF_RANK)
+            || (preferredParent && preferredParent->getSrcAddress() != dio->getSrcAddress() && dio->getRank() == INF_RANK);
 }
 
 void Rpl::processDio(const Ptr<const Dio>& dio)
@@ -802,7 +832,7 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
     emit(dioReceivedSignal, dio->dup());
 
     // If node's not a part of any DODAG, join the first one advertised
-    if (dodagId == Ipv6Address::UNSPECIFIED_ADDRESS && dio->getRank() != INF_RANK)
+    if (dodagId == Ipv6Address::UNSPECIFIED_ADDRESS)
     {
         dodagId = dio->getDodagId();
         dodagVersion = dio->getDodagVersion();
@@ -813,7 +843,6 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
 //        selfAddr = getSelfAddress();
         dodagColor = dio->getColor();
         EV_DETAIL << "Joined DODAG with id - " << dodagId << endl;
-//        purgeRoutingTable();
         // Start broadcasting DIOs, diffusing DODAG control data, TODO: refactor TT lifecycle
         if (trickleTimer->hasStarted())
             trickleTimer->reset();
@@ -874,8 +903,17 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
         return;
     }
 
+    if (!isRoot && !preferredParent) {
+        EV_DETAIL << "Node is detached from DODAG, discarding DAO" << endl;
+        return;
+    }
+
     emit(daoReceivedSignal, dao->dup());
     auto daoSender = dao->getSrcAddress();
+
+    if (!isRoot && daoSender == preferredParent->getSrcAddress())
+        throw cRuntimeError("Received DAO from preferred parent, loop detected!");
+
     auto advertisedDest = dao->getReachableDest();
     EV_DETAIL << "Processing DAO with seq num " << std::to_string(dao->getSeqNum()) << " from "
             << daoSender << " advertising " << advertisedDest << endl;
@@ -1714,19 +1752,21 @@ void Rpl::addNeighbour(const Ptr<const Dio>& dio)
     }
     EV_DETAIL << " (rank " << dio->getRank() << ")" << endl;
 
-    if (!pShowBackupParents)
-        return;
+    // Highlight backup parents with a dashed line
+    if (pShowBackupParents)
+        drawConnector(dioSender, dio->getPosition(),  dio->getColor());
+}
 
-    // Draw dashed connector line to candidate or backup parents
+void Rpl::drawConnector(Ipv6Address neighborAddr, Coord pos, cFigure::Color col) {
     cCanvas *canvas = getParentModule()->getParentModule()->getCanvas();
     EV_DETAIL << "Canvas - " << canvas << endl;
-    if (backupConnectors.find(dioSender) == backupConnectors.end()) {
+    if (backupConnectors.find(neighborAddr) == backupConnectors.end()) {
         EV_DETAIL << "No connector yet found for this neighbor" << endl;
         auto connector = new cLineFigure("backupParentConnector");
-        setLineProperties(connector, dio->getPosition(), dio->getColor(), true);
+        setLineProperties(connector, pos, col, true);
         canvas->addFigure(connector);
         EV_DETAIL << "Connector added - " << connector << endl;
-        backupConnectors[dioSender] = connector;
+        backupConnectors[neighborAddr] = connector;
     }
 }
 
