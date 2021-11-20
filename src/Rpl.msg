@@ -90,6 +90,8 @@ class Dio extends RplPacket {
     Ocp ocp;                
     
     // Non-RFC fields, misc
+    string nodeName; // name of the sender node, e.g. host[0], needed for dynamic update of connectiviy arrows in GUI
+    bool isMobile;
     Coord position; // DIO sender node location to draw directed parent-child connectors on canvas
     cFigure::Color color; // Color of the parent-child connector line, per DODAG
 	int colorId; // DODAG color id (from static palette) for multi-GW scenario

@@ -195,7 +195,7 @@ public:
     static std::string boolStr(bool cond) { return boolStr(cond, "true", "false"); }
 
     /** Search for a submodule of @param host by its name @param sname */
-    static cModule* findSubmodule(std::string sname, cModule *host);
+    cModule* findSubmodule(std::string sname, cModule *host);
 
     /** Randomly pick @param numRequested elements from a [0..@param total] array*/
     static std::vector<int> pickRandomly(int total, int numRequested);
@@ -395,8 +395,7 @@ public:
     std::string printMap(const Map& map);
 
     bool selfGeneratedPkt(Packet *pkt);
-    bool isUdpSink();
-    bool isUdpSinkApp(cModule* app);
+    bool isUdpSink(cModule* app);
     void purgeRoutingTable();
 
     /**
@@ -621,6 +620,14 @@ public:
     virtual void clearObsoleteBackupParents(map <Ipv6Address, Dio*> &backupParents);
 
     double startDelay;
+
+    string hostName; // name of the host module, e.g. "host" or "sink" etc.
+
+    IMobility *parentMobilityMod; // preferred parent mobility module
+    IMobility *mobility;
+
+    // look for mobility module of the parent, if it's mobile, to dynamically update the connection arrow
+    void setParentMobility(Dio* prefParent);
 
     /** Pick random color for parent-child connector drawing (if node's sink) */
     cFigure::Color pickRandomColor();

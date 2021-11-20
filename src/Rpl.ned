@@ -35,6 +35,7 @@ module Rpl like IManetRouting
      	@signal[isSink](type=bool);
      	@signal[parentChanged](type=long);
      	@signal[rankUpdated](type=long);
+     	@signal[parentUnreachable](type=inet::Dio);
      	@statistic[isSink](title="Node is a sink"; source="isSink"; record=count; interplationmode=none);
         @statistic[dioReceived](title = "DIO packets received"; source="dioReceived"; record=count; interpolationmode=none);  
         @statistic[daoReceived](title = "DAO packets received"; source="daoReceived"; record=count; interpolationmode=none);

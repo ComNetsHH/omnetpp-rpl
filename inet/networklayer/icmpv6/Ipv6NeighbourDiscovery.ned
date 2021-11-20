@@ -17,8 +17,6 @@
 
 package inet.networklayer.icmpv6;
 
-import inet.networklayer.contract.IIpv6NeighbourDiscovery;
-
 //
 // Implements IPv6 Neighbour Discovery.
 //
@@ -27,7 +25,7 @@ import inet.networklayer.contract.IIpv6NeighbourDiscovery;
 //
 // @see ~Ipv6, ~Ipv6RoutingTable, ~Icmpv6
 //
-simple Ipv6NeighbourDiscovery like IIpv6NeighbourDiscovery
+simple Ipv6NeighbourDiscovery
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -37,9 +35,9 @@ simple Ipv6NeighbourDiscovery like IIpv6NeighbourDiscovery
         string routingTableModule;
         
         // CUSTOM WiND PARAMS
-        bool raEnabled = default(true); // Router Advertisements partially overlap with DIOs and can generally be disabled
+        bool raEnabled = default(false); // Router Advertisements partially overlap with DIOs and can generally be disabled
         bool addRandomDelays = default(false); // Add microseconds delay to each packet transmission to remedy infinite loop bug
-        bool skipDad = default(false); // Make link-local address permanent immediately, without launching DAD
+        bool skipDad = default(true); // Make link-local address permanent immediately, without launching DAD
         
         // UPPER BOUND for the delay between NS packet generation and passing it to the IP layer,
         // note there's no expiry time for a NS packet, so this shouldn't cause any issues with validation,

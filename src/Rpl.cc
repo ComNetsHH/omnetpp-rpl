@@ -100,6 +100,8 @@ void Rpl::initialize(int stage)
 
         daoEnabled = par("daoEnabled").boolValue();
         host = getContainingNode(this);
+        hostName = host->getFullName();
+        EV_DETAIL << "My full name: " << hostName << endl;
 
         objectiveFunction = new ObjectiveFunction(par("objectiveFunctionType").stdstringValue());
         objectiveFunction->setMinHopRankIncrease(par("minHopRankIncrease").intValue());
@@ -308,6 +310,8 @@ cFigure::Color Rpl::pickRandomColor() {
 }
 
 cModule* Rpl::findSubmodule(std::string sname, cModule *host) {
+    EV_DETAIL << "Looking for module " << sname << " in " << host << endl;
+
     for (cModule::SubmoduleIterator it(host); !it.end(); ++it) {
         cModule *subm = *it;
         std::string s(subm->getFullName());
@@ -370,7 +374,7 @@ void Rpl::start()
     }
 
     selfId = interfaceTable->getInterface(1)->getMacAddress().getInt();
-    auto mobility = check_and_cast<IMobility*> (getParentModule()->getSubmodule("mobility"));
+    mobility = check_and_cast<IMobility*> (getParentModule()->getSubmodule("mobility"));
     isMobile = mobility->getMaxSpeed() > 0;
     position = mobility->getCurrentPosition();
 
@@ -400,6 +404,19 @@ void Rpl::start()
 }
 
 void Rpl::refreshDisplay() const {
+    if (preferredParent && preferredParent->isMobile() && prefParentConnector && parentMobilityMod) {
+        auto parentLoc = parentMobilityMod->getCurrentPosition();
+        prefParentConnector->setEnd(cFigure::Point(parentLoc.x, parentLoc.y));
+    }
+
+    if (isMobile && prefParentConnector) {
+        auto currentCoord = mobility->getCurrentPosition();
+        prefParentConnector->setStart(cFigure::Point(currentCoord.x, currentCoord.y));
+
+        if (!preferredParent)
+            prefParentConnector->setEnd(cFigure::Point(currentCoord.x, currentCoord.y));
+    }
+
     if (isRoot) {
         host->getDisplayString().setTagArg("t", 0, std::string(" num rcvd: " + std::to_string(udpPacketsRecv)).c_str());
         host->getDisplayString().setTagArg("t", 1, "l"); // set display text position to 'left'
@@ -504,11 +521,13 @@ void Rpl::detachFromDodag() {
     floating = true;
     EV_DETAIL << "Detached state enabled, no RPL packets will be processed for "
             << (int)detachedTimeout << "s" << endl;
-    if (detachedTimeoutEvent)
+    // TODO: this was causing runtime crash, figure out how can this message not be a self-msg?
+    if (detachedTimeoutEvent && detachedTimeoutEvent->isSelfMessage())
         cancelEvent(detachedTimeoutEvent);
     else
         detachedTimeoutEvent = new cMessage("Detachment from DODAG timeout", DETACHED_TIMEOUT);
-    drawConnector(position, cFigure::BLACK);
+    if (!isMobile)
+        drawConnector(position, cFigure::BLACK);
     scheduleAt(simTime() + detachedTimeout, detachedTimeoutEvent);
 }
 
@@ -748,6 +767,8 @@ const Ptr<Dio> Rpl::createDio()
     dio->setDodagId(isRoot ? getSelfAddress() : dodagId);
     dio->setSrcAddress(getSelfAddress());
     dio->setPosition(position);
+    dio->setNodeName(hostName.c_str());
+    dio->setIsMobile(isMobile);
     if (isRoot)
         dio->setColor(dodagColor);
     else
@@ -788,28 +809,24 @@ const Ptr<Dao> Rpl::createDao(const Ipv6Address &reachableDest, bool ackRequired
     return dao;
 }
 
-bool Rpl::isUdpSink() {
-    if (udpApp)
-        try {
-            auto udpSink = check_and_cast<UdpSink*> (udpApp);
-            return true;
-        }
-        catch (...) {}
-
-    return false;
-}
-
-bool Rpl::isUdpSinkApp(cModule* app) {
+bool Rpl::isUdpSink(cModule* app) {
     if (!app)
         return false;
 
-    try {
-        auto udpSink = check_and_cast<UdpSink*> (app);
-        return true;
-    }
-    catch (...) {}
+    std::string appName(app->getFullName());
 
-    return false;
+    bool res = appName.find("Sink") != std::string::npos;
+    EV_DETAIL << appName << " checking if UDP sink: " << (res ? "true" : "false") << endl;
+
+    return res;
+
+//    try {
+//        auto udpSink = check_and_cast<UdpSink*> (app);
+//        return true;
+//    }
+//    catch (...) {}
+//
+//    return false;
 }
 
 bool Rpl::isInvalidDio(const Dio* dio) {
@@ -851,7 +868,7 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
 
         // Avoid overwriting manually set dest address
         for (auto app : apps)
-            if (!isUdpSinkApp(app) && app->par("destAddresses").stdstringValue().empty())
+            if (!isUdpSink(app) && app->par("destAddresses").stdstringValue().empty())
                 app->par("destAddresses") = dio->getDodagId().str();
     }
     else {
@@ -1028,7 +1045,6 @@ void Rpl::drawConnector(Coord target, cFigure::Color col, Ipv6Address backupPare
         return;
     }
 
-
     // If an arrow to preferred parent is already present, we only need to update its properties
     if (prefParentConnector) {
         prefParentConnector->setLineColor(col);
@@ -1040,6 +1056,16 @@ void Rpl::drawConnector(Coord target, cFigure::Color col, Ipv6Address backupPare
     prefParentConnector = new cLineFigure("preferredParentConnector");
     setLineProperties(prefParentConnector, target, col);
     canvas->addFigure(prefParentConnector);
+}
+
+void Rpl::setParentMobility(Dio* prefParent) {
+    if (!prefParent || !prefParent->isMobile())
+        return;
+
+    auto prefParentModule = findSubmodule(prefParent->getNodeName(), host->getParentModule());
+
+    if (prefParentModule)
+        parentMobilityMod = check_and_cast<IMobility*> (prefParentModule->getSubmodule("mobility"));
 }
 
 void Rpl::updatePreferredParent()
@@ -1079,6 +1105,8 @@ void Rpl::updatePreferredParent()
      */
     if (checkPrefParentChanged(newPrefParentAddr)) {
 
+        setParentMobility(newPrefParent);
+
         auto newPrefParentDodagId = newPrefParent->getDodagId();
         dagInfo.update(newPrefParent);
 
@@ -1087,7 +1115,7 @@ void Rpl::updatePreferredParent()
 
         // Avoid overwriting manually set dest addresses
         for (auto app : apps)
-            if (!isUdpSinkApp(app) && app->par("destAddresses").stdstringValue().empty())
+            if (!isUdpSink(app) && app->par("destAddresses").stdstringValue().empty())
                 app->par("destAddresses") = newPrefParentDodagId.str();
 
         /** Notify 6TiSCH Scheduling Function (if present) about parent change */
