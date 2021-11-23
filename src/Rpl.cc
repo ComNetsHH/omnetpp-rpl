@@ -813,20 +813,13 @@ bool Rpl::isUdpSink(cModule* app) {
     if (!app)
         return false;
 
-    std::string appName(app->getFullName());
+    std::string appName(app->getNedTypeName());
 
     bool res = appName.find("Sink") != std::string::npos;
-    EV_DETAIL << appName << " checking if UDP sink: " << (res ? "true" : "false") << endl;
+    EV_DETAIL << appName << " checking if UDP sink: " << (res ? "true" : "false")
+            << ", app name: " << appName << endl;
 
     return res;
-
-//    try {
-//        auto udpSink = check_and_cast<UdpSink*> (app);
-//        return true;
-//    }
-//    catch (...) {}
-//
-//    return false;
 }
 
 bool Rpl::isInvalidDio(const Dio* dio) {
