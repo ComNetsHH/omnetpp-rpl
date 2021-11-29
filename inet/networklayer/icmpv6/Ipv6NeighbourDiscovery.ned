@@ -36,8 +36,9 @@ simple Ipv6NeighbourDiscovery
         
         // CUSTOM WiND PARAMS
         bool raEnabled = default(false); // Router Advertisements partially overlap with DIOs and can generally be disabled
-        bool addRandomDelays = default(false); // Add microseconds delay to each packet transmission to remedy infinite loop bug
+        bool addRandomDelays = default(true); // Add microseconds delay to each packet transmission to remedy infinite loop bug
         bool skipDad = default(true); // Make link-local address permanent immediately, without launching DAD
+        bool disableNud = default(true); // Completely disable Neighbor Unreachability Detection
         
         // UPPER BOUND for the delay between NS packet generation and passing it to the IP layer,
         // note there's no expiry time for a NS packet, so this shouldn't cause any issues with validation,

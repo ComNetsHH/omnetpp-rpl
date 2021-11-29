@@ -528,6 +528,11 @@ Ipv6Address Ipv6NeighbourDiscovery::determineNextHop(const Ipv6Address& destAddr
 
 void Ipv6NeighbourDiscovery::initiateNeighbourUnreachabilityDetection(Neighbour *nce)
 {
+    // CUSTOM WiND PART
+    if (par("disableNud").boolValue())
+        return;
+    // END CUSTOM PART
+
     ASSERT(nce->reachabilityState == Ipv6NeighbourCache::STALE);
     ASSERT(nce->nudTimeoutEvent == nullptr);
     const Key *nceKey = nce->nceKey;
