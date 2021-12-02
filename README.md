@@ -7,7 +7,7 @@ OMNeT++ [5.6.X](https://omnetpp.org/download/old), INET [4.2.X](https://github.c
 
 # Installation Instructions:
 1. Replace INET src files with the ones included in this repo, **following the folder structure**.
-2. In INET project Properties -> OMNeT++ -> Project Features disable "Mobile IPv6 Protocol (xMIPv6)".
+2. In INET project Properties -> OMNeT++ -> Project Features disable "Mobile IPv6 Protocol (xMIPv6)" and "Visualization".
 3. In RPL project Properties -> OMNeT++ -> Makemake -> src -> Options -> Custom add the following line:  
 `MSGC:=$(MSGC) --msg6`
 4. Add INET to RPL project references, by navigating RPL project Properties -> Project References.
