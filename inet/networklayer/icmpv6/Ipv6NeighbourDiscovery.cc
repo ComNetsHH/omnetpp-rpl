@@ -43,13 +43,7 @@ namespace inet {
 #define MK_RD_TIMEOUT                  5
 #define MK_NUD_TIMEOUT                 6
 #define MK_AR_TIMEOUT                  7
-
-
-// CUSTOM WiND PARAMETERS
-#define WIND_SEND_DELAYED              8
-#define WIND_MICRO_DELAY_MIN           0.3
-#define WIND_MICRO_DELAY_MAX           0.5
-// END CUSTOM
+#define WIND_SEND_DELAYED              8 // CUSTOM msg kind for WIND (wireless neighbor discovery)
 
 
 Define_Module(Ipv6NeighbourDiscovery);
@@ -100,7 +94,14 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
         nsFwdDelay = par("nsForwardingDelay").doubleValue();
+
+        EV_DETAIL << "ns forwarding delay: " << nsFwdDelay << endl;
+
         pAddRandomDelays = par("addRandomDelays").boolValue();
+        pRandomDelayMin = par("randomDelayMin").doubleValue();
+        pRandomDelayMax = par("randomDelayMax").doubleValue();
+
+        EV_DETAIL << "pAddRandomDelays enabled: " << pAddRandomDelays << " in range " << pRandomDelayMin << "-" << pRandomDelayMax << endl;
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         cModule *node = findContainingNode(this);
@@ -239,6 +240,12 @@ void Ipv6NeighbourDiscovery::finish()
 {
 }
 
+bool Ipv6NeighbourDiscovery::isAppPacket(Packet *packet) {
+    std::string packetName(packet->getFullName());
+
+    return packetName.find("App") != std::string::npos;
+}
+
 void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
 {
     const auto& msg = packet->peekAtFront<Ipv6Header>();
@@ -308,10 +315,16 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
         EV_INFO << "Reachability State is STALE.\n";
 
         // CUSTOM WiND PART
-        if (pAddRandomDelays)
-            sendDelayed(packet, uniform(WIND_MICRO_DELAY_MIN, WIND_MICRO_DELAY_MAX), "ipv6Out");
-        else
+        if (pAddRandomDelays && !isAppPacket(packet)) {
+            auto d = uniform(pRandomDelayMin, pRandomDelayMax);
+            sendDelayed(packet, d, "ipv6Out");
+
+            EV_DETAIL << "Forwarding non-APP packet " << packet << " with delay: " << d << "s" << endl;
+        }
+        else {
+            EV_DETAIL << "Forwarding APP packet " << packet << "without delay" << endl;
             send(packet, "ipv6Out");
+        }
         // CUSTOM PART END
 
 //        send(packet, "ipv6Out"); ORIGINAL
@@ -320,11 +333,16 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
     case Ipv6NeighbourCache::REACHABLE:
         EV_INFO << "Next hop is REACHABLE, sending packet to next-hop address.";
 
-        // CUSTOM WiND PART
-        if (pAddRandomDelays)
-            sendDelayed(packet, uniform(WIND_MICRO_DELAY_MIN, WIND_MICRO_DELAY_MAX), "ipv6Out");
-        else
+        if (pAddRandomDelays && !isAppPacket(packet)) {
+            auto d = uniform(pRandomDelayMin, pRandomDelayMax);
+            sendDelayed(packet, d, "ipv6Out");
+
+            EV_DETAIL << "Forwarding non-APP packet " << packet << " with delay: " << d << "s" << endl;
+        }
+        else {
+            EV_DETAIL << "Forwarding APP packet " << packet << "without delay" << endl;
             send(packet, "ipv6Out");
+        }
         // CUSTOM PART END
 
 //        send(packet, "ipv6Out"); ORIGINAL
@@ -333,10 +351,17 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
         EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
 
         // CUSTOM WiND PART
-        if (pAddRandomDelays)
-            sendDelayed(packet, uniform(WIND_MICRO_DELAY_MIN, WIND_MICRO_DELAY_MAX), "ipv6Out");
-        else
+        if (pAddRandomDelays && !isAppPacket(packet)) {
+            auto d = uniform(pRandomDelayMin, pRandomDelayMax);
+            sendDelayed(packet, d, "ipv6Out");
+
+            EV_DETAIL << "Forwarding non-APP packet " << packet << " with delay: " << d << "s" << endl;
+        }
+        else {
+            EV_DETAIL << "Forwarding APP packet " << packet << "without delay" << endl;
             send(packet, "ipv6Out");
+        }
+
         // CUSTOM PART END
 
 //        send(packet, "ipv6Out"); ORIGINAL
@@ -345,10 +370,17 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
         EV_INFO << "Next hop is in PROBE state, sending packet to next-hop address.";
 
         // CUSTOM WiND PART
-        if (pAddRandomDelays)
-            sendDelayed(packet, uniform(WIND_MICRO_DELAY_MIN, WIND_MICRO_DELAY_MAX), "ipv6Out");
-        else
+        if (pAddRandomDelays && !isAppPacket(packet)) {
+            auto d = uniform(pRandomDelayMin, pRandomDelayMax);
+            sendDelayed(packet, d, "ipv6Out");
+
+            EV_DETAIL << "Forwarding non-APP packet " << packet << " with delay: " << d << "s" << endl;
+        }
+        else {
+            EV_DETAIL << "Forwarding APP packet " << packet << "without delay" << endl;
             send(packet, "ipv6Out");
+        }
+
         // CUSTOM PART END
 
 //        send(packet, "ipv6Out"); ORIGINAL
@@ -742,8 +774,9 @@ void Ipv6NeighbourDiscovery::initiateAddressResolution(const Ipv6Address& dgSrcA
     msg->setContextPointer(nce);
 //    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), msg); ORIGINAL
 
-    // CUSTOM WiND PART
-    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer() + par("nsForwardingDelay"), msg);
+    // CUSTOM WiND PART - retry NS messages after slightly randomized timeouts to avoid deadlocks
+    // when cells overlap in TSCH
+    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer() + uniform(0, nsFwdDelay), msg);
 }
 
 void Ipv6NeighbourDiscovery::processArTimeout(cMessage *arTimeoutMsg)
@@ -761,7 +794,10 @@ void Ipv6NeighbourDiscovery::processArTimeout(cMessage *arTimeoutMsg)
         Ipv6Address nsDestAddr = nsTargetAddr.formSolicitedNodeMulticastAddress();
         createAndSendNsPacket(nsTargetAddr, nsDestAddr, nce->nsSrcAddr, ie);
         nce->numOfARNSSent++;
-        scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), arTimeoutMsg);
+        // CUSTOM WIND PART - retry NS messages after slightly randomized timeouts to avoid deadlocks with overlapping cells
+        scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer() + uniform(0, nsFwdDelay), arTimeoutMsg);
+        // OG
+//        scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), arTimeoutMsg);
         return;
     }
 

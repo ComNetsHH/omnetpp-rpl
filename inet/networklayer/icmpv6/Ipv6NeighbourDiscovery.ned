@@ -36,7 +36,9 @@ simple Ipv6NeighbourDiscovery
         
         // CUSTOM WiND PARAMS
         bool raEnabled = default(false); // Router Advertisements partially overlap with DIOs and can generally be disabled
-        bool addRandomDelays = default(true); // Add microseconds delay to each packet transmission to remedy infinite loop bug
+        bool addRandomDelays = default(true); // Add microseconds delay to each packet transmission to remedy infinite loop bug (and to help address resolution apparently?)
+        double randomDelayMax = default(0.5);
+        double randomDelayMin = default(0.3); 
         bool skipDad = default(true); // Make link-local address permanent immediately, without launching DAD
         bool disableNud = default(true); // Completely disable Neighbor Unreachability Detection
         

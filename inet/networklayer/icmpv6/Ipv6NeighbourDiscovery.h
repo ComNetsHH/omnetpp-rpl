@@ -394,6 +394,12 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
 
     virtual void sendSolicitedNa(Packet *packet, const Ipv6NeighbourSolicitation *ns, InterfaceEntry *ie);
 
+    /** CUSTOM WIND PART **/
+    bool isAppPacket(Packet *packet);
+    double pRandomDelayMin;
+    double pRandomDelayMax;
+
+
 #ifdef WITH_xMIPv6
 
   public:    // update 12.9.07 - CB
