@@ -240,12 +240,6 @@ void Ipv6NeighbourDiscovery::finish()
 {
 }
 
-bool Ipv6NeighbourDiscovery::isAppPacket(Packet *packet) {
-    std::string packetName(packet->getFullName());
-
-    return packetName.find("App") != std::string::npos;
-}
-
 void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
 {
     const auto& msg = packet->peekAtFront<Ipv6Header>();
@@ -313,77 +307,20 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
         break;
     case Ipv6NeighbourCache::STALE:
         EV_INFO << "Reachability State is STALE.\n";
-
-        // CUSTOM WiND PART
-        if (pAddRandomDelays && !isAppPacket(packet)) {
-            auto d = uniform(pRandomDelayMin, pRandomDelayMax);
-            sendDelayed(packet, d, "ipv6Out");
-
-            EV_DETAIL << "Forwarding non-APP packet " << packet << " with delay: " << d << "s" << endl;
-        }
-        else {
-            EV_DETAIL << "Forwarding APP packet " << packet << "without delay" << endl;
-            send(packet, "ipv6Out");
-        }
-        // CUSTOM PART END
-
-//        send(packet, "ipv6Out"); ORIGINAL
+        send(packet, "ipv6Out");
         initiateNeighbourUnreachabilityDetection(nce);
         break;
     case Ipv6NeighbourCache::REACHABLE:
         EV_INFO << "Next hop is REACHABLE, sending packet to next-hop address.";
-
-        if (pAddRandomDelays && !isAppPacket(packet)) {
-            auto d = uniform(pRandomDelayMin, pRandomDelayMax);
-            sendDelayed(packet, d, "ipv6Out");
-
-            EV_DETAIL << "Forwarding non-APP packet " << packet << " with delay: " << d << "s" << endl;
-        }
-        else {
-            EV_DETAIL << "Forwarding APP packet " << packet << "without delay" << endl;
-            send(packet, "ipv6Out");
-        }
-        // CUSTOM PART END
-
-//        send(packet, "ipv6Out"); ORIGINAL
+        send(packet, "ipv6Out");
         break;
     case Ipv6NeighbourCache::DELAY:
         EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
-
-        // CUSTOM WiND PART
-        if (pAddRandomDelays && !isAppPacket(packet)) {
-            auto d = uniform(pRandomDelayMin, pRandomDelayMax);
-            sendDelayed(packet, d, "ipv6Out");
-
-            EV_DETAIL << "Forwarding non-APP packet " << packet << " with delay: " << d << "s" << endl;
-        }
-        else {
-            EV_DETAIL << "Forwarding APP packet " << packet << "without delay" << endl;
-            send(packet, "ipv6Out");
-        }
-
-        // CUSTOM PART END
-
-//        send(packet, "ipv6Out"); ORIGINAL
+        send(packet, "ipv6Out");
         break;
     case Ipv6NeighbourCache::PROBE:
         EV_INFO << "Next hop is in PROBE state, sending packet to next-hop address.";
-
-        // CUSTOM WiND PART
-        if (pAddRandomDelays && !isAppPacket(packet)) {
-            auto d = uniform(pRandomDelayMin, pRandomDelayMax);
-            sendDelayed(packet, d, "ipv6Out");
-
-            EV_DETAIL << "Forwarding non-APP packet " << packet << " with delay: " << d << "s" << endl;
-        }
-        else {
-            EV_DETAIL << "Forwarding APP packet " << packet << "without delay" << endl;
-            send(packet, "ipv6Out");
-        }
-
-        // CUSTOM PART END
-
-//        send(packet, "ipv6Out"); ORIGINAL
+        send(packet, "ipv6Out");
         break;
     default:
         throw cRuntimeError("Unknown Neighbour cache entry state.");
