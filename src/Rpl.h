@@ -116,6 +116,7 @@ public:
     TrickleTimer *trickleTimer;
     cModule *host;
     cModule *udpApp;
+    cModule *mac;
     vector<cModule*> apps;
 
     /** RPL configuration parameters and state management */
@@ -177,6 +178,7 @@ public:
     std::vector<cFigure::Color> colorPalette;
     int udpPacketsRecv;
     cFigure::Color dodagColor;
+    double currentFrequency; // stores current frequency reported by MAC
 
   public:
     Rpl();
@@ -586,6 +588,7 @@ public:
      * @param details
      */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double value, cObject *details) override;
 
     std::vector<uint16_t> getNodesPerHopDistance();
     bool isRplPacket(Packet *packet);

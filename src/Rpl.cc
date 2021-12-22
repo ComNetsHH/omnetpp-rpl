@@ -28,6 +28,7 @@
 #include <math.h>
 #include "Rpl.h"
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
+//#include "../../tsch/src/linklayer/ieee802154e/Ieee802154eMac.h"
 
 namespace inet {
 
@@ -95,6 +96,13 @@ void Rpl::initialize(int stage)
         networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
         nd = check_and_cast<Ipv6NeighbourDiscovery*>(getModuleByPath("^.ipv6.neighbourDiscovery"));
 
+
+        mac = getModuleByPath("^.wlan[0].mac.mac");
+
+        if (mac)
+            mac->subscribe("currentFrequency", this);
+
+        EV_DETAIL << "Found MAC module - " << mac << endl;
         routingTable = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule"), this);
         trickleTimer = check_and_cast<TrickleTimer*>(getModuleByPath("^.trickleTimer"));
 
@@ -644,6 +652,10 @@ void Rpl::processPacket(Packet *packet)
         return;
     }
 
+    auto rssiTag = packet->findTag<SignalPowerInd>();
+    if (rssiTag)
+        EV_DETAIL << "Received packet RSSI: " << rssiTag->getPower() << endl;
+
     // in non-storing mode check for RPL Target, Transit Information options
     if (!storing && dodagId != Ipv6Address::UNSPECIFIED_ADDRESS)
         extractSourceRoutingData(packet);
@@ -838,7 +850,10 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
         return;
 
     EV_DETAIL << "Processing DIO from " << dio->getSrcAddress()
-                << ", advertised rank - " << dio->getRank() << endl;
+                << ", advertised rank - " << dio->getRank()
+                << "\ncurrent freq - " << currentFrequency << endl;
+
+
     emit(dioReceivedSignal, dio->dup());
 
     // If node's not a part of any DODAG, join the first one advertised
@@ -1839,6 +1854,19 @@ void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
         }
     }
 }
+
+void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, double value, cObject *details) {
+    std::string signalName = getSignalName(signalID);
+
+    if (std::strcmp(signalName.c_str(), "currentFrequency") == 0) {
+        EV_DETAIL << "RPL received current frequnecy - " << value << endl;
+
+        currentFrequency = value;
+    }
+
+}
+
+// Getting current freq from MAC
 
 } // namespace inet
 
