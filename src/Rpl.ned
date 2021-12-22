@@ -86,6 +86,9 @@ module Rpl like IManetRouting
 		bool drawConnectors = default(true);
 		bool showBackupParents = default(false);
 
+		// Optional low-latency mode settings
+		bool lowLatencyMode = default(false);
+
     gates:
         input ipIn;
         output ipOut;

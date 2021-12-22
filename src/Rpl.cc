@@ -73,6 +73,7 @@ Rpl::Rpl() :
     isMobile(false),
     numParentUpdates(0),
     numDaoForwarded(0),
+    uplinkSlotOffset(0),
     apps({})
 {}
 
@@ -125,6 +126,17 @@ void Rpl::initialize(int stage)
             generateLayout(host->getParentModule()); // generate layout using the topmost simulation module, TODO: refactor into mobility extension module
 
         dagInfo = *(new DodagInfo());
+
+
+        // low-latency mode settings
+        if (par("lowLatencyMode").boolValue()) {
+            auto tschSf = getModuleByPath("^.wlan[0].mac.sixtischInterface.sf");
+            uplinkSlotOffsetSignal = registerSignal("uplinkSlotOffset");
+
+            tschSf->subscribe("uplinkScheduled", this);
+
+            EV_DETAIL << "LL mode on, found scheduling function - " << tschSf << endl;
+        }
 
         WATCH(numParentUpdates);
         WATCH_MAP(candidateParents);
@@ -769,6 +781,7 @@ const Ptr<Dio> Rpl::createDio()
     dio->setPosition(position);
     dio->setNodeName(hostName.c_str());
     dio->setIsMobile(isMobile);
+    dio->setSlotOffset(uplinkSlotOffset);
     if (isRoot)
         dio->setColor(dodagColor);
     else
@@ -844,6 +857,16 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
     // If node's not a part of any DODAG, join the first one advertised
     if (dodagId == Ipv6Address::UNSPECIFIED_ADDRESS)
     {
+        // Custom low-latency mode part: do not join a DODAG if no slot offset is advertised to stick close to
+        if (par("lowLatencyMode").boolValue()) {
+
+            if (dio->getRank() > 1 && dio->getSlotOffset() == 0)
+                return;
+
+            emit(uplinkSlotOffsetSignal, dio->getSlotOffset());
+        }
+
+
         dodagId = dio->getDodagId();
         dodagVersion = dio->getDodagVersion();
         instanceId = dio->getInstanceId();
@@ -1803,6 +1826,7 @@ void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
     Enter_Method_Silent();
 
     EV_DETAIL << "Processing signal - " << signalID << endl;
+
     if (signalID == packetReceivedSignal)
         udpPacketsRecv++;
 
@@ -1837,6 +1861,20 @@ void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                 updatePreferredParent();
             }
         }
+    }
+
+
+}
+
+// Low-latency mode signals
+void Rpl::receiveSignal(cComponent *src, simsignal_t id, long value, cObject *details) {
+    std::string signalName = getSignalName(id);
+
+    EV_DETAIL << "RPL processing signal - " << signalName << endl;
+
+    if (std::strcmp(signalName.c_str(), "uplinkScheduled") == 0) {
+        EV_DETAIL << "Received notification about uplink cell scheduled at " << value << " slot offset" << endl;
+        uplinkSlotOffset = value;
     }
 }
 
