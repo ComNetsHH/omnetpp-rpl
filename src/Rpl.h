@@ -224,6 +224,10 @@ public:
     cFigure::Color dodagColor;
     double currentFrequency; // stores current frequency reported by MAC
 
+    // Low-latency params
+    long uplinkSlotOffset; // smallest slot offset of the uplink cell
+    simsignal_t uplinkSlotOffsetSignal; // emitted to notify SF about the slot offset learned from DIO
+
   public:
     Rpl();
     ~Rpl();
@@ -633,7 +637,9 @@ public:
      * @param details
      */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    virtual void receiveSignal(cComponent *src, simsignal_t id, long value, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, double value, cObject *details) override;
+
 
     std::vector<uint16_t> getNodesPerHopDistance();
     bool isRplPacket(Packet *packet);
