@@ -43,6 +43,46 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
 {
 public:
 
+    class DaoTimeoutInfo : public cObject {
+        public:
+            cMessage *timeoutPtr;
+            int numRetries;
+
+            DaoTimeoutInfo() {
+                this->timeoutPtr = nullptr;
+                this->numRetries = 0;
+            }
+
+            DaoTimeoutInfo(cMessage *timeoutPtr) {
+                this->timeoutPtr = timeoutPtr;
+                this->numRetries = 0;
+            }
+
+            friend std::ostream& operator<<(std::ostream& os, const DaoTimeoutInfo& timeoutInfo)
+            {
+                os << timeoutInfo.numRetries << " retries";
+                return os;
+            }
+
+
+
+    //            int getNumRetries() const {
+    //                return numRetries;
+    //            }
+    //
+    //            void setNumRetries(int numRetries) {
+    //                this->numRetries = numRetries;
+    //            }
+    //
+    //            const cMessage*& getTimeoutPtr() const {
+    //                return timeoutPtr;
+    //            }
+    //
+    //            void setTimeoutPtr(const cMessage *&timeoutPtr) {
+    //                this->timeoutPtr = timeoutPtr;
+    //            }
+    };
+
     class DodagInfo : public cObject {
 
         public:
@@ -140,6 +180,8 @@ public:
     bool allowDodagSwitching;
     bool pUnreachabilityDetectionEnabled;
     bool pShowBackupParents;
+    bool pAllowDaoForwarding;
+    bool pJoinAtSinkAllowed;
     uint16_t rank;
     uint8_t dtsn;
     uint32_t branchChOffset;
@@ -150,7 +192,9 @@ public:
     std::map<Ipv6Address, Dio *> backupParents;
     std::map<Ipv6Address, Dio *> candidateParents;
     std::map<Ipv6Address, Ipv6Address> sourceRoutingTable;
-    std::map<Ipv6Address, std::pair<cMessage *, uint8_t>> pendingDaoAcks;
+//    std::map<Ipv6Address, std::pair<cMessage *, uint8_t>> pendingDaoAcks;
+
+    std::map<Ipv6Address, DaoTimeoutInfo *> pendingDaoAcks;
 
     /** Statistics and control signals */
     simsignal_t dioReceivedSignal;
@@ -159,7 +203,7 @@ public:
     simsignal_t rankUpdatedSignal;
     simsignal_t parentUnreachableSignal;
 
-    bool pJoinAtSinkAllowed;
+
     int numDaoDropped;
 
     /** Misc */
@@ -245,6 +289,7 @@ public:
      * @param dio DIO packet object for processing
      */
     void processDio(const Ptr<const Dio>& dio);
+    void processDio(const Ptr<const Dio>& dio, double rxPower);
 
     /**
      * Checks whether DIO is valid in terms of advertised rank
