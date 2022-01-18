@@ -43,6 +43,46 @@ class Rpl : public RoutingProtocolBase, public cListener, public NetfilterBase::
 {
 public:
 
+    class DaoTimeoutInfo : public cObject {
+        public:
+            cMessage *timeoutPtr;
+            int numRetries;
+
+            DaoTimeoutInfo() {
+                this->timeoutPtr = nullptr;
+                this->numRetries = 0;
+            }
+
+            DaoTimeoutInfo(cMessage *timeoutPtr) {
+                this->timeoutPtr = timeoutPtr;
+                this->numRetries = 0;
+            }
+
+            friend std::ostream& operator<<(std::ostream& os, const DaoTimeoutInfo& timeoutInfo)
+            {
+                os << timeoutInfo.numRetries << " retries";
+                return os;
+            }
+
+
+
+    //            int getNumRetries() const {
+    //                return numRetries;
+    //            }
+    //
+    //            void setNumRetries(int numRetries) {
+    //                this->numRetries = numRetries;
+    //            }
+    //
+    //            const cMessage*& getTimeoutPtr() const {
+    //                return timeoutPtr;
+    //            }
+    //
+    //            void setTimeoutPtr(const cMessage *&timeoutPtr) {
+    //                this->timeoutPtr = timeoutPtr;
+    //            }
+    };
+
     class DodagInfo : public cObject {
 
         public:
@@ -116,6 +156,7 @@ public:
     TrickleTimer *trickleTimer;
     cModule *host;
     cModule *udpApp;
+    cModule *mac;
     vector<cModule*> apps;
 
     /** RPL configuration parameters and state management */
@@ -139,6 +180,8 @@ public:
     bool allowDodagSwitching;
     bool pUnreachabilityDetectionEnabled;
     bool pShowBackupParents;
+    bool pAllowDaoForwarding;
+    bool pJoinAtSinkAllowed;
     uint16_t rank;
     uint8_t dtsn;
     uint32_t branchChOffset;
@@ -149,7 +192,9 @@ public:
     std::map<Ipv6Address, Dio *> backupParents;
     std::map<Ipv6Address, Dio *> candidateParents;
     std::map<Ipv6Address, Ipv6Address> sourceRoutingTable;
-    std::map<Ipv6Address, std::pair<cMessage *, uint8_t>> pendingDaoAcks;
+//    std::map<Ipv6Address, std::pair<cMessage *, uint8_t>> pendingDaoAcks;
+
+    std::map<Ipv6Address, DaoTimeoutInfo *> pendingDaoAcks;
 
     /** Statistics and control signals */
     simsignal_t dioReceivedSignal;
@@ -158,7 +203,7 @@ public:
     simsignal_t rankUpdatedSignal;
     simsignal_t parentUnreachableSignal;
 
-    bool pJoinAtSinkAllowed;
+
     int numDaoDropped;
 
     /** Misc */
@@ -177,6 +222,7 @@ public:
     std::vector<cFigure::Color> colorPalette;
     int udpPacketsRecv;
     cFigure::Color dodagColor;
+    double currentFrequency; // stores current frequency reported by MAC
 
     // Low-latency params
     long uplinkSlotOffset; // smallest slot offset of the uplink cell
@@ -247,6 +293,7 @@ public:
      * @param dio DIO packet object for processing
      */
     void processDio(const Ptr<const Dio>& dio);
+    void processDio(const Ptr<const Dio>& dio, double rxPower);
 
     /**
      * Checks whether DIO is valid in terms of advertised rank
@@ -591,6 +638,8 @@ public:
      */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void receiveSignal(cComponent *src, simsignal_t id, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double value, cObject *details) override;
+
 
     std::vector<uint16_t> getNodesPerHopDistance();
     bool isRplPacket(Packet *packet);

@@ -28,6 +28,7 @@
 #include <math.h>
 #include "Rpl.h"
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
+//#include "../../tsch/src/linklayer/ieee802154e/Ieee802154eMac.h"
 
 namespace inet {
 
@@ -75,6 +76,7 @@ Rpl::Rpl() :
     numDaoForwarded(0),
     uplinkSlotOffset(0),
     apps({})
+    pJoinAtSinkAllowed(false)
 {}
 
 Rpl::~Rpl()
@@ -96,6 +98,13 @@ void Rpl::initialize(int stage)
         networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
         nd = check_and_cast<Ipv6NeighbourDiscovery*>(getModuleByPath("^.ipv6.neighbourDiscovery"));
 
+
+        mac = getModuleByPath("^.wlan[0].mac.mac");
+
+        if (mac)
+            mac->subscribe("currentFrequency", this);
+
+        EV_DETAIL << "Found MAC module - " << mac << endl;
         routingTable = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule"), this);
         trickleTimer = check_and_cast<TrickleTimer*>(getModuleByPath("^.trickleTimer"));
 
@@ -112,6 +121,8 @@ void Rpl::initialize(int stage)
         pUseWarmup = par("useWarmup").boolValue();
         pUnreachabilityDetectionEnabled = par("unreachabilityDetectionEnabled").boolValue();
         pShowBackupParents = par("showBackupParents").boolValue();
+        pAllowDaoForwarding = par("allowDaoForwarding").boolValue();
+        pJoinAtSinkAllowed = par("allowJoinAtSink").boolValue() || (uniform(0, 1) < par("joinAtSinkProbability").doubleValue());
 
         // statistic signals
         dioReceivedSignal = registerSignal("dioReceived");
@@ -141,6 +152,7 @@ void Rpl::initialize(int stage)
         WATCH(numParentUpdates);
         WATCH_MAP(candidateParents);
         WATCH_MAP(backupParents);
+        WATCH_PTRMAP(pendingDaoAcks);
 //        WATCH_OBJ(dagInfo); TODO: figure out why this doesn't work! the object IS shown in the GUI, but without any fields
         WATCH(dagInfo.prefParent);
         WATCH(dagInfo.prefParentRank);
@@ -390,6 +402,8 @@ void Rpl::start()
     isMobile = mobility->getMaxSpeed() > 0;
     position = mobility->getCurrentPosition();
 
+    EV_DETAIL << "RPL detected node location: " << position << endl;
+
     auto numApps = host->par("numApps").intValue();
     EV_DETAIL << "Detected " << numApps << " apps" << endl;
 
@@ -476,16 +490,21 @@ void Rpl::processSelfMessage(cMessage *message)
 }
 
 void Rpl::clearDaoAckTimer(Ipv6Address daoDest) {
+//    if (pendingDaoAcks.count(daoDest))
+//        if (pendingDaoAcks[daoDest].first && pendingDaoAcks[daoDest].first->isSelfMessage())
+//            cancelEvent(pendingDaoAcks[daoDest].first);
+//    pendingDaoAcks.erase(daoDest);
+
     if (pendingDaoAcks.count(daoDest))
-        if (pendingDaoAcks[daoDest].first && pendingDaoAcks[daoDest].first->isSelfMessage())
-            cancelEvent(pendingDaoAcks[daoDest].first);
+        if (pendingDaoAcks[daoDest]->timeoutPtr && pendingDaoAcks[daoDest]->timeoutPtr->isSelfMessage())
+            cancelEvent(pendingDaoAcks[daoDest]->timeoutPtr);
     pendingDaoAcks.erase(daoDest);
 }
 
 void Rpl::clearAllDaoAckTimers() {
     for (auto t: pendingDaoAcks)
-        if (t.second.first && t.second.first->isSelfMessage())
-            cancelEvent(t.second.first);
+        if (t.second->timeoutPtr && t.second->timeoutPtr->isSelfMessage())
+            cancelEvent(t.second->timeoutPtr);
 
     pendingDaoAcks.erase(pendingDaoAcks.begin(), pendingDaoAcks.end());
 }
@@ -500,7 +519,7 @@ void Rpl::retransmitDao(Ipv6Address advDest) {
         return;
     }
 
-    auto rtxCtn = pendingDaoAcks[advDest].second++;
+    auto rtxCtn = pendingDaoAcks[advDest]->numRetries++;
     if (rtxCtn > daoRtxThresh) {
         EV_DETAIL << "Retransmission threshold (" << std::to_string(daoRtxThresh)
             << ") exceeded, erasing corresponding entry from pending ACKs" << endl;
@@ -656,6 +675,13 @@ void Rpl::processPacket(Packet *packet)
         return;
     }
 
+    auto rssiTag = packet->findTag<SignalPowerInd>();
+    if (rssiTag)
+        EV_DETAIL << "Received packet RSSI: " << rssiTag->getPower() << endl;
+
+    // in picowatts
+    auto receivedPower = rssiTag->getPower().get() * pow(10, 12);
+
     // in non-storing mode check for RPL Target, Transit Information options
     if (!storing && dodagId != Ipv6Address::UNSPECIFIED_ADDRESS)
         extractSourceRoutingData(packet);
@@ -663,7 +689,7 @@ void Rpl::processPacket(Packet *packet)
     auto rplBody = packet->peekData<RplPacket>();
     switch (rplHeader->getIcmpv6Code()) {
         case DIO: {
-            processDio(dynamicPtrCast<const Dio>(rplBody));
+            processDio(dynamicPtrCast<const Dio>(rplBody), receivedPower);
             break;
         }
         case DAO: {
@@ -748,16 +774,18 @@ void Rpl::sendRplPacket(const Ptr<RplPacket> &body, RplPacketCode code,
 
         auto daoAckEntry = pendingDaoAcks.find(advertisedDest);
         if (daoAckEntry != pendingDaoAcks.end()) {
-            pendingDaoAcks[advertisedDest].first = daoTimeoutMsg;
+            pendingDaoAcks[advertisedDest]->timeoutPtr = daoTimeoutMsg;
             EV_DETAIL << "Found existing entry in DAO_ACKs map for dest - " << advertisedDest
                     << " updating timeout event ptr" << endl;
         }
-        else
-            pendingDaoAcks[advertisedDest] = {daoTimeoutMsg, 0};
+        else {
+            pendingDaoAcks[advertisedDest] = new DaoTimeoutInfo(daoTimeoutMsg);
+        }
 
         EV_DETAIL << "Pending DAO_ACKs:" << endl;
         for (auto e : pendingDaoAcks)
-            EV_DETAIL << e.first << " (" << std::to_string(e.second.second) << " attempts), timeout msg ptr - " << e.second.first << endl;
+            EV_DETAIL << e.first << " (" << std::to_string(e.second->numRetries) << " attempts), timeout msg ptr - " << e.second->timeoutPtr << endl;
+
         scheduleAt(timeout, daoTimeoutMsg);
     }
     sendPacket(pkt, delay);
@@ -845,13 +873,25 @@ bool Rpl::isInvalidDio(const Dio* dio) {
             || (preferredParent && preferredParent->getSrcAddress() != dio->getSrcAddress() && dio->getRank() == INF_RANK);
 }
 
+void Rpl::processDio(const Ptr<const Dio>& dio, double rxPower) {
+    if (isRoot || isInvalidDio(dio.get()))
+        return;
+
+    if (dio->getRank() == 1 && rxPower < par("joinAtSinkPowerThresh").doubleValue())
+        return;
+
+    processDio(dio);
+}
+
 void Rpl::processDio(const Ptr<const Dio>& dio)
 {
     if (isRoot || isInvalidDio(dio.get()))
         return;
 
     EV_DETAIL << "Processing DIO from " << dio->getSrcAddress()
-                << ", advertised rank - " << dio->getRank() << endl;
+                << ", advertised rank - " << dio->getRank()
+                << "\ncurrent freq - " << currentFrequency << endl;
+
     emit(dioReceivedSignal, dio->dup());
 
     // If node's not a part of any DODAG, join the first one advertised
@@ -931,8 +971,8 @@ bool Rpl::checkPoisonedParent(const Ptr<const Dio>& dio) {
 }
 
 void Rpl::processDao(const Ptr<const Dao>& dao) {
-    if (!daoEnabled) {
-        EV_WARN << "DAO support not enabled, discarding packet" << endl;
+    if (!daoEnabled && !pAllowDaoForwarding) {
+        EV_WARN << "DAO processing disabled, discarding packet" << endl;
         return;
     }
 
@@ -945,7 +985,7 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
     auto daoSender = dao->getSrcAddress();
 
     if (!isRoot && daoSender == preferredParent->getSrcAddress())
-        throw cRuntimeError("Received DAO from preferred parent, loop detected!");
+        throw cRuntimeError("Received DAO from the preferred parent, loop detected!");
 
     auto advertisedDest = dao->getReachableDest();
     EV_DETAIL << "Processing DAO with seq num " << std::to_string(dao->getSeqNum()) << " from "
@@ -1021,9 +1061,8 @@ void Rpl::processDaoAck(const Ptr<const Dao>& daoAck) {
     EV_DETAIL << "Cancelled timeout event and erased entry in the pendingDaoAcks, remaining: " << endl;
 
     for (auto e : pendingDaoAcks)
-        EV_DETAIL << e.first << " rtxs: " << std::to_string(e.second.second)
-            << ", msg ptr - " << e.second.first << endl;
-
+        EV_DETAIL << e.first << " retries: " << std::to_string(e.second->numRetries)
+            << ", msg ptr - " << e.second->timeoutPtr << endl;
 }
 
 
@@ -1877,6 +1916,18 @@ void Rpl::receiveSignal(cComponent *src, simsignal_t id, long value, cObject *de
         uplinkSlotOffset = value;
     }
 }
+
+void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, double value, cObject *details) {
+    std::string signalName = getSignalName(signalID);
+
+    if (std::strcmp(signalName.c_str(), "currentFrequency") == 0) {
+//        EV_DETAIL << "RPL received current frequnecy - " << value << endl;
+        currentFrequency = value;
+    }
+
+}
+
+// Getting current freq from MAC
 
 } // namespace inet
 

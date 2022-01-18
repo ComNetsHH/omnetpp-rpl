@@ -65,13 +65,19 @@ module Rpl like IManetRouting
         double startDelay = default(0);
         string objectiveFunctionType = default("hopCount");	 // hopCount, ETX, energy, ...
         bool allowDodagSwitching = default(false);
+        bool allowDaoForwarding = default(true);
         
         // Utility params (mostly required for specific simulation scenarios, not for general use)
         
         // Manual topology generation
         bool layoutConfigurator = default(false);
         bool branchesLayout = default(false);
-        bool allowJoinAtSink = default(true);  
+        
+        // required for ReSA demo use case with seatbelts 
+        bool allowJoinAtSink = default(true);
+        double joinAtSinkProbability = default(0.5);    
+        double joinAtSinkPowerThresh = default(-1);
+          
         int numBranches = default(3);
         int numHops = default(1);
         double yAnchor = default(200); // first sink location
