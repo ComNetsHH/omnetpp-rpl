@@ -746,14 +746,14 @@ void Rpl::sendRplPacket(const Ptr<RplPacket> &body, RplPacketCode code,
     pkt->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
 
     // Manually set the request outgoing interface, TODO: investigate in more detail, causes weird Neighbor Discovery behavior
-    if (!interfaceName.empty())
-    {
-        auto iePtr = interfaceTable->findInterfaceByName(interfaceName.c_str());
-        if (iePtr)
-            pkt->addTag<InterfaceReq>()->setInterfaceId(iePtr->getInterfaceId());
-
-        EV_DETAIL << "Set tag <InterfaceReq> to " << iePtr->getInterfaceId() << endl;
-    }
+//    if (!interfaceName.empty())
+//    {
+//        auto iePtr = interfaceTable->findInterfaceByName(interfaceName.c_str());
+//        if (iePtr)
+//            pkt->addTag<InterfaceReq>()->setInterfaceId(iePtr->getInterfaceId());
+//
+//        EV_DETAIL << "Set tag <InterfaceReq> to " << iePtr->getInterfaceId() << endl;
+//    }
 
     auto addresses = pkt->addTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
