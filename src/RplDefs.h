@@ -52,7 +52,8 @@ enum TRICKLE_EVENTS {
 enum RPL_SELF_MSG {
     DETACHED_TIMEOUT,
     DAO_ACK_TIMEOUT,
-    RPL_START
+    RPL_START,
+    SEND_ETHER
 };
 
 /** Purely for cross-layer SF */

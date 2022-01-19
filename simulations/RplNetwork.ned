@@ -32,5 +32,6 @@ network RplNetwork
         }
 
     connections allowunconnected:
+        host[0].ethg++ <--> {  delay = 0.5us; datarate = 100Mbps; } <--> sink[0].ethg++;
 
 }

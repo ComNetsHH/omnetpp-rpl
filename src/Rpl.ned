@@ -47,7 +47,7 @@ module Rpl like IManetRouting
         @display("i=block/routing");
 
         // context parameters
-        string interfaceTableModule;   // The path to the InterfaceTable module
+        string interfaceTableModule = default(absPath("^.interfaceTable"));  // The path to the InterfaceTable module
         string routingTableModule = default(absPath("^.ipv6.routingTable"));
         string networkProtocolModule = default(absPath("^.ipv6.ipv6"));
     	
@@ -94,6 +94,9 @@ module Rpl like IManetRouting
 
 		// Optional low-latency mode settings
 		bool lowLatencyMode = default(false);
+		
+		// Misc
+		bool scheduleEthernetPkt = default(false);
 
     gates:
         input ipIn;

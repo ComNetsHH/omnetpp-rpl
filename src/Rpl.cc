@@ -28,7 +28,6 @@
 #include <math.h>
 #include "Rpl.h"
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
-//#include "../../tsch/src/linklayer/ieee802154e/Ieee802154eMac.h"
 
 namespace inet {
 
@@ -75,7 +74,7 @@ Rpl::Rpl() :
     numParentUpdates(0),
     numDaoForwarded(0),
     uplinkSlotOffset(0),
-    apps({})
+    apps({}),
     pJoinAtSinkAllowed(false)
 {}
 
@@ -130,6 +129,8 @@ void Rpl::initialize(int stage)
         parentUnreachableSignal = registerSignal("parentUnreachable");
         parentChangedSignal = registerSignal("parentChanged");
         rankUpdatedSignal = registerSignal("rankUpdated");
+        rankUpdatedSignalSf = registerSignal("rankUpdatedSf");
+        childJoinedSignal = registerSignal("childJoined");
 
         startDelay = par("startDelay").doubleValue();
 
@@ -145,8 +146,6 @@ void Rpl::initialize(int stage)
             uplinkSlotOffsetSignal = registerSignal("uplinkSlotOffset");
 
             tschSf->subscribe("uplinkScheduled", this);
-
-            EV_DETAIL << "LL mode on, found scheduling function - " << tschSf << endl;
         }
 
         WATCH(numParentUpdates);
@@ -160,6 +159,7 @@ void Rpl::initialize(int stage)
         WATCH(selfAddr);
         WATCH(selfId);
         WATCH(isMobile);
+        WATCH(uplinkSlotOffset);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
@@ -346,26 +346,6 @@ cModule* Rpl::findSubmodule(std::string sname, cModule *host) {
     return nullptr;
 }
 
-std::vector<int> Rpl::pickRandomly(int total, int numRequested) {
-    // shuffle the array
-    std::random_device rd;
-    std::mt19937 e{rd()};
-
-    std::vector<int> values(total);
-
-    std::iota(values.begin(), values.end(), 1);
-
-    std::shuffle(values.begin(), values.end(), e);
-
-    // copy the picked ones
-    std::vector<int> picked(numRequested);
-//    for (auto i = 0; i < numRequested; i++)
-//        picked.push_back(inputVec[i]);
-
-    std::copy(values.begin(), values.begin() + numRequested, picked.begin());
-    return picked;
-}
-
 //
 // Lifecycle operations
 //
@@ -389,6 +369,7 @@ void Rpl::start()
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
     {
         ie = interfaceTable->getInterface(i);
+
         if (strstr(ie->getInterfaceName(), "wlan") != nullptr)
         {
             interfaceEntryPtr = ie;
@@ -427,11 +408,17 @@ void Rpl::start()
         for (auto app : apps)
             app->subscribe("packetReceived", this);
     }
+
+
+    // For demo purposes
+    if (par("scheduleEthernetPkt").boolValue())
+        scheduleAt(simTime() + 20, new cMessage("", SEND_ETHER));
 }
 
 void Rpl::refreshDisplay() const {
     if (preferredParent && preferredParent->isMobile() && prefParentConnector && parentMobilityMod) {
         auto parentLoc = parentMobilityMod->getCurrentPosition();
+
         prefParentConnector->setEnd(cFigure::Point(parentLoc.x, parentLoc.y));
     }
 
@@ -476,6 +463,11 @@ void Rpl::processSelfMessage(cMessage *message)
             start();
             break;
         }
+        case SEND_ETHER: {
+            EV_DETAIL << "Preparing to send packet over ethernet" << endl;
+            sendRplPacket(createDao(getSelfAddress()), DAO, preferredParent->getSrcAddress(), daoDelay * uniform(1, 2), "eth0");
+            break;
+        }
         case DAO_ACK_TIMEOUT: {
             Ipv6Address *advDest = (Ipv6Address*) message->getContextPointer();
             if (pendingDaoAcks.find(*advDest) == pendingDaoAcks.end())
@@ -490,11 +482,6 @@ void Rpl::processSelfMessage(cMessage *message)
 }
 
 void Rpl::clearDaoAckTimer(Ipv6Address daoDest) {
-//    if (pendingDaoAcks.count(daoDest))
-//        if (pendingDaoAcks[daoDest].first && pendingDaoAcks[daoDest].first->isSelfMessage())
-//            cancelEvent(pendingDaoAcks[daoDest].first);
-//    pendingDaoAcks.erase(daoDest);
-
     if (pendingDaoAcks.count(daoDest))
         if (pendingDaoAcks[daoDest]->timeoutPtr && pendingDaoAcks[daoDest]->timeoutPtr->isSelfMessage())
             cancelEvent(pendingDaoAcks[daoDest]->timeoutPtr);
@@ -676,11 +663,11 @@ void Rpl::processPacket(Packet *packet)
     }
 
     auto rssiTag = packet->findTag<SignalPowerInd>();
-    if (rssiTag)
+    double receivedPower = 0;
+    if (rssiTag) {
         EV_DETAIL << "Received packet RSSI: " << rssiTag->getPower() << endl;
-
-    // in picowatts
-    auto receivedPower = rssiTag->getPower().get() * pow(10, 12);
+        receivedPower = rssiTag->getPower().get() * pow(10, 12); // in picowatts
+    }
 
     // in non-storing mode check for RPL Target, Transit Information options
     if (!storing && dodagId != Ipv6Address::UNSPECIFIED_ADDRESS)
@@ -730,26 +717,44 @@ void Rpl::sendPacket(cPacket *packet, double delay)
         sendDelayed(packet, delay, "ipOut");
 }
 
+
+
+
 //
 // Handling RPL packets
 //
 
 void Rpl::sendRplPacket(const Ptr<RplPacket>& body, RplPacketCode code,
+        const L3Address& nextHop, double delay, std::string interfaceName)
+{
+    sendRplPacket(body, code, nextHop, delay, Ipv6Address::UNSPECIFIED_ADDRESS, Ipv6Address::UNSPECIFIED_ADDRESS, interfaceName);
+}
+
+void Rpl::sendRplPacket(const Ptr<RplPacket>& body, RplPacketCode code,
         const L3Address& nextHop, double delay)
 {
-    sendRplPacket(body, code, nextHop, delay, Ipv6Address::UNSPECIFIED_ADDRESS, Ipv6Address::UNSPECIFIED_ADDRESS);
+    sendRplPacket(body, code, nextHop, delay, Ipv6Address::UNSPECIFIED_ADDRESS, Ipv6Address::UNSPECIFIED_ADDRESS, "wlan0");
 }
 
 void Rpl::sendRplPacket(const Ptr<RplPacket> &body, RplPacketCode code,
-        const L3Address& nextHop, double delay, const Ipv6Address &target, const Ipv6Address &transit)
+        const L3Address& nextHop, double delay, const Ipv6Address &target, const Ipv6Address &transit, std::string interfaceName)
 {
     Packet *pkt = new Packet(std::string("inet::RplPacket::" + rplIcmpCodeToStr(code)).c_str());
     auto header = makeShared<RplHeader>();
     header->setIcmpv6Code(code);
     pkt->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     pkt->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
-//    if (interfaceEntryPtr)
-//        pkt->addTag<InterfaceReq>()->setInterfaceId(interfaceEntryPtr->getInterfaceId());
+
+    // Manually set the request outgoing interface, TODO: investigate in more detail, causes weird Neighbor Discovery behavior
+    if (!interfaceName.empty())
+    {
+        auto iePtr = interfaceTable->findInterfaceByName(interfaceName.c_str());
+        if (iePtr)
+            pkt->addTag<InterfaceReq>()->setInterfaceId(iePtr->getInterfaceId());
+
+        EV_DETAIL << "Set tag <InterfaceReq> to " << iePtr->getInterfaceId() << endl;
+    }
+
     auto addresses = pkt->addTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
     addresses->setDestAddress(nextHop);
@@ -897,11 +902,13 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
     // If node's not a part of any DODAG, join the first one advertised
     if (dodagId == Ipv6Address::UNSPECIFIED_ADDRESS)
     {
-        // Custom low-latency mode part: do not join a DODAG if no slot offset is advertised to stick close to
+        // Custom low-latency mode part: do not join a DODAG if no slot offset is advertised to daisy-chain to
         if (par("lowLatencyMode").boolValue()) {
 
             if (dio->getRank() > 1 && dio->getSlotOffset() == 0)
                 return;
+
+            EV_DETAIL << "Found uplink slot offset in DIO: " << dio->getSlotOffset() << endl;
 
             emit(uplinkSlotOffsetSignal, dio->getSlotOffset());
         }
@@ -1005,6 +1012,7 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
     if (storing || isRoot) {
         if (!checkDestKnown(daoSender, advertisedDest)) {
             updateRoutingTable(daoSender, advertisedDest, prepRouteData(dao.get()));
+            emit(childJoinedSignal, 1);
 
             EV_DETAIL << "Destination learned from DAO - " << advertisedDest
                     << " reachable via " << daoSender << endl;
@@ -1215,7 +1223,9 @@ void Rpl::updatePreferredParent()
         EV_DETAIL << "Updated rank - " << rank << endl;
         clearObsoleteBackupParents(backupParents);
 
-        emit(rankUpdatedSignal, (long) rank);
+        // didn't work properly, the signal was emitted too early for some reason, TODO: revisit
+//        emit(rankUpdatedSignal, (long) newRank);
+        emit(rankUpdatedSignalSf, (long) rank);
     }
 }
 

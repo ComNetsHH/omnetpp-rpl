@@ -201,7 +201,9 @@ public:
     simsignal_t daoReceivedSignal;
     simsignal_t parentChangedSignal;
     simsignal_t rankUpdatedSignal;
+    simsignal_t rankUpdatedSignalSf;
     simsignal_t parentUnreachableSignal;
+    simsignal_t childJoinedSignal;
 
 
     int numDaoDropped;
@@ -224,7 +226,7 @@ public:
     cFigure::Color dodagColor;
     double currentFrequency; // stores current frequency reported by MAC
 
-    // Low-latency params
+    // Low-latency params, only for use in 6TiSCH
     long uplinkSlotOffset; // smallest slot offset of the uplink cell
     simsignal_t uplinkSlotOffsetSignal; // emitted to notify SF about the slot offset learned from DIO
 
@@ -246,9 +248,6 @@ public:
 
     /** Search for a submodule of @param host by its name @param sname */
     cModule* findSubmodule(std::string sname, cModule *host);
-
-    /** Randomly pick @param numRequested elements from a [0..@param total] array*/
-    static std::vector<int> pickRandomly(int total, int numRequested);
 
     int numParentUpdates;
     int numDaoForwarded;
@@ -332,8 +331,15 @@ public:
      * @param nextHop next hop for the RPL packet to be sent out to (unicast DAO, broadcast DIO, DIS)
      * @param delay transmission delay before sending packet from outgoing gate
      */
-    void sendRplPacket(const Ptr<RplPacket>& body, RplPacketCode code, const L3Address& nextHop, double delay, const Ipv6Address &target, const Ipv6Address &transit);
+    void sendRplPacket(const Ptr<RplPacket>& body, RplPacketCode code, const L3Address& nextHop, double delay, const Ipv6Address &target, const Ipv6Address &transit, std::string interfaceName);
+    void sendRplPacket(const Ptr<RplPacket>& body, RplPacketCode code, const L3Address& nextHop, double delay, const Ipv6Address &target, const Ipv6Address &transit)
+    {
+        sendRplPacket(body, code, nextHop, delay, target, transit, "wlan");
+    }
+
     void sendRplPacket(const Ptr<RplPacket>& body, RplPacketCode code, const L3Address& nextHop, double delay);
+    void sendRplPacket(const Ptr<RplPacket>& body, RplPacketCode code, const L3Address& nextHop, double delay, std::string interfaceName);
+
 
     /**
      * Create DIO packet to broadcast DODAG info and configuration parameters
