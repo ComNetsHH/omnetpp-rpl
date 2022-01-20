@@ -899,21 +899,13 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
 
     emit(dioReceivedSignal, dio->dup());
 
+    // Custom low-latency mode part: do not join a DODAG if no slot offset is advertised to daisy-chain to
+    if (par("lowLatencyMode").boolValue() && dio->getRank() > 1 && dio->getSlotOffset() == 0)
+        return;
+
     // If node's not a part of any DODAG, join the first one advertised
     if (dodagId == Ipv6Address::UNSPECIFIED_ADDRESS)
     {
-        // Custom low-latency mode part: do not join a DODAG if no slot offset is advertised to daisy-chain to
-        if (par("lowLatencyMode").boolValue()) {
-
-            if (dio->getRank() > 1 && dio->getSlotOffset() == 0)
-                return;
-
-            EV_DETAIL << "Found uplink slot offset in DIO: " << dio->getSlotOffset() << endl;
-
-            emit(uplinkSlotOffsetSignal, dio->getSlotOffset());
-        }
-
-
         dodagId = dio->getDodagId();
         dodagVersion = dio->getDodagVersion();
         instanceId = dio->getInstanceId();
@@ -999,9 +991,9 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
             << daoSender << " advertising " << advertisedDest << endl;
 
     if (dao->getDaoAckRequired()) {
-        sendRplPacket(createDao(advertisedDest), DAO_ACK, daoSender, uniform(1, 3));
-        EV_DETAIL << "DAO_ACK sent to " << daoSender
-                << " acknowledging advertised dest - " << advertisedDest << endl;
+        auto timeout = uniform(1, 3);
+        sendRplPacket(createDao(advertisedDest), DAO_ACK, daoSender, timeout);
+        EV_DETAIL << "DAO_ACK will be sent back acknowledging advertised destination at " << simTime() + timeout << "s" << endl;
     }
 
     /**
@@ -1010,15 +1002,17 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
      * TODO: Implement DAO aggregation!
      */
     if (storing || isRoot) {
-        if (!checkDestKnown(daoSender, advertisedDest)) {
-            updateRoutingTable(daoSender, advertisedDest, prepRouteData(dao.get()));
-            emit(childJoinedSignal, 1);
-
-            EV_DETAIL << "Destination learned from DAO - " << advertisedDest
-                    << " reachable via " << daoSender << endl;
-        }
-        else
-            return;
+//        if (!checkDestKnown(daoSender, advertisedDest)) {
+//            updateRoutingTable(daoSender, advertisedDest, prepRouteData(dao.get()));
+//            emit(childJoinedSignal, 1);
+//
+//            EV_DETAIL << "Destination learned from DAO - " << advertisedDest
+//                    << " reachable via " << daoSender << endl;
+//        }
+//        else
+//            return;
+        updateRoutingTable(daoSender, advertisedDest, prepRouteData(dao.get()));
+        emit(childJoinedSignal, 1);
     }
     /**
      * Forward DAO 'upwards' via preferred parent advertising destination to the root [RFC6560, 6.4]
@@ -1076,8 +1070,6 @@ void Rpl::processDaoAck(const Ptr<const Dao>& daoAck) {
 
 void Rpl::setLineProperties(cLineFigure *connector, Coord target, cFigure::Color col, bool dashed) const
 {
-    EV_DETAIL << "Setting line propeties, X = "  << target.x << ", Y = " << target.y << endl;
-    EV_DETAIL << "our coords X = "  << position.x << ", Y = " << position.y << endl;
     connector->setStart(cFigure::Point(position.x, position.y));
     connector->setEnd(cFigure::Point(target.x, target.y));
     connector->setLineWidth(2);
@@ -1183,10 +1175,15 @@ void Rpl::updatePreferredParent()
 
         /** Notify 6TiSCH Scheduling Function (if present) about parent change */
         auto rplCtrlInfo = new RplGenericControlInfo(newPrefParent->getNodeId());
-        EV_DETAIL << "Emitting signal with my new parent's MAC addr - " << MacAddress(newPrefParent->getNodeId()) << endl;
+
+        if (par("lowLatencyMode").boolValue())
+            emit(uplinkSlotOffsetSignal, newPrefParent->getSlotOffset());
+
         emit(parentChangedSignal, 0, (cObject*) rplCtrlInfo);
         daoSeqNum = 0;
         clearParentRoutes();
+        clearAllDaoAckTimers();
+
         drawConnector(newPrefParent->getPosition(), newPrefParent->getColor());
         updateRoutingTable(newPrefParentAddr, dodagId, nullptr, true);
 
@@ -1203,15 +1200,16 @@ void Rpl::updatePreferredParent()
          */
         trickleTimer->reset();
         if (daoEnabled) {
+            auto timeout = daoDelay * uniform(1, 7);
+
             if (storing)
                 // TODO: magic numbers
-                sendRplPacket(createDao(), DAO, newPrefParentAddr, daoDelay * uniform(1, 7));
+                sendRplPacket(createDao(), DAO, newPrefParentAddr, timeout);
             else
-                sendRplPacket(createDao(), DAO, newPrefParentAddr, daoDelay * uniform(1, 7),
-                            getSelfAddress(), newPrefParentAddr);
+                sendRplPacket(createDao(), DAO, newPrefParentAddr, timeout, getSelfAddress(), newPrefParentAddr);
 
             EV_DETAIL << "Sending DAO to new pref. parent - " << newPrefParentAddr
-                    << " advertising " << getSelfAddress() << " reachability" << endl;
+                    << " advertising " << getSelfAddress() << " reachability at " << simTime() + timeout << "s" << endl;
         }
     }
     preferredParent = newPrefParent->dup();
@@ -1291,8 +1289,11 @@ void Rpl::updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest
     if (routeData)
         route->setProtocolData(routeData);
 
-    if (!checkDuplicateRoute((Ipv6Route*) route))
+    if (!checkDuplicateRoute((Ipv6Route*) route)) {
         routingTable->addRoute(route);
+        EV_DETAIL << "New destination learned - " << dest << " reachable via " << nextHop << endl;
+    }
+
 }
 
 bool Rpl::checkDuplicateRoute(Ipv6Route *route) {
