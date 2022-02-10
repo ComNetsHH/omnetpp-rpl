@@ -201,10 +201,8 @@ public:
     simsignal_t daoReceivedSignal;
     simsignal_t parentChangedSignal;
     simsignal_t rankUpdatedSignal;
-    simsignal_t rankUpdatedSignalSf;
     simsignal_t parentUnreachableSignal;
     simsignal_t childJoinedSignal;
-
 
     int numDaoDropped;
 

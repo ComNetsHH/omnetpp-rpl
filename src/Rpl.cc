@@ -129,7 +129,6 @@ void Rpl::initialize(int stage)
         parentUnreachableSignal = registerSignal("parentUnreachable");
         parentChangedSignal = registerSignal("parentChanged");
         rankUpdatedSignal = registerSignal("rankUpdated");
-        rankUpdatedSignalSf = registerSignal("rankUpdatedSf");
         childJoinedSignal = registerSignal("childJoined");
 
         startDelay = par("startDelay").doubleValue();
@@ -740,20 +739,11 @@ void Rpl::sendRplPacket(const Ptr<RplPacket> &body, RplPacketCode code,
         const L3Address& nextHop, double delay, const Ipv6Address &target, const Ipv6Address &transit, std::string interfaceName)
 {
     Packet *pkt = new Packet(std::string("inet::RplPacket::" + rplIcmpCodeToStr(code)).c_str());
+
     auto header = makeShared<RplHeader>();
     header->setIcmpv6Code(code);
     pkt->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     pkt->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
-
-    // Manually set the request outgoing interface, TODO: investigate in more detail, causes weird Neighbor Discovery behavior
-//    if (!interfaceName.empty())
-//    {
-//        auto iePtr = interfaceTable->findInterfaceByName(interfaceName.c_str());
-//        if (iePtr)
-//            pkt->addTag<InterfaceReq>()->setInterfaceId(iePtr->getInterfaceId());
-//
-//        EV_DETAIL << "Set tag <InterfaceReq> to " << iePtr->getInterfaceId() << endl;
-//    }
 
     auto addresses = pkt->addTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
@@ -860,12 +850,7 @@ bool Rpl::isUdpSink(cModule* app) {
         return false;
 
     std::string appName(app->getNedTypeName());
-
-    bool res = appName.find("Sink") != std::string::npos;
-    EV_DETAIL << appName << " checking if UDP sink: " << (res ? "true" : "false")
-            << ", app name: " << appName << endl;
-
-    return res;
+    return appName.find("Sink") != std::string::npos;
 }
 
 bool Rpl::isInvalidDio(const Dio* dio) {
@@ -1220,10 +1205,7 @@ void Rpl::updatePreferredParent()
         rank = newRank;
         EV_DETAIL << "Updated rank - " << rank << endl;
         clearObsoleteBackupParents(backupParents);
-
-        // didn't work properly, the signal was emitted too early for some reason, TODO: revisit
-//        emit(rankUpdatedSignal, (long) newRank);
-        emit(rankUpdatedSignalSf, (long) rank);
+        emit(rankUpdatedSignal, (long) rank);
     }
 }
 
@@ -1293,7 +1275,6 @@ void Rpl::updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest
         routingTable->addRoute(route);
         EV_DETAIL << "New destination learned - " << dest << " reachable via " << nextHop << endl;
     }
-
 }
 
 bool Rpl::checkDuplicateRoute(Ipv6Route *route) {
