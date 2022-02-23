@@ -91,27 +91,19 @@ void Rpl::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-
-        EV_DETAIL << "got interface table - " << interfaceTable << endl;
-
         networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
         nd = check_and_cast<Ipv6NeighbourDiscovery*>(getModuleByPath("^.ipv6.neighbourDiscovery"));
 
-
         mac = getModuleByPath("^.wlan[0].mac.mac");
+        host = getContainingNode(this);
 
         if (mac)
             mac->subscribe("currentFrequency", this);
 
-        EV_DETAIL << "Found MAC module - " << mac << endl;
         routingTable = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule"), this);
         trickleTimer = check_and_cast<TrickleTimer*>(getModuleByPath("^.trickleTimer"));
-
         daoEnabled = par("daoEnabled").boolValue();
-        host = getContainingNode(this);
         hostName = host->getFullName();
-        EV_DETAIL << "My full name: " << hostName << endl;
-
         objectiveFunction = new ObjectiveFunction(par("objectiveFunctionType").stdstringValue());
         objectiveFunction->setMinHopRankIncrease(par("minHopRankIncrease").intValue());
         daoRtxThresh = par("numDaoRetransmitAttempts").intValue();
@@ -139,7 +131,7 @@ void Rpl::initialize(int stage)
         dagInfo = *(new DodagInfo());
 
 
-        // low-latency mode settings
+        // low-latency mode settings (only of use in combination with TSCH)
         if (par("lowLatencyMode").boolValue()) {
             auto tschSf = getModuleByPath("^.wlan[0].mac.sixtischInterface.sf");
             uplinkSlotOffsetSignal = registerSignal("uplinkSlotOffset");
@@ -1143,7 +1135,7 @@ void Rpl::updatePreferredParent()
      * If a better preferred parent is discovered (based on the objective function metric),
      * update default route to DODAG sink with the new nextHop
      */
-    if (checkPrefParentChanged(newPrefParentAddr)) {
+    if (prefParentHasChanged(newPrefParentAddr)) {
 
         setParentMobility(newPrefParent);
 
@@ -1234,7 +1226,7 @@ void Rpl::clearObsoleteBackupParents(map <Ipv6Address, Dio*> &backupParents) {
     EV_DETAIL << endl;
 }
 
-bool Rpl::checkPrefParentChanged(const Ipv6Address &newPrefParentAddr)
+bool Rpl::prefParentHasChanged(const Ipv6Address &newPrefParentAddr)
 {
     return !preferredParent || preferredParent->getSrcAddress() != newPrefParentAddr;
 }
@@ -1340,9 +1332,17 @@ bool Rpl::isSourceRouted(Packet *pkt) {
 }
 
 
-// TODO: update to realistic value or calculate dynamically?
+// TODO: update to realistic values or calculate dynamically?
 B Rpl::getDaoLength() {
     return B(8);
+}
+
+B Rpl::getTransitOptionsLength() {
+    return B(16);
+}
+
+B Rpl::getRpiHeaderLength() {
+    return B(4);
 }
 
 void Rpl::appendDaoTransitOptions(Packet *pkt) {
@@ -1428,15 +1428,6 @@ bool Rpl::checkRplRouteInfo(Packet *datagram) {
     datagram->insertAtBack(rpiCopy);
     return true;
 }
-
-B Rpl::getTransitOptionsLength() {
-    return B(16);
-}
-
-B Rpl::getRpiHeaderLength() {
-    return B(4);
-}
-
 
 void Rpl::extractSourceRoutingData(Packet *pkt) {
     try {

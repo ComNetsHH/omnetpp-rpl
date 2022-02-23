@@ -63,24 +63,6 @@ public:
                 os << timeoutInfo.numRetries << " retries";
                 return os;
             }
-
-
-
-    //            int getNumRetries() const {
-    //                return numRetries;
-    //            }
-    //
-    //            void setNumRetries(int numRetries) {
-    //                this->numRetries = numRetries;
-    //            }
-    //
-    //            const cMessage*& getTimeoutPtr() const {
-    //                return timeoutPtr;
-    //            }
-    //
-    //            void setTimeoutPtr(const cMessage *&timeoutPtr) {
-    //                this->timeoutPtr = timeoutPtr;
-    //            }
     };
 
     class DodagInfo : public cObject {
@@ -444,7 +426,7 @@ public:
      * @return True if new preferred parent address differs from the one currently stored,
      * false otherwise
      */
-    bool checkPrefParentChanged(const Ipv6Address &newPrefParentAddr);
+    bool prefParentHasChanged(const Ipv6Address &newPrefParentAddr);
 
     template<typename Map>
     std::string printMap(const Map& map);
