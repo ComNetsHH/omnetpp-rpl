@@ -30,7 +30,6 @@ OBJS = \
     $O/RplRouteData.o \
     $O/TrickleTimer.o \
     $O/configurator/RplNetConfigurator.o \
-    $O/neighborDiscovery/Ipv6NeighbourDiscoveryWireless.o \
     $O/Rpl_m.o
 
 # Message files
