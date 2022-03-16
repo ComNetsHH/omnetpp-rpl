@@ -92,11 +92,16 @@ module Rpl like IManetRouting
 		bool drawConnectors = default(true);
 		bool showBackupParents = default(false);
 
-		// Optional low-latency mode settings
+		// Optional low-latency mode settings (6TiSCH) 
 		bool lowLatencyMode = default(false);
+		
+		// Optional downlink path scheduling (6TiSCH)
+		bool downlinkRequired = default(false);
 		
 		// Misc
 		bool scheduleEthernetPkt = default(false);
+		
+		
 
     gates:
         input ipIn;

@@ -209,6 +209,7 @@ public:
     // Low-latency params, only for use in 6TiSCH
     long uplinkSlotOffset; // smallest slot offset of the uplink cell
     simsignal_t uplinkSlotOffsetSignal; // emitted to notify SF about the slot offset learned from DIO
+    simsignal_t tschScheduleDownlinkSignal; // notifies TSCH SF that a downlink cell is required for a child
 
   public:
     Rpl();
@@ -349,6 +350,8 @@ public:
     void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData) { updateRoutingTable(nextHop, dest, routeData, false); };
 //    void updateRoutingTable(const Dao *dao);
     RplRouteData* prepRouteData(const Dao *dao);
+
+    bool checkDestRoutable(const Ipv6Address &dest);
 
     /** Delete default routes for given interface
      *

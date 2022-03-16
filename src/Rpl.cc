@@ -130,7 +130,6 @@ void Rpl::initialize(int stage)
 
         dagInfo = *(new DodagInfo());
 
-
         // low-latency mode settings (only of use in combination with TSCH)
         if (par("lowLatencyMode").boolValue()) {
             auto tschSf = getModuleByPath("^.wlan[0].mac.sixtischInterface.sf");
@@ -138,6 +137,9 @@ void Rpl::initialize(int stage)
 
             tschSf->subscribe("uplinkScheduled", this);
         }
+
+        // for heuristic: extra downlink scheduling along the DAO path
+        tschScheduleDownlinkSignal = registerSignal("tschScheduleDownlink");
 
         WATCH(numParentUpdates);
         WATCH_MAP(candidateParents);
@@ -655,10 +657,8 @@ void Rpl::processPacket(Packet *packet)
 
     auto rssiTag = packet->findTag<SignalPowerInd>();
     double receivedPower = 0;
-    if (rssiTag) {
-        EV_DETAIL << "Received packet RSSI: " << rssiTag->getPower() << endl;
+    if (rssiTag)
         receivedPower = rssiTag->getPower().get() * pow(10, 12); // in picowatts
-    }
 
     // in non-storing mode check for RPL Target, Transit Information options
     if (!storing && dodagId != Ipv6Address::UNSPECIFIED_ADDRESS)
@@ -749,18 +749,22 @@ void Rpl::sendRplPacket(const Ptr<RplPacket> &body, RplPacketCode code,
     if (code == DAO && ((dynamicPtrCast<Dao>) (body))->getDaoAckRequired()) {
         auto outgoingDao = (dynamicPtrCast<Dao>) (body);
         auto advertisedDest = outgoingDao->getReachableDest();
-        auto timeout = simTime() + SimTime(daoAckTimeout, SIMTIME_S) * uniform(1, 3); // TODO: Magic numbers
+        auto timeout = simTime() + SimTime(daoAckTimeout, SIMTIME_S) * uniform(3, 4); // TODO: Magic numbers
 
         EV_DETAIL << "Scheduling DAO_ACK timeout at " << timeout << " for advertised dest "
                 << advertisedDest << endl;
 
         cMessage *daoTimeoutMsg = new cMessage("", DAO_ACK_TIMEOUT);
         daoTimeoutMsg->setContextPointer(new Ipv6Address(advertisedDest));
-        EV_DETAIL << "Created DAO_ACK timeout msg with context pointer - "
+        EV_DEBUG << "Created DAO_ACK timeout msg with context pointer - "
                 << *((Ipv6Address *) daoTimeoutMsg->getContextPointer()) << endl;
 
         auto daoAckEntry = pendingDaoAcks.find(advertisedDest);
         if (daoAckEntry != pendingDaoAcks.end()) {
+
+            if (pendingDaoAcks[advertisedDest]->timeoutPtr)
+                cancelEvent(pendingDaoAcks[advertisedDest]->timeoutPtr);
+
             pendingDaoAcks[advertisedDest]->timeoutPtr = daoTimeoutMsg;
             EV_DETAIL << "Found existing entry in DAO_ACKs map for dest - " << advertisedDest
                     << " updating timeout event ptr" << endl;
@@ -773,7 +777,7 @@ void Rpl::sendRplPacket(const Ptr<RplPacket> &body, RplPacketCode code,
         for (auto e : pendingDaoAcks)
             EV_DETAIL << e.first << " (" << std::to_string(e.second->numRetries) << " attempts), timeout msg ptr - " << e.second->timeoutPtr << endl;
 
-        scheduleAt(timeout, daoTimeoutMsg);
+        scheduleAt(timeout, pendingDaoAcks[advertisedDest]->timeoutPtr);
     }
     sendPacket(pkt, delay);
 
@@ -819,21 +823,15 @@ const Ptr<Dao> Rpl::createDao(const Ipv6Address &reachableDest)
     dao->setSeqNum(daoSeqNum++);
     dao->setNodeId(selfId);
     dao->setDaoAckRequired(pDaoAckEnabled);
+    dao->setDownlinkRequired(par("downlinkRequired").boolValue());
     EV_DETAIL << "Created DAO with seqNum = " << std::to_string(dao->getSeqNum()) << " advertising " << reachableDest << endl;
     return dao;
 }
 
 const Ptr<Dao> Rpl::createDao(const Ipv6Address &reachableDest, bool ackRequired)
 {
-    auto dao = makeShared<Dao>();
-    dao->setInstanceId(instanceId);
-    dao->setChunkLength(b(64));
-    dao->setSrcAddress(getSelfAddress());
-    dao->setReachableDest(reachableDest);
-    dao->setSeqNum(daoSeqNum++);
-    dao->setNodeId(selfId);
+    auto dao = createDao(reachableDest);
     dao->setDaoAckRequired(ackRequired);
-    EV_DETAIL << "Created DAO with seqNum = " << std::to_string(dao->getSeqNum()) << " advertising " << reachableDest << endl;
     return dao;
 }
 
@@ -871,8 +869,7 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
         return;
 
     EV_DETAIL << "Processing DIO from " << dio->getSrcAddress()
-                << ", advertised rank - " << dio->getRank()
-                << "\ncurrent freq - " << currentFrequency << endl;
+                << ", advertised rank - " << dio->getRank() << endl;
 
     emit(dioReceivedSignal, dio->dup());
 
@@ -991,16 +988,24 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
         updateRoutingTable(daoSender, advertisedDest, prepRouteData(dao.get()));
         emit(childJoinedSignal, 1);
     }
+
+    // Check if extra downlink bandwidth is needed for the child
+    if (dao->getDownlinkRequired()) {
+        EV_DETAIL << "Detected downlink required for node " << MacAddress(dao->getNodeId()) << endl;
+        emit(tschScheduleDownlinkSignal, (long) dao->getNodeId());
+    }
+
     /**
      * Forward DAO 'upwards' via preferred parent advertising destination to the root [RFC6560, 6.4]
      */
     if (!isRoot && preferredParent) {
+        auto fwdDao = createDao(advertisedDest);
+        fwdDao->setDownlinkRequired(dao->getDownlinkRequired());
+
         if (!storing)
-            sendRplPacket(createDao(advertisedDest), DAO,
-                preferredParent->getSrcAddress(), daoDelay * uniform(1, 2), *lastTarget, *lastTransit);
+            sendRplPacket(fwdDao, DAO, preferredParent->getSrcAddress(), daoDelay * uniform(1, 2), *lastTarget, *lastTransit);
         else
-            sendRplPacket(createDao(advertisedDest), DAO,
-                preferredParent->getSrcAddress(), daoDelay * uniform(1, 2));
+            sendRplPacket(fwdDao, DAO, preferredParent->getSrcAddress(), daoDelay * uniform(1, 2));
 
         numDaoForwarded++;
         EV_DETAIL << "Forwarding DAO to " << preferredParent->getSrcAddress()
@@ -1218,12 +1223,15 @@ void Rpl::clearObsoleteBackupParents(map <Ipv6Address, Dio*> &backupParents) {
         }
     }
 
-    EV_DETAIL << "Erased obsolete (higher rank) backup parents:" << endl;
-    for (auto addr: parentsToDelete) {
-        backupParents.erase(backupParents.find(addr));
-        EV_DETAIL << addr << ", ";
+    if (parentsToDelete.size()) {
+        EV_DETAIL << "Erased obsolete (higher rank) backup parents:" << endl;
+
+        for (auto addr: parentsToDelete) {
+            backupParents.erase(backupParents.find(addr));
+            EV_DETAIL << addr << ", ";
+        }
+        EV_DETAIL << endl;
     }
-    EV_DETAIL << endl;
 }
 
 bool Rpl::prefParentHasChanged(const Ipv6Address &newPrefParentAddr)
@@ -1267,7 +1275,22 @@ void Rpl::updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest
         routingTable->addRoute(route);
         EV_DETAIL << "New destination learned - " << dest << " reachable via " << nextHop << endl;
     }
+
+    if (!checkDestRoutable(nextHop))
+        updateRoutingTable(nextHop, nextHop, nullptr, false);
+
 }
+
+bool Rpl::checkDestRoutable(const Ipv6Address &dest) {
+    for (auto i = 0; i < routingTable->getNumRoutes(); i++) {
+        auto rt = routingTable->getRoute(i);
+        auto knownDest = rt->getDestinationAsGeneric().toIpv6();
+        if (dest == knownDest)
+            return true;
+    }
+    return false;
+}
+
 
 bool Rpl::checkDuplicateRoute(Ipv6Route *route) {
     for (auto i = 0; i < routingTable->getNumRoutes(); i++) {

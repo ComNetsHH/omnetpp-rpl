@@ -112,7 +112,9 @@ cplusplus (Dio) {{
 class Dao extends RplPacket {
     uint8_t seqNum;				// ID for each unique DAO sent by a node
     bool daoAckRequired;		// indicates whether DAO-ACK is expected by the sender 
-    Ipv6Address reachableDest;	// advertised reachable destination		
+    Ipv6Address reachableDest;	// advertised reachable destination
+    
+	bool downlinkRequired; 		// heuristic for 6TiSCH to schedule an extra TX cell from parent to child, to ensure sufficient downlink bandwidth       		
 }
 
 cplusplus (Dao) {{
