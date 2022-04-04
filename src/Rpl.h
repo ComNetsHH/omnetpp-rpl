@@ -210,6 +210,7 @@ public:
     long uplinkSlotOffset; // smallest slot offset of the uplink cell
     simsignal_t uplinkSlotOffsetSignal; // emitted to notify SF about the slot offset learned from DIO
     simsignal_t tschScheduleDownlinkSignal; // notifies TSCH SF that a downlink cell is required for a child
+    simsignal_t tschScheduleUplinkSignal; // notifies TSCH SF that a downlink cell is required for a child
 
   public:
     Rpl();
@@ -346,8 +347,8 @@ public:
      * @param nextHop next hop address to reach the destination for findBestMatchingRoute()
      * @param dest discovered destination address being added to the routing table
      */
-    void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData, bool defaultRoute);
-    void updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData) { updateRoutingTable(nextHop, dest, routeData, false); };
+    bool updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData, bool defaultRoute);
+    bool updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData) { return updateRoutingTable(nextHop, dest, routeData, false); };
 //    void updateRoutingTable(const Dao *dao);
     RplRouteData* prepRouteData(const Dao *dao);
 

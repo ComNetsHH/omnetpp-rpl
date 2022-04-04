@@ -140,6 +140,7 @@ void Rpl::initialize(int stage)
 
         // for heuristic: extra downlink scheduling along the DAO path
         tschScheduleDownlinkSignal = registerSignal("tschScheduleDownlink");
+        tschScheduleUplinkSignal = registerSignal("tschScheduleUplink");
 
         WATCH(numParentUpdates);
         WATCH_MAP(candidateParents);
@@ -824,6 +825,7 @@ const Ptr<Dao> Rpl::createDao(const Ipv6Address &reachableDest)
     dao->setNodeId(selfId);
     dao->setDaoAckRequired(pDaoAckEnabled);
     dao->setDownlinkRequired(par("downlinkRequired").boolValue());
+    dao->setUplinkRequired(par("uplinkRequired").boolValue());
     EV_DETAIL << "Created DAO with seqNum = " << std::to_string(dao->getSeqNum()) << " advertising " << reachableDest << endl;
     return dao;
 }
@@ -985,15 +987,23 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
 //        }
 //        else
 //            return;
-        updateRoutingTable(daoSender, advertisedDest, prepRouteData(dao.get()));
+        bool isNewRoute = updateRoutingTable(daoSender, advertisedDest, prepRouteData(dao.get()));
+
+        // Check if extra up-/downlink bandwidth is required (TODO: only if a new route is learned)
+        if (dao->getDownlinkRequired()) {
+            EV_DETAIL << "Detected downlink required for node " << MacAddress(dao->getNodeId()) << endl;
+            emit(tschScheduleDownlinkSignal, (long) dao->getNodeId());
+        }
+
+        if (dao->getUplinkRequired()) {
+            EV_DETAIL << "Detected uplink required for node " << MacAddress(dao->getNodeId()) << endl;
+            emit(tschScheduleUplinkSignal, (long) dao->getNodeId());
+        }
+
         emit(childJoinedSignal, 1);
     }
 
-    // Check if extra downlink bandwidth is needed for the child
-    if (dao->getDownlinkRequired()) {
-        EV_DETAIL << "Detected downlink required for node " << MacAddress(dao->getNodeId()) << endl;
-        emit(tschScheduleDownlinkSignal, (long) dao->getNodeId());
-    }
+
 
     /**
      * Forward DAO 'upwards' via preferred parent advertising destination to the root [RFC6560, 6.4]
@@ -1001,6 +1011,7 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
     if (!isRoot && preferredParent) {
         auto fwdDao = createDao(advertisedDest);
         fwdDao->setDownlinkRequired(dao->getDownlinkRequired());
+        fwdDao->setUplinkRequired(dao->getUplinkRequired());
 
         if (!storing)
             sendRplPacket(fwdDao, DAO, preferredParent->getSrcAddress(), daoDelay * uniform(1, 2), *lastTarget, *lastTransit);
@@ -1252,8 +1263,10 @@ RplRouteData* Rpl::prepRouteData(const Dao *dao) {
     return routeData;
 }
 
-void Rpl::updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData, bool defaultRoute)
+bool Rpl::updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest, RplRouteData *routeData, bool defaultRoute)
 {
+    bool isDuplicateRoute = false;
+
     auto route = routingTable->createRoute();
     route->setSourceType(IRoute::MANET);
     route->setPrefixLength(isRoot ? 128 : prefixLength);
@@ -1275,10 +1288,13 @@ void Rpl::updateRoutingTable(const Ipv6Address &nextHop, const Ipv6Address &dest
         routingTable->addRoute(route);
         EV_DETAIL << "New destination learned - " << dest << " reachable via " << nextHop << endl;
     }
+    else
+        isDuplicateRoute = true;
 
     if (!checkDestRoutable(nextHop))
         updateRoutingTable(nextHop, nextHop, nullptr, false);
 
+    return isDuplicateRoute;
 }
 
 bool Rpl::checkDestRoutable(const Ipv6Address &dest) {

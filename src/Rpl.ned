@@ -95,14 +95,14 @@ module Rpl like IManetRouting
 		// Optional low-latency mode settings (6TiSCH) 
 		bool lowLatencyMode = default(false);
 		
-		// Optional downlink path scheduling (6TiSCH)
+		// Optional up-/downlink redundancy (6TiSCH-TRED / 6TiSCH-CLX (down))
 		bool downlinkRequired = default(false);
+		bool uplinkRequired = default(false);
 		
 		// Misc
 		bool scheduleEthernetPkt = default(false);
 		
-		
-
+	
     gates:
         input ipIn;
         output ipOut;

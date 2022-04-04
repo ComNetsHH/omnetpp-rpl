@@ -114,7 +114,9 @@ class Dao extends RplPacket {
     bool daoAckRequired;		// indicates whether DAO-ACK is expected by the sender 
     Ipv6Address reachableDest;	// advertised reachable destination
     
-	bool downlinkRequired; 		// heuristic for 6TiSCH to schedule an extra TX cell from parent to child, to ensure sufficient downlink bandwidth       		
+    // heuristic for 6TiSCH to ensure sufficient up-/downlink bandwidth
+	bool downlinkRequired; 		
+	bool uplinkRequired;
 }
 
 cplusplus (Dao) {{
