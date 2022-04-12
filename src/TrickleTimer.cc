@@ -122,7 +122,7 @@ void TrickleTimer::processSelfMessage(cMessage *message)
 
 void TrickleTimer::scheduleNext() {
     // TODO: Make delay float to allow more diverse transmission intervals
-    unsigned long delay = currentInterval/2 + intrand(currentInterval/2);
+    auto delay = (double) currentInterval/2 + uniform(1, (double) currentInterval/2);
     try {
         if (!trickleTriggerEvent)
             trickleTriggerEvent = new cMessage("TT triggered", TRICKLE_TRIGGER_EVENT);
