@@ -1147,11 +1147,13 @@ void Rpl::updatePreferredParent()
     }
 
     auto newPrefParentAddr = newPrefParent->getSrcAddress();
+    bool parentChanged = false;
     /**
      * If a better preferred parent is discovered (based on the objective function metric),
      * update default route to DODAG sink with the new nextHop
      */
     if (prefParentHasChanged(newPrefParentAddr)) {
+        parentChanged = true;
 
         setParentMobility(newPrefParent);
 
@@ -1166,13 +1168,6 @@ void Rpl::updatePreferredParent()
             if (!isUdpSink(app) && app->par("destAddresses").stdstringValue().empty())
                 app->par("destAddresses") = newPrefParentDodagId.str();
 
-        /** Notify 6TiSCH Scheduling Function (if present) about parent change */
-        auto rplCtrlInfo = new RplGenericControlInfo(newPrefParent->getNodeId());
-
-        if (par("lowLatencyMode").boolValue())
-            emit(uplinkSlotOffsetSignal, newPrefParent->getSlotOffset());
-
-        emit(parentChangedSignal, 0, (cObject*) rplCtrlInfo);
         daoSeqNum = 0;
         clearParentRoutes();
         clearAllDaoAckTimers();
@@ -1207,6 +1202,8 @@ void Rpl::updatePreferredParent()
     }
     preferredParent = newPrefParent->dup();
 
+    // Modified: the order of these signals makes a difference for SF behavior, lets see
+
     /** Recalculate rank based on the objective function */
     auto newRank = objectiveFunction->calcRank(preferredParent);
     if (newRank != rank) {
@@ -1215,6 +1212,19 @@ void Rpl::updatePreferredParent()
         clearObsoleteBackupParents(backupParents);
         emit(rankUpdatedSignal, (long) rank);
     }
+
+
+    /** Notify 6TiSCH Scheduling Function (if present) about parent change */
+    if (parentChanged)
+    {
+        auto rplCtrlInfo = new RplGenericControlInfo(newPrefParent->getNodeId());
+
+        if (par("lowLatencyMode").boolValue())
+            emit(uplinkSlotOffsetSignal, newPrefParent->getSlotOffset());
+
+        emit(parentChangedSignal, 0, (cObject*) rplCtrlInfo);
+    }
+
 }
 
 void Rpl::clearObsoleteBackupParents(map <Ipv6Address, Dio*> &backupParents) {
