@@ -40,6 +40,7 @@ module Rpl like IManetRouting
         @statistic[dioReceived](title = "DIO packets received"; source="dioReceived"; record=count; interpolationmode=none);  
         @statistic[daoReceived](title = "DAO packets received"; source="daoReceived"; record=count; interpolationmode=none);
         @statistic[parentChanged](title = "Preferred parent has changed"; source="parentChanged"; record=count; interpolationmode=none);
+        @statistic[rankUpdated](title = "Rank is updated"; source="rankUpdated"; record=vector, count; interpolationmode=none);
         @statistic[parentUnreachable](title = "Preferred parent unreachability detected"; source="parentUnreachable"; record=count; interpolationmode=none);
         
         // properties
