@@ -274,7 +274,6 @@ public:
      * @param dio DIO packet object for processing
      */
     void processDio(const Ptr<const Dio>& dio);
-    void processDio(const Ptr<const Dio>& dio, double rxPower);
 
     /**
      * Checks whether DIO is valid in terms of advertised rank

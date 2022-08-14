@@ -98,11 +98,7 @@ module Rpl like IManetRouting
 		
 		// Optional up-/downlink redundancy (6TiSCH-TRED / 6TiSCH-CLX (down))
 		bool downlinkRequired = default(false);
-		bool uplinkRequired = default(false);
-		
-		// Misc
-		bool scheduleEthernetPkt = default(false);
-		
+		bool uplinkRequired = default(false);	
 	
     gates:
         input ipIn;

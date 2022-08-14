@@ -130,7 +130,7 @@ void Rpl::initialize(int stage)
 
         dagInfo = *(new DodagInfo());
 
-        // low-latency mode settings (only of use in combination with TSCH)
+        // low-latency mode (CLXv2) settings (only of use in combination with TSCH)
         if (par("lowLatencyMode").boolValue()) {
             auto tschSf = getModuleByPath("^.wlan[0].mac.sixtischInterface.sf");
             uplinkSlotOffsetSignal = registerSignal("uplinkSlotOffset");
@@ -402,17 +402,11 @@ void Rpl::start()
         for (auto app : apps)
             app->subscribe("packetReceived", this);
     }
-
-
-    // For demo purposes
-    if (par("scheduleEthernetPkt").boolValue())
-        scheduleAt(simTime() + 20, new cMessage("", SEND_ETHER));
 }
 
 void Rpl::refreshDisplay() const {
     if (preferredParent && preferredParent->isMobile() && prefParentConnector && parentMobilityMod) {
         auto parentLoc = parentMobilityMod->getCurrentPosition();
-
         prefParentConnector->setEnd(cFigure::Point(parentLoc.x, parentLoc.y));
     }
 
@@ -455,11 +449,6 @@ void Rpl::processSelfMessage(cMessage *message)
         case RPL_START: {
             startDelay = 0;
             start();
-            break;
-        }
-        case SEND_ETHER: {
-            EV_DETAIL << "Preparing to send packet over ethernet" << endl;
-            sendRplPacket(createDao(getSelfAddress()), DAO, preferredParent->getSrcAddress(), daoDelay * uniform(1, 2), "eth0");
             break;
         }
         case DAO_ACK_TIMEOUT: {
@@ -656,11 +645,6 @@ void Rpl::processPacket(Packet *packet)
         return;
     }
 
-    auto rssiTag = packet->findTag<SignalPowerInd>();
-    double receivedPower = 0;
-    if (rssiTag)
-        receivedPower = rssiTag->getPower().get() * pow(10, 12); // in picowatts
-
     // in non-storing mode check for RPL Target, Transit Information options
     if (!storing && dodagId != Ipv6Address::UNSPECIFIED_ADDRESS)
         extractSourceRoutingData(packet);
@@ -668,7 +652,7 @@ void Rpl::processPacket(Packet *packet)
     auto rplBody = packet->peekData<RplPacket>();
     switch (rplHeader->getIcmpv6Code()) {
         case DIO: {
-            processDio(dynamicPtrCast<const Dio>(rplBody), receivedPower);
+            processDio(dynamicPtrCast<const Dio>(rplBody));
             break;
         }
         case DAO: {
@@ -824,8 +808,11 @@ const Ptr<Dao> Rpl::createDao(const Ipv6Address &reachableDest)
     dao->setSeqNum(daoSeqNum++);
     dao->setNodeId(selfId);
     dao->setDaoAckRequired(pDaoAckEnabled);
+
+    // Flags only used by TSCH
     dao->setDownlinkRequired(par("downlinkRequired").boolValue());
     dao->setUplinkRequired(par("uplinkRequired").boolValue());
+
     EV_DETAIL << "Created DAO with seqNum = " << std::to_string(dao->getSeqNum()) << " advertising " << reachableDest << endl;
     return dao;
 }
@@ -855,16 +842,6 @@ bool Rpl::isInvalidDio(const Dio* dio) {
             || (preferredParent && preferredParent->getSrcAddress() != dio->getSrcAddress() && dio->getRank() == INF_RANK);
 }
 
-void Rpl::processDio(const Ptr<const Dio>& dio, double rxPower) {
-    if (isRoot || isInvalidDio(dio.get()))
-        return;
-
-    if (dio->getRank() == 1 && rxPower < par("joinAtSinkPowerThresh").doubleValue())
-        return;
-
-    processDio(dio);
-}
-
 void Rpl::processDio(const Ptr<const Dio>& dio)
 {
     if (isRoot || isInvalidDio(dio.get()))
@@ -875,7 +852,8 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
 
     emit(dioReceivedSignal, dio->dup());
 
-    // Custom low-latency mode part: do not join a DODAG if no slot offset is advertised to daisy-chain to
+    // Custom low-latency mode part:
+    // do not join a DODAG if no slot offset is advertised (required for cell daisy-chain)
     if (par("lowLatencyMode").boolValue() && dio->getRank() > 1 && dio->getSlotOffset() == 0)
         return;
 
@@ -888,7 +866,6 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
         storing = dio->getStoring();
         dtsn = dio->getDtsn();
         lastTarget = new Ipv6Address(getSelfAddress());
-//        selfAddr = getSelfAddress();
         dodagColor = dio->getColor();
         EV_DETAIL << "Joined DODAG with id - " << dodagId << endl;
         // Start broadcasting DIOs, diffusing DODAG control data, TODO: refactor TT lifecycle
@@ -960,17 +937,14 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
     auto daoSender = dao->getSrcAddress();
 
     if (!isRoot && daoSender == preferredParent->getSrcAddress())
-        throw cRuntimeError("Received DAO from the preferred parent, loop detected!");
+        throw cRuntimeError("Received DAO from preferred parent, loop detected!");
 
     auto advertisedDest = dao->getReachableDest();
     EV_DETAIL << "Processing DAO with seq num " << std::to_string(dao->getSeqNum()) << " from "
             << daoSender << " advertising " << advertisedDest << endl;
 
-    if (dao->getDaoAckRequired()) {
-        auto timeout = uniform(1, 3);
-        sendRplPacket(createDao(advertisedDest), DAO_ACK, daoSender, timeout);
-        EV_DETAIL << "DAO_ACK will be sent back acknowledging advertised destination at " << simTime() + timeout << "s" << endl;
-    }
+    if (dao->getDaoAckRequired())
+        sendRplPacket(createDao(advertisedDest), DAO_ACK, daoSender, uniform(1, 3)); // TODO: magic numbers
 
     /**
      * If a node is root or operates in storing mode
@@ -989,6 +963,7 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
 //            return;
         bool isNewRoute = updateRoutingTable(daoSender, advertisedDest, prepRouteData(dao.get()));
 
+        // Only in combination with TSCH:
         // Check if extra up-/downlink bandwidth is required (TODO: only if a new route is learned)
         if (dao->getDownlinkRequired()) {
             EV_DETAIL << "Detected downlink required for node " << MacAddress(dao->getNodeId()) << endl;
@@ -1002,8 +977,6 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
 
         emit(childJoinedSignal, 1);
     }
-
-
 
     /**
      * Forward DAO 'upwards' via preferred parent advertising destination to the root [RFC6560, 6.4]
@@ -1937,7 +1910,7 @@ void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
 
 }
 
-// Low-latency mode signals
+// TSCH low-latency mode signals
 void Rpl::receiveSignal(cComponent *src, simsignal_t id, long value, cObject *details) {
     std::string signalName = getSignalName(id);
 
@@ -1952,14 +1925,9 @@ void Rpl::receiveSignal(cComponent *src, simsignal_t id, long value, cObject *de
 void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, double value, cObject *details) {
     std::string signalName = getSignalName(signalID);
 
-    if (std::strcmp(signalName.c_str(), "currentFrequency") == 0) {
-//        EV_DETAIL << "RPL received current frequnecy - " << value << endl;
+    if (std::strcmp(signalName.c_str(), "currentFrequency") == 0)
         currentFrequency = value;
-    }
-
 }
-
-// Getting current freq from MAC
 
 } // namespace inet
 
