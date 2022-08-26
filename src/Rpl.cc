@@ -28,6 +28,7 @@
 #include <math.h>
 #include "Rpl.h"
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
+#include "inet/linklayer/ieee802154/Ieee802154MacHeader_m.h"
 
 namespace inet {
 
@@ -128,7 +129,7 @@ void Rpl::initialize(int stage)
         if (par("layoutConfigurator").boolValue())
             generateLayout(host->getParentModule()); // generate layout using the topmost simulation module, TODO: refactor into mobility extension module
 
-        dagInfo = *(new DodagInfo());
+        dodagInfo = *(new DodagInfo());
 
         // low-latency mode (CLXv2) settings (only of use in combination with TSCH)
         if (par("lowLatencyMode").boolValue()) {
@@ -147,8 +148,9 @@ void Rpl::initialize(int stage)
         WATCH_MAP(backupParents);
         WATCH_PTRMAP(pendingDaoAcks);
 //        WATCH_OBJ(dagInfo); TODO: figure out why this doesn't work! the object IS shown in the GUI, but without any fields
-        WATCH(dagInfo.prefParent);
-        WATCH(dagInfo.prefParentRank);
+        WATCH(dodagInfo.prefParent);
+        WATCH(dodagInfo.prefParentRank);
+        WATCH(dodagInfo.prefParentName);
         WATCH(rank);
         WATCH(selfAddr);
         WATCH(selfId);
@@ -165,6 +167,11 @@ void Rpl::initialize(int stage)
 
 void Rpl::finish() {
     recordScalar("rank", rank);
+    if (preferredParent)
+    {
+        recordScalar("parentId", getNodeId(dodagInfo.prefParentName));
+    }
+
 }
 
 void Rpl::generateLayout(cModule *net) {
@@ -367,7 +374,6 @@ void Rpl::start()
         if (strstr(ie->getInterfaceName(), "wlan") != nullptr)
         {
             interfaceEntryPtr = ie;
-            EV_DETAIL << "Interface #" << i << " set as IE pointer" << endl;
             break;
         }
     }
@@ -847,8 +853,16 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
     if (isRoot || isInvalidDio(dio.get()))
         return;
 
-    EV_DETAIL << "Processing DIO from " << dio->getSrcAddress()
-                << ", advertised rank - " << dio->getRank() << endl;
+    auto dioSenderAddr = dio->getSrcAddress();
+    EV_DETAIL << "Processing DIO from " << dioSenderAddr
+                << " (MAC - " << MacAddress(dio->getNodeId()) << "), advertised rank - " << dio->getRank() << endl;
+
+    if (!nd->neighbourCache.lookup(dioSenderAddr, interfaceEntryPtr->getInterfaceId()))
+    {
+        auto nce = nd->neighbourCache.addNeighbour(dioSenderAddr, interfaceEntryPtr->getInterfaceId(), MacAddress(dio->getNodeId()));
+        nce->reachabilityState = Ipv6NeighbourCache::REACHABLE;
+        nce->reachabilityExpires = SIMTIME_MAX;
+    }
 
     emit(dioReceivedSignal, dio->dup());
 
@@ -892,7 +906,7 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
             EV_DETAIL << "Received poisoned DIO from preferred parent - "
                     << preferredParent->getSrcAddress() << endl;
             deletePrefParent(true);
-            updatePreferredParent();
+            updatePrefParent();
             return;
         }
     }
@@ -909,7 +923,7 @@ void Rpl::processDio(const Ptr<const Dio>& dio)
     }
 
     addNeighbour(dio);
-    updatePreferredParent();
+    updatePrefParent();
 }
 
 void Rpl::purgeRoutingTable() {
@@ -1034,7 +1048,7 @@ void Rpl::processDaoAck(const Ptr<const Dao>& daoAck) {
 }
 
 
-void Rpl::setLineProperties(cLineFigure *connector, Coord target, cFigure::Color col, bool dashed) const
+void Rpl::setParentConnectorProps(cLineFigure *connector, Coord target, cFigure::Color col, bool dashed) const
 {
     connector->setStart(cFigure::Point(position.x, position.y));
     connector->setEnd(cFigure::Point(target.x, target.y));
@@ -1060,7 +1074,7 @@ void Rpl::drawConnector(Coord target, cFigure::Color col, Ipv6Address backupPare
     if (backupParent != Ipv6Address::UNSPECIFIED_ADDRESS) {
         if (backupConnectors.find(backupParent) == backupConnectors.end()) {
             backupConnectors[backupParent] = new cLineFigure("backupParentConnector");
-            setLineProperties(backupConnectors[backupParent], target, col, true);
+            setParentConnectorProps(backupConnectors[backupParent], target, col, true);
             canvas->addFigure(backupConnectors[backupParent]);
         }
         return;
@@ -1075,7 +1089,7 @@ void Rpl::drawConnector(Coord target, cFigure::Color col, Ipv6Address backupPare
 
     // Otherwise create a new line and add it to canvas
     prefParentConnector = new cLineFigure("preferredParentConnector");
-    setLineProperties(prefParentConnector, target, col);
+    setParentConnectorProps(prefParentConnector, target, col);
     canvas->addFigure(prefParentConnector);
 }
 
@@ -1089,7 +1103,7 @@ void Rpl::setParentMobility(Dio* prefParent) {
         parentMobilityMod = check_and_cast<IMobility*> (prefParentModule->getSubmodule("mobility"));
 }
 
-void Rpl::updatePreferredParent()
+void Rpl::updatePrefParent()
 {
     Dio *newPrefParent;
     EV_DETAIL << "Choosing preferred parent from "
@@ -1131,7 +1145,7 @@ void Rpl::updatePreferredParent()
         setParentMobility(newPrefParent);
 
         auto newPrefParentDodagId = newPrefParent->getDodagId();
-        dagInfo.update(newPrefParent);
+        dodagInfo.update(newPrefParent);
 
         /** Silently join new DODAG and update dest address for application, TODO: Check with RFC */
         dodagId = newPrefParentDodagId;
@@ -1851,7 +1865,7 @@ void Rpl::drawConnector(Ipv6Address neighborAddr, Coord pos, cFigure::Color col)
     if (backupConnectors.find(neighborAddr) == backupConnectors.end()) {
         EV_DETAIL << "No connector yet found for this neighbor" << endl;
         auto connector = new cLineFigure("backupParentConnector");
-        setLineProperties(connector, pos, col, true);
+        setParentConnectorProps(connector, pos, col, true);
         canvas->addFigure(connector);
         EV_DETAIL << "Connector added - " << connector << endl;
         backupConnectors[neighborAddr] = connector;
@@ -1902,7 +1916,7 @@ void Rpl::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                 deletePrefParent();
                 // TODO: Redirect all packets already enqueued for previous pref. parent to the new one
                 // or flush the queue completely
-                updatePreferredParent();
+                updatePrefParent();
             }
         }
     }

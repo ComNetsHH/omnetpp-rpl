@@ -68,31 +68,32 @@ public:
     class DodagInfo : public cObject {
 
         public:
-            Ipv6Address dagId;
+            Ipv6Address dodagId;
+            uint8_t instanceId;
             Ipv6Address prefParent;
             uint16_t prefParentRank;
-            uint8_t rplInstanceId;
+            std::string prefParentName;
 
             DodagInfo() {
-                this->dagId = Ipv6Address::UNSPECIFIED_ADDRESS;
+                this->dodagId = Ipv6Address::UNSPECIFIED_ADDRESS;
                 this->prefParent = Ipv6Address::UNSPECIFIED_ADDRESS;
                 this->prefParentRank = INF_RANK;
-                this->rplInstanceId = 0xFF; // TODO: check/define the default value
+                this->instanceId = 0xFF; // TODO: check/define the default value
             }
 
             DodagInfo(Ipv6Address dagId, Ipv6Address prefParent, int prefParentRank, int rplInstanceId)
             {
-                this->dagId = dagId;
+                this->dodagId = dagId;
+                this->instanceId = rplInstanceId;
                 this->prefParent = prefParent;
                 this->prefParentRank = prefParentRank;
-                this->rplInstanceId = rplInstanceId;
             }
 
             const Ipv6Address& getDagId() const {
-                return dagId;
+                return dodagId;
             }
             void setDagId(const Ipv6Address &dagId) {
-                this->dagId = dagId;
+                this->dodagId = dagId;
             }
 
             const Ipv6Address& getPrefParent() const {
@@ -110,17 +111,19 @@ public:
             }
 
             uint8_t getRplInstanceId() const {
-                return rplInstanceId;
+                return instanceId;
             }
             void setRplInstanceId(uint8_t rplInstanceId) {
-                this->rplInstanceId = rplInstanceId;
+                this->instanceId = rplInstanceId;
             }
 
             void update(Dio *dio) {
-                this->dagId = dio->getDodagId();
+                this->dodagId = dio->getDodagId();
                 this->prefParent = dio->getSrcAddress();
                 this->prefParentRank = dio->getRank();
-                this->rplInstanceId = dio->getInstanceId();
+                std::string parentName(dio->getNodeName());
+                this->prefParentName = parentName;
+                this->instanceId = dio->getInstanceId();
             }
     };
 
@@ -142,7 +145,7 @@ public:
     vector<cModule*> apps;
 
     /** RPL configuration parameters and state management */
-    DodagInfo dagInfo; // for display/tracking purposes only, since WATCH_PTR on preferredParent DIO crashes
+    DodagInfo dodagInfo; // for display/tracking purposes only, since WATCH_PTR on preferredParent DIO crashes
     uint8_t dodagVersion;
     Ipv6Address dodagId;
     Ipv6Address selfAddr;
@@ -387,7 +390,7 @@ public:
      * determined by the objective function from candidate neighbors
      * If change in preferred parent detected, restart Trickle timer [RFC 6550, 8.3]
      */
-    void updatePreferredParent();
+    void updatePrefParent();
 
     /************ Lifecycle ****************/
 
@@ -646,10 +649,10 @@ public:
     }
     void drawConnector(Ipv6Address neighborAddr, Coord pos, cFigure::Color col);
 
-    void setLineProperties(cLineFigure *connector, Coord target, cFigure::Color col, bool dashed) const;
-    void setLineProperties(cLineFigure *connector, Coord target, cFigure::Color col) const
+    void setParentConnectorProps(cLineFigure *connector, Coord target, cFigure::Color col, bool dashed) const;
+    void setParentConnectorProps(cLineFigure *connector, Coord target, cFigure::Color col) const
     {
-        setLineProperties(connector, target, col, false);
+        setParentConnectorProps(connector, target, col, false);
     }
 
     static int getNodeId(std::string nodeName);

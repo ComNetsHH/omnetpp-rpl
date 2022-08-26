@@ -62,7 +62,7 @@ module Rpl like IManetRouting
         bool poisoning = default(false);
         bool useBackupAsPreferred = default(false);
         bool unreachabilityDetectionEnabled = default(false);
-        int minHopRankIncrease = default(1); // Preferred parent update threshold 
+        int minHopRankIncrease = default(1); // required difference in rank to consider switching preffered parent  
         double startDelay = default(0);
         string objectiveFunctionType = default("hopCount");	 // hopCount, ETX, energy, ...
         bool allowDodagSwitching = default(false);
