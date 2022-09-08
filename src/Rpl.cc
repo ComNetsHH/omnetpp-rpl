@@ -110,7 +110,7 @@ void Rpl::initialize(int stage)
         daoRtxThresh = par("numDaoRetransmitAttempts").intValue();
         allowDodagSwitching = par("allowDodagSwitching").boolValue();
         pDaoAckEnabled = par("daoAckEnabled").boolValue();
-        pUseWarmup = par("useWarmup").boolValue();
+        pUseWarmup = par("useWarmup").boolValue(); // TODO: check if still needed after IPv6 ND adjustments
         pUnreachabilityDetectionEnabled = par("unreachabilityDetectionEnabled").boolValue();
         pShowBackupParents = par("showBackupParents").boolValue();
         pAllowDaoForwarding = par("allowDaoForwarding").boolValue();
@@ -942,13 +942,21 @@ void Rpl::processDao(const Ptr<const Dao>& dao) {
         return;
     }
 
+    auto daoSender = dao->getSrcAddress();
+
+    if (!nd->neighbourCache.lookup(daoSender, interfaceEntryPtr->getInterfaceId()))
+    {
+        auto nce = nd->neighbourCache.addNeighbour(daoSender, interfaceEntryPtr->getInterfaceId(), MacAddress(dao->getNodeId()));
+        nce->reachabilityState = Ipv6NeighbourCache::REACHABLE;
+        nce->reachabilityExpires = SIMTIME_MAX;
+    }
+
     if (!isRoot && !preferredParent) {
         EV_DETAIL << "Node is detached from DODAG, discarding DAO" << endl;
         return;
     }
 
     emit(daoReceivedSignal, dao->dup());
-    auto daoSender = dao->getSrcAddress();
 
     if (!isRoot && daoSender == preferredParent->getSrcAddress())
         throw cRuntimeError("Received DAO from preferred parent, loop detected!");

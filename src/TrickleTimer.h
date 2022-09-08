@@ -40,6 +40,8 @@ class TrickleTimer : public cSimpleModule
     int skipIntDoublings;
     int intervalUpdatesCtn;
     int maxInterval;
+    int intervalExponent;
+    int pStartIntervalOverride;
     bool started;
     cMessage *trickleTriggerEvent;
     cMessage *trickleTriggerMsg;
@@ -47,6 +49,9 @@ class TrickleTimer : public cSimpleModule
 
     uint8_t redundancyConst;
     uint8_t ctrlMsgReceivedCtn;
+
+  protected:
+    void initialize(int stage) override;
 
   public:
     TrickleTimer();
@@ -86,7 +91,7 @@ class TrickleTimer : public cSimpleModule
     void updateInterval();
 
     /** Messsage processing */
-    void handleMessage(cMessage *message);
+    void handleMessage(cMessage *message) override;
     void processSelfMessage(cMessage *message);
     void handleMessageWhenUp(cMessage *message);
 

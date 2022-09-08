@@ -28,6 +28,8 @@ simple TrickleTimer
     parameters:
         // properties
         @class("inet::TrickleTimer");
+        int intervalExponent = default(2);
+        int startIntervalOverride = default(0); // overrides default starting interval with the specified value
 
 
     gates:

@@ -20,6 +20,7 @@
  */
 
 #include "Rpl.h"
+#include <limits>
 
 namespace inet {
 
@@ -29,6 +30,7 @@ TrickleTimer::TrickleTimer() :
     trickleTriggerEvent(nullptr),
     intervalTriggerEvent(nullptr),
     intervalUpdatesCtn(0),
+    intervalExponent(2),
     numDoublings(DEFAULT_DIO_INTERVAL_DOUBLINGS),
     redundancyConst(DEFAULT_DIO_REDUNDANCY_CONST),
     started(false),
@@ -38,6 +40,13 @@ TrickleTimer::TrickleTimer() :
 
 TrickleTimer::~TrickleTimer() {
     stop();
+}
+
+void TrickleTimer::initialize(int stage) {
+    if (stage == INITSTAGE_LOCAL) {
+        intervalExponent = par("intervalExponent").intValue();
+        pStartIntervalOverride = par("startIntervalOverride").intValue();
+    }
 }
 
 void TrickleTimer::stop() {
@@ -57,8 +66,16 @@ void TrickleTimer::start(bool warmupDelay, int skipIntervalDoublings) {
     skipIntDoublings = skipIntervalDoublings;
     started = true;
     minInterval = DEFAULT_DIO_INTERVAL_MIN;
-    currentInterval = warmupDelay ? minInterval * 2 : minInterval;
-    maxInterval = minInterval * (pow(2, numDoublings));
+    currentInterval = warmupDelay ? minInterval * intervalExponent : minInterval;
+
+    // FIXME: conflicts with warmupDelay to some extent
+    if (pStartIntervalOverride > 0)
+        currentInterval = pStartIntervalOverride;
+
+    maxInterval = minInterval * (pow(intervalExponent, numDoublings));
+    if (maxInterval < 0)
+        maxInterval = std::numeric_limits<int>::max();
+
     ctrlMsgReceivedCtn = 0;
 
     intervalTriggerEvent = new cMessage("TT interval update", TRICKLE_INTERVAL_UPDATE_EVENT);
@@ -66,6 +83,12 @@ void TrickleTimer::start(bool warmupDelay, int skipIntervalDoublings) {
 
     scheduleAt(simTime() + currentInterval, intervalTriggerEvent);
     scheduleNext();
+
+    WATCH(currentInterval);
+    WATCH(skipIntDoublings);
+    WATCH(maxInterval);
+    WATCH_PTR(intervalTriggerEvent);
+    WATCH_PTR(trickleTriggerEvent);
 }
 
 void TrickleTimer::handleMessageWhenUp(cMessage *message)
@@ -91,7 +114,7 @@ void TrickleTimer::processSelfMessage(cMessage *message)
 
             if (currentInterval < maxInterval) {
                 if (intervalUpdatesCtn >= skipIntDoublings) {
-                    currentInterval *= 2;
+                    currentInterval *= intervalExponent;
                     EV_INFO << "Trickle interval doubled, current - " << currentInterval << endl;
                 }
             }
@@ -150,7 +173,7 @@ bool TrickleTimer::checkRedundancyConst() {
 void TrickleTimer::reset() {
     Enter_Method_Silent("TrickleTimer::reset()");
     ctrlMsgReceivedCtn = 0;
-    currentInterval = minInterval;
+    currentInterval = pStartIntervalOverride > 0 ? pStartIntervalOverride : minInterval;
     intervalUpdatesCtn = 0;
     try {
         if (intervalTriggerEvent)
