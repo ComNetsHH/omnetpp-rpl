@@ -2,9 +2,9 @@ cd omnetpp-5.6.2/samples
 git clone git@collaborating.tuhh.de:e-4/Research/omnetpp-rpl.git
 cd omnetpp-rpl
 source replace_inet_files.sh ../inet4
-mv features.h ../inet4/src/inet/
-mv .oppfeaturestate ../inet4/
-mv .nedexclusions ../inet4/
+cp ../../../features.h ../inet4/src/inet/
+cp ../../../.oppfeaturestate ../inet4/
+cp ../../../.nedexclusions ../inet4/
 cd ../inet4
 make makefiles
 make MODE=release
