@@ -53,6 +53,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
     typedef Ipv6NeighbourCache::Key Key;    //for convenience
     typedef Ipv6NeighbourCache::Neighbour Neighbour;    // for convenience
     typedef Ipv6NeighbourCache::DefaultRouterList DefaultRouterList;    // for convenience
+    Ipv6NeighbourCache neighbourCache;
 
   public:
     Ipv6NeighbourDiscovery();
@@ -110,7 +111,6 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
     xMIPv6 *mipv6 = nullptr;    // in case the node has MIP support
 #endif /* WITH_xMIPv6 */
 
-    Ipv6NeighbourCache neighbourCache;
     typedef std::set<cMessage *> RaTimerList;    //FIXME add comparator for stable fingerprints!
 
     // stores information about a pending Duplicate Address Detection for
