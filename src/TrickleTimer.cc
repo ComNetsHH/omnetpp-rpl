@@ -144,8 +144,8 @@ void TrickleTimer::processSelfMessage(cMessage *message)
 
 
 void TrickleTimer::scheduleNext() {
-    // TODO: Make delay float to allow more diverse transmission intervals
-    auto delay = (double) currentInterval/2 + uniform(1, (double) currentInterval/2);
+   auto delay = (double) currentInterval/2 + uniform(1, (double) currentInterval/2);
+    // auto delay = (double) currentInterval/2; // avoid randomness for topology evaluation scenarios with 6TiSCH
     try {
         if (!trickleTriggerEvent)
             trickleTriggerEvent = new cMessage("TT triggered", TRICKLE_TRIGGER_EVENT);
