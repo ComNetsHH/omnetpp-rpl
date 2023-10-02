@@ -618,7 +618,8 @@ void Rpl::processTrickleTimerMsg(cMessage *message)
              */
             if (trickleTimer->checkRedundancyConst()) {
                 EV_DETAIL << "Redundancy OK, broadcasting DIO" << endl;
-                sendRplPacket(createDio(), DIO, Ipv6Address::ALL_NODES_1, uniform(0, 1));
+               sendRplPacket(createDio(), DIO, Ipv6Address::ALL_NODES_1, uniform(0, 1));
+                // sendRplPacket(createDio(), DIO, Ipv6Address::ALL_NODES_1, 0); // avoid randomness for topology evaluation scenarios with 6TiSCH
             }
             break;
         }
