@@ -3,7 +3,6 @@ import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 import rpl.RplRouter;
-import rpl.configurator.RplNetConfigurator;
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 
 network RplNetwork
